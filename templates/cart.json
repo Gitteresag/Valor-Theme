@@ -25,19 +25,12 @@
           "type": "trust_badges"
         }
       },
-      "block_order": [
-        "discount_code",
-        "shipping_note",
-        "cart_note",
-        "trust_badges"
-      ],
+      "block_order": ["discount_code", "shipping_note", "cart_note", "trust_badges"],
       "settings": {
         "heading_alignment": "left",
         "summary_text_alignment": "center"
       }
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main"]
 }

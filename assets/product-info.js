@@ -52,11 +52,11 @@ class ValorProductInfo extends HTMLElement {
       self._initialize();
     };
 
-    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
-      this._initScheduled = 'raf';
+    if (typeof window !== "undefined" && typeof window.requestAnimationFrame === "function") {
+      this._initScheduled = "raf";
       this._initHandle = window.requestAnimationFrame(run);
     } else {
-      this._initScheduled = 'timeout';
+      this._initScheduled = "timeout";
       this._initHandle = setTimeout(run, 0);
     }
   }
@@ -65,29 +65,31 @@ class ValorProductInfo extends HTMLElement {
     if (this._initialized) return;
     this._initialized = true;
 
-    this.sectionId = this.dataset.sectionId || '';
+    this.sectionId = this.dataset.sectionId || "";
     this.productId = parseInt(this.dataset.productId, 10) || 0;
-    this.productUrl = this.dataset.productUrl || '';
-    this.moneyFormat = this.dataset.moneyFormat || '{{amount}}';
+    this.productUrl = this.dataset.productUrl || "";
+    this.moneyFormat = this.dataset.moneyFormat || "{{amount}}";
 
-    this.i18n = this._readJsonScript('[data-product-info-i18n]') || {};
-    this.variants = this._readJsonScript('[data-section-variants]') || [];
+    this.i18n = this._readJsonScript("[data-product-info-i18n]") || {};
+    this.variants = this._readJsonScript("[data-section-variants]") || [];
 
-    this.optionInputs = Array.prototype.slice.call(this.querySelectorAll('.valor-mp__option-input'));
-    this.optionSelects = Array.prototype.slice.call(this.querySelectorAll('.valor-mp__option-select'));
+    this.optionInputs = Array.prototype.slice.call(this.querySelectorAll(".valor-mp__option-input"));
+    this.optionSelects = Array.prototype.slice.call(this.querySelectorAll(".valor-mp__option-select"));
 
-    this.variantIdInput = this.querySelector('[data-variant-id-input]');
-    this.addBtn = this.querySelector('[data-add-button]');
-    this.addBtnText = this.querySelector('[data-add-button-text]');
-    this.priceEl = this.querySelector('.valor-mp__price');
-    this.unitPriceWrapper = this.querySelector('.valor-mp__unit-price[data-unit-price-wrapper]');
-    this.unitPriceEl = this.unitPriceWrapper ? this.unitPriceWrapper.querySelector('[data-unit-price]') : null;
-    this.skuEl = this.querySelector('.valor-mp__sku');
-    this.inventoryEl = this.querySelector('.valor-mp__inventory');
-    this.qtyInput = this.querySelector('.valor-mp__quantity-input');
-    this.cartQtyEl = this.querySelector('[data-mp-cart-qty]');
-    this.paymentTermsVariantInputs = Array.prototype.slice.call(this.querySelectorAll('[data-payment-terms-variant-id-input]'));
-    this.pickupAvailabilityEls = Array.prototype.slice.call(this.querySelectorAll('valor-pickup-availability'));
+    this.variantIdInput = this.querySelector("[data-variant-id-input]");
+    this.addBtn = this.querySelector("[data-add-button]");
+    this.addBtnText = this.querySelector("[data-add-button-text]");
+    this.priceEl = this.querySelector(".valor-mp__price");
+    this.unitPriceWrapper = this.querySelector(".valor-mp__unit-price[data-unit-price-wrapper]");
+    this.unitPriceEl = this.unitPriceWrapper ? this.unitPriceWrapper.querySelector("[data-unit-price]") : null;
+    this.skuEl = this.querySelector(".valor-mp__sku");
+    this.inventoryEl = this.querySelector(".valor-mp__inventory");
+    this.qtyInput = this.querySelector(".valor-mp__quantity-input");
+    this.cartQtyEl = this.querySelector("[data-mp-cart-qty]");
+    this.paymentTermsVariantInputs = Array.prototype.slice.call(
+      this.querySelectorAll("[data-payment-terms-variant-id-input]"),
+    );
+    this.pickupAvailabilityEls = Array.prototype.slice.call(this.querySelectorAll("valor-pickup-availability"));
 
     this.currentVariant = null;
 
@@ -106,16 +108,16 @@ class ValorProductInfo extends HTMLElement {
 
   disconnectedCallback() {
     if (this._initScheduled) {
-      if (this._initScheduled === 'raf' && typeof window !== 'undefined' && this._initHandle != null) {
+      if (this._initScheduled === "raf" && typeof window !== "undefined" && this._initHandle != null) {
         window.cancelAnimationFrame(this._initHandle);
-      } else if (this._initScheduled === 'timeout' && this._initHandle != null) {
+      } else if (this._initScheduled === "timeout" && this._initHandle != null) {
         clearTimeout(this._initHandle);
       }
       this._initScheduled = false;
       this._initHandle = null;
     }
 
-    document.removeEventListener('valor:cart:updated', this._handleCartEvent);
+    document.removeEventListener("valor:cart:updated", this._handleCartEvent);
     this._unbindPopups();
     this._initialized = false;
     // Other listeners are on elements within the custom element itself
@@ -126,7 +128,7 @@ class ValorProductInfo extends HTMLElement {
     const el = this.querySelector(selector);
     if (!el) return null;
     try {
-      return JSON.parse(el.textContent || '');
+      return JSON.parse(el.textContent || "");
     } catch (e) {
       return null;
     }
@@ -135,24 +137,24 @@ class ValorProductInfo extends HTMLElement {
   /* --- Quantity buttons --- */
   _bindQuantity() {
     const self = this;
-    this.querySelectorAll('[data-qty-action]').forEach(function (btn) {
-      btn.addEventListener('click', function () {
+    this.querySelectorAll("[data-qty-action]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
         if (!self.qtyInput) return;
         const current = parseInt(self.qtyInput.value, 10) || 1;
-        if (btn.dataset.qtyAction === 'increase') {
+        if (btn.dataset.qtyAction === "increase") {
           self.qtyInput.value = current + 1;
         } else if (current > 1) {
           self.qtyInput.value = current - 1;
         }
-        self.qtyInput.dispatchEvent(new Event('change', { bubbles: true }));
+        self.qtyInput.dispatchEvent(new Event("change", { bubbles: true }));
       });
     });
   }
 
   /* --- Option change listeners --- */
   _bindOptions() {
-    this.optionInputs.forEach((i) => i.addEventListener('change', this._handleChange));
-    this.optionSelects.forEach((s) => s.addEventListener('change', this._handleChange));
+    this.optionInputs.forEach((i) => i.addEventListener("change", this._handleChange));
+    this.optionSelects.forEach((s) => s.addEventListener("change", this._handleChange));
   }
 
   /* --- Cart event listener (cleaned up in disconnectedCallback) ---
@@ -164,7 +166,7 @@ class ValorProductInfo extends HTMLElement {
      just duplicate the work, since cart-drawer always follows added
      with updated once it has the fresh cart state. */
   _bindCartEvents() {
-    document.addEventListener('valor:cart:updated', this._handleCartEvent);
+    document.addEventListener("valor:cart:updated", this._handleCartEvent);
   }
 
   /* --- Variant resolution ---
@@ -181,9 +183,11 @@ class ValorProductInfo extends HTMLElement {
           checked[pos] = i.value;
         }
       });
-      Object.keys(checked).sort().forEach(function (pos) {
-        opts.push(checked[pos]);
-      });
+      Object.keys(checked)
+        .sort()
+        .forEach(function (pos) {
+          opts.push(checked[pos]);
+        });
     }
     if (this.optionSelects.length) {
       this.optionSelects
@@ -191,7 +195,9 @@ class ValorProductInfo extends HTMLElement {
         .sort(function (a, b) {
           return parseInt(a.dataset.optionPosition, 10) - parseInt(b.dataset.optionPosition, 10);
         })
-        .forEach(function (s) { opts.push(s.value); });
+        .forEach(function (s) {
+          opts.push(s.value);
+        });
     }
     return opts;
   }
@@ -201,7 +207,10 @@ class ValorProductInfo extends HTMLElement {
       const v = this.variants[i];
       let match = true;
       for (let j = 0; j < opts.length; j++) {
-        if (v.options[j] !== opts[j]) { match = false; break; }
+        if (v.options[j] !== opts[j]) {
+          match = false;
+          break;
+        }
       }
       if (match) return v;
     }
@@ -212,20 +221,20 @@ class ValorProductInfo extends HTMLElement {
      {{amount_with_comma_separator}}, etc.). Falls back to plain number
      for unknown placeholders. --- */
   formatMoney(cents) {
-    if (cents == null) return '';
-    const value = (cents / 100);
+    if (cents == null) return "";
+    const value = cents / 100;
     return this.moneyFormat.replace(/\{\{\s*(\w+)\s*\}\}/g, function (_, key) {
       switch (key) {
-        case 'amount':
+        case "amount":
           return value.toFixed(2);
-        case 'amount_no_decimals':
+        case "amount_no_decimals":
           return Math.round(value).toString();
-        case 'amount_with_comma_separator':
-          return value.toFixed(2).replace('.', ',');
-        case 'amount_no_decimals_with_comma_separator':
+        case "amount_with_comma_separator":
+          return value.toFixed(2).replace(".", ",");
+        case "amount_no_decimals_with_comma_separator":
           return Math.round(value).toString();
-        case 'amount_with_space_separator':
-          return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+        case "amount_with_space_separator":
+          return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
         default:
           return value.toFixed(2);
       }
@@ -235,28 +244,28 @@ class ValorProductInfo extends HTMLElement {
   /* --- Updaters: price, SKU, inventory, image, URL, add-to-cart --- */
   updatePrice(variant) {
     if (!this.priceEl) return;
-    let current = this.priceEl.querySelector('.valor-mp__price-current');
-    let compare = this.priceEl.querySelector('.valor-mp__price-compare');
-    let badge   = this.priceEl.querySelector('.valor-mp__price-badge');
+    let current = this.priceEl.querySelector(".valor-mp__price-current");
+    let compare = this.priceEl.querySelector(".valor-mp__price-compare");
+    let badge = this.priceEl.querySelector(".valor-mp__price-badge");
     if (!variant) return;
 
     const onSale = variant.compare_at_price && variant.compare_at_price > variant.price;
     if (current) {
       current.textContent = this.formatMoney(variant.price);
-      current.classList.toggle('valor-mp__price-current--sale', onSale);
+      current.classList.toggle("valor-mp__price-current--sale", onSale);
     }
     if (onSale) {
       if (!compare) {
-        compare = document.createElement('s');
-        compare.className = 'valor-mp__price-compare';
-        current.insertAdjacentElement('afterend', compare);
+        compare = document.createElement("s");
+        compare.className = "valor-mp__price-compare";
+        current.insertAdjacentElement("afterend", compare);
       }
       compare.textContent = this.formatMoney(variant.compare_at_price);
       if (!badge) {
-        badge = document.createElement('span');
-        badge.className = 'valor-mp__price-badge';
-        badge.textContent = this.i18n.sale || '';
-        (compare || current).insertAdjacentElement('afterend', badge);
+        badge = document.createElement("span");
+        badge.className = "valor-mp__price-badge";
+        badge.textContent = this.i18n.sale || "";
+        (compare || current).insertAdjacentElement("afterend", badge);
       }
     } else {
       if (compare) compare.remove();
@@ -269,7 +278,7 @@ class ValorProductInfo extends HTMLElement {
     if (!this.unitPriceWrapper || !this.unitPriceEl) return;
     if (!variant || !variant.unit_price_measurement) {
       this.unitPriceWrapper.hidden = true;
-      this.unitPriceEl.textContent = '';
+      this.unitPriceEl.textContent = "";
       return;
     }
 
@@ -279,17 +288,16 @@ class ValorProductInfo extends HTMLElement {
 
   formatUnitPrice(variant) {
     const measurement = variant && variant.unit_price_measurement;
-    if (!measurement) return '';
-    const value = measurement.reference_value && measurement.reference_value !== 1
-      ? String(measurement.reference_value)
-      : '';
-    return this.formatMoney(variant.unit_price) + ' / ' + value + measurement.reference_unit;
+    if (!measurement) return "";
+    const value =
+      measurement.reference_value && measurement.reference_value !== 1 ? String(measurement.reference_value) : "";
+    return this.formatMoney(variant.unit_price) + " / " + value + measurement.reference_unit;
   }
 
   updateSku(variant) {
     if (!this.skuEl || !variant) return;
     if (variant.sku) {
-      this.skuEl.textContent = (this.i18n.sku || 'SKU') + ': ' + variant.sku;
+      this.skuEl.textContent = (this.i18n.sku || "SKU") + ": " + variant.sku;
       this.skuEl.hidden = false;
     } else {
       this.skuEl.hidden = true;
@@ -298,35 +306,39 @@ class ValorProductInfo extends HTMLElement {
 
   updateInventory(variant) {
     if (!this.inventoryEl || !variant) return;
-    const threshold = parseInt(this.inventoryEl.dataset.threshold || '10', 10);
-    const showQty = this.inventoryEl.dataset.showQty === 'true';
-    if (variant.inventory_management !== 'shopify' || variant.inventory_policy !== 'deny') {
+    const threshold = parseInt(this.inventoryEl.dataset.threshold || "10", 10);
+    const showQty = this.inventoryEl.dataset.showQty === "true";
+    if (variant.inventory_management !== "shopify" || variant.inventory_policy !== "deny") {
       this.inventoryEl.hidden = true;
       return;
     }
     this.inventoryEl.hidden = false;
     const qty = variant.inventory_quantity;
     let labelText;
-    this.inventoryEl.classList.remove('valor-mp__inventory--in', 'valor-mp__inventory--low', 'valor-mp__inventory--out');
+    this.inventoryEl.classList.remove(
+      "valor-mp__inventory--in",
+      "valor-mp__inventory--low",
+      "valor-mp__inventory--out",
+    );
     if (qty <= 0) {
-      this.inventoryEl.classList.add('valor-mp__inventory--out');
-      labelText = this.i18n.outOfStock || 'Out of stock';
+      this.inventoryEl.classList.add("valor-mp__inventory--out");
+      labelText = this.i18n.outOfStock || "Out of stock";
     } else if (qty <= threshold) {
-      this.inventoryEl.classList.add('valor-mp__inventory--low');
+      this.inventoryEl.classList.add("valor-mp__inventory--low");
       labelText = showQty
-        ? (this.i18n.lowStockCount || '{{ count }} left in stock').replace('{{ count }}', qty)
-        : (this.i18n.lowStock || 'Low stock');
+        ? (this.i18n.lowStockCount || "{{ count }} left in stock").replace("{{ count }}", qty)
+        : this.i18n.lowStock || "Low stock";
     } else {
-      this.inventoryEl.classList.add('valor-mp__inventory--in');
-      labelText = this.i18n.inStock || 'In stock';
+      this.inventoryEl.classList.add("valor-mp__inventory--in");
+      labelText = this.i18n.inStock || "In stock";
     }
     // Re-write text without breaking the dot element
-    this.inventoryEl.innerHTML = '';
-    const newDot = document.createElement('span');
-    newDot.className = 'valor-mp__inventory-dot';
-    newDot.setAttribute('aria-hidden', 'true');
+    this.inventoryEl.innerHTML = "";
+    const newDot = document.createElement("span");
+    newDot.className = "valor-mp__inventory-dot";
+    newDot.setAttribute("aria-hidden", "true");
     this.inventoryEl.appendChild(newDot);
-    this.inventoryEl.appendChild(document.createTextNode(' ' + labelText));
+    this.inventoryEl.appendChild(document.createTextNode(" " + labelText));
   }
 
   updateAddButton(variant) {
@@ -334,13 +346,11 @@ class ValorProductInfo extends HTMLElement {
     const available = variant && variant.available;
     this.addBtn.disabled = !available;
     if (this.addBtnText) {
-      this.addBtnText.textContent = available
-        ? (this.i18n.addToCart || 'Add to cart')
-        : (this.i18n.soldOut || 'Sold out');
+      this.addBtnText.textContent = available ? this.i18n.addToCart || "Add to cart" : this.i18n.soldOut || "Sold out";
     }
     if (this.variantIdInput) {
-      this.variantIdInput.value = variant ? variant.id : '';
-      this.variantIdInput.dispatchEvent(new Event('change', { bubbles: true }));
+      this.variantIdInput.value = variant ? variant.id : "";
+      this.variantIdInput.dispatchEvent(new Event("change", { bubbles: true }));
     }
   }
 
@@ -348,14 +358,14 @@ class ValorProductInfo extends HTMLElement {
     if (!variant || !this.paymentTermsVariantInputs.length) return;
     this.paymentTermsVariantInputs.forEach(function (input) {
       input.value = variant.id;
-      input.dispatchEvent(new Event('change', { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
     });
   }
 
   updatePickupAvailability(variant) {
     if (!this.pickupAvailabilityEls.length) return;
     this.pickupAvailabilityEls.forEach(function (el) {
-      if (typeof el.update === 'function') el.update(variant);
+      if (typeof el.update === "function") el.update(variant);
     });
   }
 
@@ -365,13 +375,15 @@ class ValorProductInfo extends HTMLElement {
     // click handler (which would open the lightbox).
     if (!variant || !variant.featured_media || !variant.featured_media.id) return;
     // Gallery lives on the same section; reach it from the section root
-    const section = this.closest('.valor-mp');
+    const section = this.closest(".valor-mp");
     if (!section) return;
-    const gallery = section.querySelector('.valor-product-media');
+    const gallery = section.querySelector(".valor-product-media");
     if (!gallery) return;
-    gallery.dispatchEvent(new CustomEvent('valor:gallery:set-media', {
-      detail: { mediaId: variant.featured_media.id }
-    }));
+    gallery.dispatchEvent(
+      new CustomEvent("valor:gallery:set-media", {
+        detail: { mediaId: variant.featured_media.id },
+      }),
+    );
   }
 
   updateUrl(variant) {
@@ -385,12 +397,14 @@ class ValorProductInfo extends HTMLElement {
     // parameter would also leak into nearby in-page anchors. The variant
     // id still travels with the add-to-cart form, so cart behaviour is
     // unaffected.
-    if (window.location.pathname.indexOf('/products/') === -1) return;
+    if (window.location.pathname.indexOf("/products/") === -1) return;
     try {
       const url = new URL(window.location.href);
-      url.searchParams.set('variant', variant.id);
-      window.history.replaceState({}, '', url.toString());
-    } catch (err) { /* older browsers */ }
+      url.searchParams.set("variant", variant.id);
+      window.history.replaceState({}, "", url.toString());
+    } catch (err) {
+      /* older browsers */
+    }
   }
 
   /* Render the in-cart count for `variant`. If a cart object is
@@ -403,7 +417,7 @@ class ValorProductInfo extends HTMLElement {
     // Hide while we resolve; we don't want to flash the previous
     // variant's count for a moment after a change.
     this.cartQtyEl.hidden = true;
-    this.cartQtyEl.textContent = '';
+    this.cartQtyEl.textContent = "";
 
     if (cart && Array.isArray(cart.items)) {
       this._renderCartQty(variant, cart);
@@ -411,11 +425,17 @@ class ValorProductInfo extends HTMLElement {
     }
 
     const self = this;
-    const root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
-    fetch(root.replace(/\/?$/, '/') + 'cart.js', { credentials: 'same-origin' })
-      .then(function (r) { return r.json(); })
-      .then(function (c) { self._renderCartQty(variant, c); })
-      .catch(function () { /* fail silently */ });
+    const root = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || "/";
+    fetch(root.replace(/\/?$/, "/") + "cart.js", { credentials: "same-origin" })
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (c) {
+        self._renderCartQty(variant, c);
+      })
+      .catch(function () {
+        /* fail silently */
+      });
   }
 
   _renderCartQty(variant, cart) {
@@ -429,7 +449,7 @@ class ValorProductInfo extends HTMLElement {
     });
     const text = this._formatCartText(selected, total);
     if (text) {
-      this.cartQtyEl.textContent = ' (' + text + ')';
+      this.cartQtyEl.textContent = " (" + text + ")";
       this.cartQtyEl.hidden = false;
     }
   }
@@ -447,19 +467,17 @@ class ValorProductInfo extends HTMLElement {
      and JS replace() matches the exact substring. */
   _formatCartText(selected, total) {
     if (selected > 0 && total > selected) {
-      return (this.i18n.inCartOf || '{{ selected }} of {{ total }} in cart')
-        .replace('{{ selected }}', selected)
-        .replace('{{ total }}', total);
+      return (this.i18n.inCartOf || "{{ selected }} of {{ total }} in cart")
+        .replace("{{ selected }}", selected)
+        .replace("{{ total }}", total);
     }
     if (selected > 0) {
-      return (this.i18n.inCartCount || '{{ count }} in cart')
-        .replace('{{ count }}', selected);
+      return (this.i18n.inCartCount || "{{ count }} in cart").replace("{{ count }}", selected);
     }
     if (total > 0) {
-      return (this.i18n.totalInCart || '{{ total }} total in cart')
-        .replace('{{ total }}', total);
+      return (this.i18n.totalInCart || "{{ total }} total in cart").replace("{{ total }}", total);
     }
-    return '';
+    return "";
   }
 
   updateSoldOutPills(opts) {
@@ -473,9 +491,9 @@ class ValorProductInfo extends HTMLElement {
       candidate[pos - 1] = input.value;
       const match = self.findVariant(candidate);
       if (match && match.available) {
-        pill.removeAttribute('data-disabled');
+        pill.removeAttribute("data-disabled");
       } else {
-        pill.setAttribute('data-disabled', 'true');
+        pill.setAttribute("data-disabled", "true");
       }
     });
   }
@@ -528,7 +546,7 @@ class ValorProductInfo extends HTMLElement {
     // detail is the cart object when dispatched by cart-drawer.js;
     // null/undefined / non-cart shapes trigger updateCartQty's
     // /cart.js fallback inside.
-    const cart = (e && e.detail && Array.isArray(e.detail.items)) ? e.detail : null;
+    const cart = e && e.detail && Array.isArray(e.detail.items) ? e.detail : null;
     if (this.currentVariant) {
       this.updateCartQty(this.currentVariant, cart);
     } else if (this.variantIdInput && this.variantIdInput.value) {
@@ -538,10 +556,10 @@ class ValorProductInfo extends HTMLElement {
 
   /* --- Share button: Web Share API with clipboard fallback --- */
   _bindShare() {
-    const shareWrapper = this.querySelector('[data-share]');
+    const shareWrapper = this.querySelector("[data-share]");
     if (!shareWrapper) return;
-    const shareBtn = shareWrapper.querySelector('[data-share-button]');
-    const shareMessage = shareWrapper.querySelector('[data-share-message]');
+    const shareBtn = shareWrapper.querySelector("[data-share-button]");
+    const shareMessage = shareWrapper.querySelector("[data-share-message]");
     let clearTimer = null;
     const i18n = this.i18n;
 
@@ -556,17 +574,24 @@ class ValorProductInfo extends HTMLElement {
     }
 
     if (shareBtn) {
-      shareBtn.addEventListener('click', function () {
+      shareBtn.addEventListener("click", function () {
         const shareData = {
           title: document.title,
-          url: window.location.href
+          url: window.location.href,
         };
         if (navigator.share) {
-          navigator.share(shareData).catch(function () { /* user cancelled */ });
+          navigator.share(shareData).catch(function () {
+            /* user cancelled */
+          });
         } else if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(shareData.url).then(function () {
-            showMessage(i18n.shareLinkCopied || 'Link copied');
-          }).catch(function () { /* clipboard blocked */ });
+          navigator.clipboard
+            .writeText(shareData.url)
+            .then(function () {
+              showMessage(i18n.shareLinkCopied || "Link copied");
+            })
+            .catch(function () {
+              /* clipboard blocked */
+            });
         }
       });
     }
@@ -581,8 +606,8 @@ class ValorProductInfo extends HTMLElement {
      the native dialog handles focus trap and aria roles. */
   _bindPopups() {
     this._popupHandlers = [];
-    const triggers = this.querySelectorAll('[data-popup-trigger]');
-    const closes = this.querySelectorAll('[data-popup-close]');
+    const triggers = this.querySelectorAll("[data-popup-trigger]");
+    const closes = this.querySelectorAll("[data-popup-close]");
     const self = this;
 
     triggers.forEach(function (trigger) {
@@ -593,8 +618,8 @@ class ValorProductInfo extends HTMLElement {
       const onTrigger = function () {
         self._openPopup(dialog, trigger);
       };
-      trigger.addEventListener('click', onTrigger);
-      self._popupHandlers.push([trigger, 'click', onTrigger]);
+      trigger.addEventListener("click", onTrigger);
+      self._popupHandlers.push([trigger, "click", onTrigger]);
 
       // Backdrop click: the dialog element itself is now a full-viewport
       // flex container with a visually centred inner card. A click that
@@ -605,45 +630,49 @@ class ValorProductInfo extends HTMLElement {
       const onBackdrop = function (e) {
         if (e.target === dialog) self._closePopup(dialog);
       };
-      dialog.addEventListener('click', onBackdrop);
-      self._popupHandlers.push([dialog, 'click', onBackdrop]);
+      dialog.addEventListener("click", onBackdrop);
+      self._popupHandlers.push([dialog, "click", onBackdrop]);
 
       // 'close' fires for every close path (X, ESC, backdrop, .close()).
       // We unify cleanup here.
       const onClose = function () {
         self._unlockBodyScroll();
-        try { trigger.focus(); } catch (e) { /* trigger may be detached */ }
+        try {
+          trigger.focus();
+        } catch (e) {
+          /* trigger may be detached */
+        }
       };
-      dialog.addEventListener('close', onClose);
-      self._popupHandlers.push([dialog, 'close', onClose]);
+      dialog.addEventListener("close", onClose);
+      self._popupHandlers.push([dialog, "close", onClose]);
     });
 
     closes.forEach(function (close) {
       const onClose = function () {
-        const dialog = close.closest('dialog');
+        const dialog = close.closest("dialog");
         if (dialog) self._closePopup(dialog);
       };
-      close.addEventListener('click', onClose);
-      self._popupHandlers.push([close, 'click', onClose]);
+      close.addEventListener("click", onClose);
+      self._popupHandlers.push([close, "click", onClose]);
     });
   }
 
   _openPopup(dialog, trigger) {
     this._lockBodyScroll();
-    if (typeof dialog.showModal === 'function') {
+    if (typeof dialog.showModal === "function") {
       dialog.showModal();
     } else {
       // Fallback for very old browsers: just toggle [open]. No focus
       // trap or backdrop in this state, but the modal at least appears.
-      dialog.setAttribute('open', '');
+      dialog.setAttribute("open", "");
     }
   }
 
   _closePopup(dialog) {
-    if (typeof dialog.close === 'function') {
+    if (typeof dialog.close === "function") {
       dialog.close();
     } else {
-      dialog.removeAttribute('open');
+      dialog.removeAttribute("open");
       this._unlockBodyScroll();
     }
   }
@@ -654,23 +683,23 @@ class ValorProductInfo extends HTMLElement {
      overflow:hidden because some browsers still allow touch-scroll
      through overflow:hidden on body. */
   _lockBodyScroll() {
-    if (document.body.dataset.valorScrollLock === 'true') return;
+    if (document.body.dataset.valorScrollLock === "true") return;
     const scrollY = window.scrollY;
-    document.body.dataset.valorScrollLock = 'true';
+    document.body.dataset.valorScrollLock = "true";
     document.body.dataset.valorScrollY = scrollY;
-    document.body.style.position = 'fixed';
-    document.body.style.top = '-' + scrollY + 'px';
-    document.body.style.left = '0';
-    document.body.style.right = '0';
+    document.body.style.position = "fixed";
+    document.body.style.top = "-" + scrollY + "px";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
   }
 
   _unlockBodyScroll() {
-    if (document.body.dataset.valorScrollLock !== 'true') return;
+    if (document.body.dataset.valorScrollLock !== "true") return;
     const scrollY = parseInt(document.body.dataset.valorScrollY, 10) || 0;
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
     delete document.body.dataset.valorScrollLock;
     delete document.body.dataset.valorScrollY;
     window.scrollTo(0, scrollY);
@@ -687,6 +716,6 @@ class ValorProductInfo extends HTMLElement {
   }
 }
 
-if (typeof customElements !== 'undefined' && !customElements.get('product-info')) {
-  customElements.define('product-info', ValorProductInfo);
+if (typeof customElements !== "undefined" && !customElements.get("product-info")) {
+  customElements.define("product-info", ValorProductInfo);
 }

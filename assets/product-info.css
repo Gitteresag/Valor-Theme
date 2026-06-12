@@ -52,7 +52,9 @@
   font-size: 1.5rem;
   font-weight: var(--font-body--weight-bold);
 }
-.valor-mp__price-current--sale { color: var(--color-foreground); }
+.valor-mp__price-current--sale {
+  color: var(--color-foreground);
+}
 .valor-mp__price-compare {
   font-size: 1.125rem;
   color: color-mix(in srgb, var(--color-foreground) 55%, transparent);
@@ -121,9 +123,15 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
-.valor-mp__inventory--in   .valor-mp__inventory-dot { background-color: #2e8540; }
-.valor-mp__inventory--low  .valor-mp__inventory-dot { background-color: #d49000; }
-.valor-mp__inventory--out  .valor-mp__inventory-dot { background-color: var(--valor-color-error); }
+.valor-mp__inventory--in .valor-mp__inventory-dot {
+  background-color: #2e8540;
+}
+.valor-mp__inventory--low .valor-mp__inventory-dot {
+  background-color: #d49000;
+}
+.valor-mp__inventory--out .valor-mp__inventory-dot {
+  background-color: var(--valor-color-error);
+}
 
 /* === Vendor === */
 .valor-mp__vendor {
@@ -217,7 +225,10 @@
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .valor-mp__option-input:checked + .valor-mp__option-pill {
@@ -230,7 +241,7 @@
   outline-offset: 3px;
 }
 /* Disabled (sold out) variants — JS toggles data-disabled per pill */
-.valor-mp__option-pill[data-disabled='true'] {
+.valor-mp__option-pill[data-disabled="true"] {
   opacity: 0.65;
   text-decoration: line-through;
 }
@@ -256,7 +267,9 @@
   font-size: 0.875rem;
   font-weight: 500;
   line-height: 1.2;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 .valor-mp__option-input:checked + .valor-mp__option-size-text {
@@ -268,7 +281,7 @@
   outline-offset: 4px;
   border-radius: 2px;
 }
-.valor-mp__option-size-text[data-disabled='true'] {
+.valor-mp__option-size-text[data-disabled="true"] {
   opacity: 0.4;
   text-decoration: line-through;
   cursor: not-allowed;
@@ -300,7 +313,9 @@
   background-position: center;
   background-repeat: no-repeat;
   cursor: pointer;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
 }
@@ -322,12 +337,12 @@
 /* Sold-out swatches get a diagonal slash through them. We can't use
    the line-through trick from pills because there's no text — the
    slash is rendered with a gradient on ::after. */
-.valor-mp__option-swatch[data-disabled='true'] {
+.valor-mp__option-swatch[data-disabled="true"] {
   opacity: 0.65;
   cursor: not-allowed;
 }
-.valor-mp__option-swatch[data-disabled='true']::after {
-  content: '';
+.valor-mp__option-swatch[data-disabled="true"]::after {
+  content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
@@ -374,7 +389,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .valor-mp__option-pill,
-  .valor-mp__option-size-text { transition: none; }
+  .valor-mp__option-size-text {
+    transition: none;
+  }
 }
 
 /* === Quantity selector === */
@@ -426,7 +443,7 @@
   -webkit-appearance: none;
   margin: 0;
 }
-.valor-mp__quantity-input[type='number'] {
+.valor-mp__quantity-input[type="number"] {
   -moz-appearance: textfield;
 }
 
@@ -592,7 +609,7 @@
   display: none;
 }
 .valor-mp__collapsible-summary::marker {
-  content: '';
+  content: "";
 }
 .valor-mp__collapsible-heading {
   font-weight: var(--font-body--weight-bold);
@@ -650,7 +667,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .valor-mp__collapsible-icon { transition: none; }
+  .valor-mp__collapsible-icon {
+    transition: none;
+  }
 }
 
 /* === Custom Liquid ===
@@ -817,8 +836,12 @@
   max-width: 100%;
   height: auto;
 }
-.valor-mp__popup-dialog-content > *:first-child { margin-top: 0; }
-.valor-mp__popup-dialog-content > *:last-child { margin-bottom: 0; }
+.valor-mp__popup-dialog-content > *:first-child {
+  margin-top: 0;
+}
+.valor-mp__popup-dialog-content > *:last-child {
+  margin-bottom: 0;
+}
 .valor-mp__popup-dialog-content p,
 .valor-mp__popup-dialog-content ul,
 .valor-mp__popup-dialog-content ol {

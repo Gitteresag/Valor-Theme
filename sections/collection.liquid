@@ -40,29 +40,29 @@
 {%- endcomment -%}
 
 {{ 'product-card.css' | asset_url | stylesheet_tag }}
-{{ 'collection.css'   | asset_url | stylesheet_tag }}
-{{ 'facets-bar.css'   | asset_url | stylesheet_tag }}
+{{ 'collection.css' | asset_url | stylesheet_tag }}
+{{ 'facets-bar.css' | asset_url | stylesheet_tag }}
 <script src="{{ 'collection.js' | asset_url }}" defer></script>
 <script src="{{ 'grid-view.js' | asset_url }}" defer></script>
 
 {%- liquid
-  assign show_image       = section.settings.show_collection_image
-  assign banner_height    = section.settings.banner_height
+  assign show_image = section.settings.show_collection_image
+  assign banner_height = section.settings.banner_height
   assign show_description = section.settings.show_description
-  assign heading_size     = section.settings.heading_size | default: 'large'
-  assign heading_align    = section.settings.heading_alignment | default: 'center'
-  assign body_size        = section.settings.body_size | default: 'medium'
-  assign body_align       = section.settings.body_alignment | default: 'center'
-  assign cols_desktop     = section.settings.columns_desktop
-  assign cols_mobile      = section.settings.columns_mobile
-  assign per_page         = section.settings.products_per_page
-  assign image_ratio      = section.settings.image_ratio
-  assign show_secondary   = section.settings.show_secondary_image
-  assign show_vendor      = section.settings.show_vendor
+  assign heading_size = section.settings.heading_size | default: 'large'
+  assign heading_align = section.settings.heading_alignment | default: 'center'
+  assign body_size = section.settings.body_size | default: 'medium'
+  assign body_align = section.settings.body_alignment | default: 'center'
+  assign cols_desktop = section.settings.columns_desktop
+  assign cols_mobile = section.settings.columns_mobile
+  assign per_page = section.settings.products_per_page
+  assign image_ratio = section.settings.image_ratio
+  assign show_secondary = section.settings.show_secondary_image
+  assign show_vendor = section.settings.show_vendor
   assign enable_filtering = section.settings.enable_filtering
-  assign enable_sorting   = section.settings.enable_sorting
+  assign enable_sorting = section.settings.enable_sorting
 
-  assign sort_by          = collection.sort_by | default: collection.default_sort_by
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
 
   assign has_filters = false
   if enable_filtering and collection.filters != empty
@@ -107,7 +107,9 @@
   <header class="valor-collection__header valor-collection__header--{{ heading_align }}">
     <h1 class="valor-collection__title valor-heading valor-heading--{{ heading_size }}">{{ collection.title }}</h1>
     {%- if show_description and collection.description != blank -%}
-      <div class="valor-collection__description valor-collection__description--{{ body_align }} valor-collection__description--body-{{ body_size }} rte">{{ collection.description }}</div>
+      <div class="valor-collection__description valor-collection__description--{{ body_align }} valor-collection__description--body-{{ body_size }} rte">
+        {{ collection.description }}
+      </div>
     {%- endif -%}
   </header>
 
@@ -146,7 +148,20 @@
           data-facets-open
           aria-label="{{ 'collection.filters.filter_and_sort' | t }}"
         >
-          <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
           <span>{{ 'collection.filters.filter_and_sort' | t }}</span>
           {%- if active_filter_count > 0 -%}
             <span class="valor-collection__filter-count">{{ active_filter_count }}</span>
@@ -166,12 +181,12 @@
     {%- endcomment -%}
     {%- if has_filters or has_sorting -%}
       {%- render 'facets-bar',
-          results: collection,
-          paginate: paginate,
-          enable_filtering: enable_filtering,
-          show_sort: true,
-          has_sorting: has_sorting,
-          results_count: collection.products_count
+        results: collection,
+        paginate: paginate,
+        enable_filtering: enable_filtering,
+        show_sort: true,
+        has_sorting: has_sorting,
+        results_count: collection.products_count
       -%}
     {%- endif -%}
 
@@ -196,7 +211,12 @@
               aria-label="{{ 'collection.sort_by' | t }}"
             >
               {%- for option in collection.sort_options -%}
-                <option value="{{ option.value }}" {% if option.value == sort_by %}selected{% endif %}>
+                <option
+                  value="{{ option.value }}"
+                  {% if option.value == sort_by %}
+                    selected
+                  {% endif %}
+                >
                   {{ option.name }}
                 </option>
               {%- endfor -%}
@@ -214,11 +234,11 @@
           <div class="valor-collection__grid valor-collection__grid--cols-{{ cols_desktop }} valor-collection__grid--mobile-{{ cols_mobile }}">
             {%- for product in collection.products -%}
               {%- render 'product-card',
-                  product: product,
-                  image_ratio: image_ratio,
-                  show_secondary_image: show_secondary,
-                  show_vendor: show_vendor,
-                  show_price: true
+                product: product,
+                image_ratio: image_ratio,
+                show_secondary_image: show_secondary,
+                show_vendor: show_vendor,
+                show_price: true
               -%}
             {%- endfor -%}
           </div>
@@ -260,9 +280,9 @@
       "id": "banner_height",
       "label": "Banner height",
       "options": [
-        { "value": "small",  "label": "Small" },
+        { "value": "small", "label": "Small" },
         { "value": "medium", "label": "Medium" },
-        { "value": "large",  "label": "Large" }
+        { "value": "large", "label": "Large" }
       ],
       "default": "medium"
     },
@@ -361,9 +381,9 @@
       "id": "image_ratio",
       "label": "Image ratio",
       "options": [
-        { "value": "adapt",     "label": "Adapt to image" },
-        { "value": "portrait",  "label": "Portrait (3:4)" },
-        { "value": "square",    "label": "Square (1:1)" },
+        { "value": "adapt", "label": "Adapt to image" },
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "square", "label": "Square (1:1)" },
         { "value": "landscape", "label": "Landscape (4:3)" }
       ],
       "default": "square"

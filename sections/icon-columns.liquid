@@ -30,7 +30,11 @@
           {%- endif -%}
           <div class="valor-icon-column" {{ block.shopify_attributes }}>
             {%- if block.settings.icon != 'none' and block.settings.icon != blank -%}
-              <div class="valor-icon-column__icon" aria-hidden="true" style="--valor-icon-size: {{ section.settings.icon_size }}px;">
+              <div
+                class="valor-icon-column__icon"
+                aria-hidden="true"
+                style="--valor-icon-size: {{ section.settings.icon_size }}px;"
+              >
                 {%- render 'icon-library', icon: block.settings.icon, size: section.settings.icon_size -%}
               </div>
             {%- elsif block.settings.image != blank -%}
@@ -61,7 +65,8 @@
             {%- endif -%}
             {%- if block.settings.link_label != blank and block.settings.link != blank -%}
               <a href="{{ block.settings.link }}" class="valor-icon-column__link">
-                {{ block.settings.link_label | escape }} <span aria-hidden="true">→</span>
+                {{ block.settings.link_label | escape }}
+                <span aria-hidden="true">→</span>
               </a>
             {%- endif -%}
           </div>
@@ -91,19 +96,35 @@
        Falls back to center if neither modifier is present (legacy safety). */
     text-align: center;
   }
-  .valor-icon-columns__header--align-left { text-align: left; }
-  .valor-icon-columns__header--align-center { text-align: center; }
-  .valor-icon-columns__header--align-right { text-align: right; }
+  .valor-icon-columns__header--align-left {
+    text-align: left;
+  }
+  .valor-icon-columns__header--align-center {
+    text-align: center;
+  }
+  .valor-icon-columns__header--align-right {
+    text-align: right;
+  }
 
   .valor-icon-columns__grid {
     display: grid;
     gap: clamp(1.5rem, 3vw, 2.5rem);
   }
-  .valor-icon-columns__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .valor-icon-columns__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .valor-icon-columns__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .valor-icon-columns__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
-  .valor-icon-columns__grid--cols-6 { grid-template-columns: repeat(6, 1fr); }
+  .valor-icon-columns__grid--cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .valor-icon-columns__grid--cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .valor-icon-columns__grid--cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .valor-icon-columns__grid--cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .valor-icon-columns__grid--cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
 
   @media (max-width: 989px) {
     .valor-icon-columns__grid--cols-4,
@@ -114,8 +135,12 @@
   }
 
   @media (max-width: 749px) {
-    .valor-icon-columns__grid--mobile-1 { grid-template-columns: 1fr; }
-    .valor-icon-columns__grid--mobile-2 { grid-template-columns: repeat(2, 1fr); }
+    .valor-icon-columns__grid--mobile-1 {
+      grid-template-columns: 1fr;
+    }
+    .valor-icon-columns__grid--mobile-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
 
     .valor-icon-columns__grid--swipe-mobile {
       grid-template-columns: none;
@@ -129,7 +154,9 @@
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
-    .valor-icon-columns__grid--swipe-mobile::-webkit-scrollbar { display: none; }
+    .valor-icon-columns__grid--swipe-mobile::-webkit-scrollbar {
+      display: none;
+    }
     .valor-icon-columns__grid--swipe-mobile > * {
       flex: 0 0 70%;
       scroll-snap-align: start;
@@ -189,8 +216,12 @@
     line-height: 1.55;
     color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
   }
-  .valor-icon-column__text > *:first-child { margin-top: 0; }
-  .valor-icon-column__text > *:last-child { margin-bottom: 0; }
+  .valor-icon-column__text > *:first-child {
+    margin-top: 0;
+  }
+  .valor-icon-column__text > *:last-child {
+    margin-bottom: 0;
+  }
 
   .valor-icon-column__link {
     color: var(--color-foreground);
@@ -202,7 +233,9 @@
     align-self: flex-start;
     transition: opacity 0.15s ease;
   }
-  .valor-icon-column__link:hover { opacity: 0.7; }
+  .valor-icon-column__link:hover {
+    opacity: 0.7;
+  }
   .valor-icon-columns__grid--align-center .valor-icon-column__link {
     align-self: center;
   }
@@ -412,10 +445,22 @@
     {
       "name": "Icon columns",
       "blocks": [
-        { "type": "column", "settings": { "icon": "truck", "title": "Free shipping", "text": "<p>On orders over €50.</p>" } },
-        { "type": "column", "settings": { "icon": "lock", "title": "Secure payment", "text": "<p>Encrypted checkout.</p>" } },
-        { "type": "column", "settings": { "icon": "package", "title": "Easy returns", "text": "<p>30-day return policy.</p>" } },
-        { "type": "column", "settings": { "icon": "chat", "title": "Friendly support", "text": "<p>We're here to help.</p>" } }
+        {
+          "type": "column",
+          "settings": { "icon": "truck", "title": "Free shipping", "text": "<p>On orders over €50.</p>" }
+        },
+        {
+          "type": "column",
+          "settings": { "icon": "lock", "title": "Secure payment", "text": "<p>Encrypted checkout.</p>" }
+        },
+        {
+          "type": "column",
+          "settings": { "icon": "package", "title": "Easy returns", "text": "<p>30-day return policy.</p>" }
+        },
+        {
+          "type": "column",
+          "settings": { "icon": "chat", "title": "Friendly support", "text": "<p>We're here to help.</p>" }
+        }
       ]
     }
   ]

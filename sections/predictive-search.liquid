@@ -15,7 +15,6 @@
         {{ 'general.search.no_results_html' | t: terms: predictive_search.terms }}
       </p>
     {%- else -%}
-
       {%- if queries.size > 0 -%}
         <div class="valor-psearch__group">
           <h3 class="valor-psearch__heading">{{ 'general.search.suggestions' | t }}</h3>

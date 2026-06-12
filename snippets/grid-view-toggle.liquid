@@ -15,7 +15,11 @@
 
 {%- assign vp = viewport | default: 'desktop' -%}
 
-<div class="valor-grid-view-toggle valor-grid-view-toggle--{{ vp }}" role="group" aria-label="{{ 'collection.grid_view.label' | t }}">
+<div
+  class="valor-grid-view-toggle valor-grid-view-toggle--{{ vp }}"
+  role="group"
+  aria-label="{{ 'collection.grid_view.label' | t }}"
+>
   <button
     type="button"
     class="valor-grid-view-toggle__btn"

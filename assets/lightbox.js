@@ -29,30 +29,30 @@ class ValorLightbox extends HTMLDialogElement {
   }
 
   connectedCallback() {
-    this.imgEl = this.querySelector('[data-lightbox-image]');
-    this.counterEl = this.querySelector('[data-lightbox-counter]');
-    this.prevBtn = this.querySelector('[data-lightbox-prev]');
-    this.nextBtn = this.querySelector('[data-lightbox-next]');
-    this.viewportEl = this.querySelector('[data-lightbox-viewport]');
+    this.imgEl = this.querySelector("[data-lightbox-image]");
+    this.counterEl = this.querySelector("[data-lightbox-counter]");
+    this.prevBtn = this.querySelector("[data-lightbox-prev]");
+    this.nextBtn = this.querySelector("[data-lightbox-next]");
+    this.viewportEl = this.querySelector("[data-lightbox-viewport]");
 
-    document.addEventListener('valor:lightbox:open', this._handleOpen);
-    this.addEventListener('click', this._handleClick);
-    this.addEventListener('keydown', this._handleKey);
+    document.addEventListener("valor:lightbox:open", this._handleOpen);
+    this.addEventListener("click", this._handleClick);
+    this.addEventListener("keydown", this._handleKey);
     if (this.viewportEl) {
-      this.viewportEl.addEventListener('touchstart', this._handleTouchStart, { passive: true });
-      this.viewportEl.addEventListener('touchend', this._handleTouchEnd, { passive: true });
+      this.viewportEl.addEventListener("touchstart", this._handleTouchStart, { passive: true });
+      this.viewportEl.addEventListener("touchend", this._handleTouchEnd, { passive: true });
     }
-    this.addEventListener('close', this.onClose.bind(this));
+    this.addEventListener("close", this.onClose.bind(this));
 
     // Hook prev/next directly (in addition to general click handler)
-    if (this.prevBtn) this.prevBtn.addEventListener('click', this.prev.bind(this));
-    if (this.nextBtn) this.nextBtn.addEventListener('click', this.next.bind(this));
-    var closeBtn = this.querySelector('[data-lightbox-close]');
-    if (closeBtn) closeBtn.addEventListener('click', this._handleClose);
+    if (this.prevBtn) this.prevBtn.addEventListener("click", this.prev.bind(this));
+    if (this.nextBtn) this.nextBtn.addEventListener("click", this.next.bind(this));
+    var closeBtn = this.querySelector("[data-lightbox-close]");
+    if (closeBtn) closeBtn.addEventListener("click", this._handleClose);
   }
 
   disconnectedCallback() {
-    document.removeEventListener('valor:lightbox:open', this._handleOpen);
+    document.removeEventListener("valor:lightbox:open", this._handleOpen);
   }
 
   openWith(event) {
@@ -60,27 +60,27 @@ class ValorLightbox extends HTMLDialogElement {
     if (!detail.images || !detail.images.length) return;
     this.images = detail.images;
     this.index = Math.max(0, Math.min(detail.index || 0, this.images.length - 1));
-    this.setAttribute('data-single', this.images.length <= 1 ? 'true' : 'false');
+    this.setAttribute("data-single", this.images.length <= 1 ? "true" : "false");
     this.render();
-    if (typeof this.showModal === 'function') {
+    if (typeof this.showModal === "function") {
       this.showModal();
     } else {
-      this.setAttribute('open', '');
+      this.setAttribute("open", "");
     }
-    document.body.classList.add('valor-no-scroll');
+    document.body.classList.add("valor-no-scroll");
   }
 
   onClose() {
-    document.body.classList.remove('valor-no-scroll');
+    document.body.classList.remove("valor-no-scroll");
   }
 
   render() {
     var img = this.images[this.index];
     if (!img || !this.imgEl) return;
     this.imgEl.src = img.src;
-    this.imgEl.alt = img.alt || '';
-    this.imgEl.removeAttribute('width');
-    this.imgEl.removeAttribute('height');
+    this.imgEl.alt = img.alt || "";
+    this.imgEl.removeAttribute("width");
+    this.imgEl.removeAttribute("height");
     var imgEl = this.imgEl;
     var setDims = function () {
       if (imgEl.naturalWidth) {
@@ -89,30 +89,36 @@ class ValorLightbox extends HTMLDialogElement {
       }
     };
     if (imgEl.complete) setDims();
-    else imgEl.addEventListener('load', setDims, { once: true });
+    else imgEl.addEventListener("load", setDims, { once: true });
     if (img.srcset) {
       this.imgEl.srcset = img.srcset;
     } else {
-      this.imgEl.removeAttribute('srcset');
+      this.imgEl.removeAttribute("srcset");
     }
     if (img.sizes) {
       this.imgEl.sizes = img.sizes;
     } else {
-      this.imgEl.removeAttribute('sizes');
+      this.imgEl.removeAttribute("sizes");
     }
     if (this.counterEl) {
-      this.counterEl.textContent = (this.index + 1) + ' / ' + this.images.length;
+      this.counterEl.textContent = this.index + 1 + " / " + this.images.length;
     }
-    if (this.prevBtn) this.prevBtn.toggleAttribute('disabled', this.index === 0);
-    if (this.nextBtn) this.nextBtn.toggleAttribute('disabled', this.index === this.images.length - 1);
+    if (this.prevBtn) this.prevBtn.toggleAttribute("disabled", this.index === 0);
+    if (this.nextBtn) this.nextBtn.toggleAttribute("disabled", this.index === this.images.length - 1);
   }
 
   prev() {
-    if (this.index > 0) { this.index -= 1; this.render(); }
+    if (this.index > 0) {
+      this.index -= 1;
+      this.render();
+    }
   }
 
   next() {
-    if (this.index < this.images.length - 1) { this.index += 1; this.render(); }
+    if (this.index < this.images.length - 1) {
+      this.index += 1;
+      this.render();
+    }
   }
 
   onClick(e) {
@@ -122,8 +128,13 @@ class ValorLightbox extends HTMLDialogElement {
   }
 
   onKey(e) {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); this.prev(); }
-    else if (e.key === 'ArrowRight') { e.preventDefault(); this.next(); }
+    if (e.key === "ArrowLeft") {
+      e.preventDefault();
+      this.prev();
+    } else if (e.key === "ArrowRight") {
+      e.preventDefault();
+      this.next();
+    }
   }
 
   onTouchStart(e) {
@@ -134,8 +145,8 @@ class ValorLightbox extends HTMLDialogElement {
 
   onTouchEnd(e) {
     if (this._touchStartX == null) return;
-    var endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : 0;
-    var endY = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientY : 0;
+    var endX = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientX : 0;
+    var endY = e.changedTouches && e.changedTouches[0] ? e.changedTouches[0].clientY : 0;
     var dx = endX - this._touchStartX;
     var dy = endY - this._touchStartY;
     // Only treat as swipe if horizontal motion is dominant and crosses threshold
@@ -148,14 +159,14 @@ class ValorLightbox extends HTMLDialogElement {
   }
 }
 
-if (!customElements.get('valor-lightbox')) {
-  customElements.define('valor-lightbox', ValorLightbox, { extends: 'dialog' });
+if (!customElements.get("valor-lightbox")) {
+  customElements.define("valor-lightbox", ValorLightbox, { extends: "dialog" });
 }
 
 // Body scroll lock helper (CSS class — defined in lightbox.css indirectly via inline style)
 // We use a simple class because dialog::backdrop already covers the page.
-(function() {
-  var style = document.createElement('style');
-  style.textContent = '.valor-no-scroll { overflow: hidden; }';
+(function () {
+  var style = document.createElement("style");
+  style.textContent = ".valor-no-scroll { overflow: hidden; }";
   document.head.appendChild(style);
 })();

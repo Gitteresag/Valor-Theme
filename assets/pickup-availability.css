@@ -6,7 +6,7 @@
   display: block;
 }
 
-.valor-pickup[aria-busy='true'] {
+.valor-pickup[aria-busy="true"] {
   opacity: 0.65;
 }
 

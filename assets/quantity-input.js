@@ -1,13 +1,13 @@
 (() => {
-  if (customElements.get('quantity-input')) return;
+  if (customElements.get("quantity-input")) return;
 
   class QuantityInput extends HTMLElement {
     constructor() {
       super();
 
-      this.input = this.querySelector('[data-quantity-field]');
-      this.minusButton = this.querySelector('[data-quantity-minus]');
-      this.plusButton = this.querySelector('[data-quantity-plus]');
+      this.input = this.querySelector("[data-quantity-field]");
+      this.minusButton = this.querySelector("[data-quantity-minus]");
+      this.plusButton = this.querySelector("[data-quantity-plus]");
 
       this.onButtonClick = this.onButtonClick.bind(this);
       this.onInputChange = this.onInputChange.bind(this);
@@ -16,23 +16,23 @@
     connectedCallback() {
       if (!this.input) return;
 
-      this.minusButton?.addEventListener('click', this.onButtonClick);
-      this.plusButton?.addEventListener('click', this.onButtonClick);
-      this.input.addEventListener('change', this.onInputChange);
+      this.minusButton?.addEventListener("click", this.onButtonClick);
+      this.plusButton?.addEventListener("click", this.onButtonClick);
+      this.input.addEventListener("change", this.onInputChange);
 
       this.disabledObserver = new MutationObserver(() => this.updateButtonStates());
       this.disabledObserver.observe(this.input, {
         attributes: true,
-        attributeFilter: ['disabled', 'min', 'max']
+        attributeFilter: ["disabled", "min", "max"],
       });
 
       this.updateButtonStates();
     }
 
     disconnectedCallback() {
-      this.minusButton?.removeEventListener('click', this.onButtonClick);
-      this.plusButton?.removeEventListener('click', this.onButtonClick);
-      this.input?.removeEventListener('change', this.onInputChange);
+      this.minusButton?.removeEventListener("click", this.onButtonClick);
+      this.plusButton?.removeEventListener("click", this.onButtonClick);
+      this.input?.removeEventListener("change", this.onInputChange);
       this.disabledObserver?.disconnect();
     }
 
@@ -47,11 +47,11 @@
 
       let nextValue = currentValue;
 
-      if (event.currentTarget.name === 'plus') {
+      if (event.currentTarget.name === "plus") {
         nextValue = currentValue + step;
       }
 
-      if (event.currentTarget.name === 'minus') {
+      if (event.currentTarget.name === "minus") {
         nextValue = currentValue - step;
       }
 
@@ -59,7 +59,7 @@
       this.updateButtonStates();
 
       if (this.input.value !== previousValue) {
-        this.input.dispatchEvent(new Event('change', { bubbles: true }));
+        this.input.dispatchEvent(new Event("change", { bubbles: true }));
       }
     }
 
@@ -74,8 +74,8 @@
     }
 
     getMin() {
-      const raw = this.input.getAttribute('min');
-      if (raw === null || raw === '') return 1;
+      const raw = this.input.getAttribute("min");
+      if (raw === null || raw === "") return 1;
       const m = Number(raw);
       return Number.isFinite(m) ? m : 1;
     }
@@ -85,7 +85,7 @@
       // which may be 0 in cart contexts to allow removal). Falls back to
       // native min when no rule is provided.
       const raw = this.input.dataset.min;
-      if (raw === undefined || raw === '') return this.getMin();
+      if (raw === undefined || raw === "") return this.getMin();
       const m = Number(raw);
       return Number.isFinite(m) ? m : this.getMin();
     }
@@ -95,15 +95,15 @@
       // explicitly check for missing/empty attribute before converting —
       // otherwise products without a quantity_rule.max (i.e. no max attr
       // rendered by Liquid) would clamp every value to 0.
-      const raw = this.input.getAttribute('max');
-      if (raw === null || raw === '') return null;
+      const raw = this.input.getAttribute("max");
+      if (raw === null || raw === "") return null;
       const m = Number(raw);
       return Number.isFinite(m) ? m : null;
     }
 
     getStep() {
-      const raw = this.input.dataset.step || this.input.getAttribute('step');
-      if (raw === undefined || raw === null || raw === '') return 1;
+      const raw = this.input.dataset.step || this.input.getAttribute("step");
+      if (raw === undefined || raw === null || raw === "") return 1;
       const s = Number(raw);
       return Number.isFinite(s) && s > 0 ? s : 1;
     }
@@ -120,7 +120,7 @@
       // min=0 for removal). Outside cart contexts, native min is >= ruleMin
       // so this branch never fires.
       if (nativeMin === 0 && nextValue === 0) {
-        return '0';
+        return "0";
       }
 
       // Otherwise enforce the quantity rule minimum
@@ -165,5 +165,5 @@
     }
   }
 
-  customElements.define('quantity-input', QuantityInput);
+  customElements.define("quantity-input", QuantityInput);
 })();

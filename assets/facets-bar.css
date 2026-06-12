@@ -223,7 +223,10 @@
     border-radius: 2px;
     background-color: var(--color-background);
     color: transparent;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
   }
 
   .valor-facets-bar__checkbox:checked ~ .valor-facets-bar__check-box {

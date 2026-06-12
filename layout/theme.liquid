@@ -24,7 +24,6 @@
       {{ 'component-predictive-search.css' | asset_url | stylesheet_tag }}
     {%- endif -%}
 
-
     {{ 'product-media-gallery.css' | asset_url | stylesheet_tag }}
     {{ 'lightbox.css' | asset_url | stylesheet_tag }}
 
@@ -64,12 +63,15 @@
       <script src="{{ 'predictive-search.js' | asset_url }}" defer></script>
     {%- endif -%}
 
-
     {%- if request.page_type == 'index' -%}
       <script>
         (function () {
           requestAnimationFrame(function () {
-            if (!document.querySelector('#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger')) {
+            if (
+              !document.querySelector(
+                '#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger',
+              )
+            ) {
               document.documentElement.classList.add('valor-transparent-header-ready');
             }
           });

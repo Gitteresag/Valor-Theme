@@ -11,11 +11,17 @@
       {%- for block in section.blocks -%}
         {%- case block.type -%}
           {%- when 'heading' -%}
-            <h2 class="valor-rich-text__heading valor-heading valor-heading--{{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+            <h2
+              class="valor-rich-text__heading valor-heading valor-heading--{{ block.settings.heading_size }}"
+              {{ block.shopify_attributes }}
+            >
               {{ block.settings.heading }}
             </h2>
           {%- when 'caption' -%}
-            <div class="valor-rich-text__caption valor-rich-text__caption--{{ block.settings.text_size }}" {{ block.shopify_attributes }}>
+            <div
+              class="valor-rich-text__caption valor-rich-text__caption--{{ block.settings.text_size }}"
+              {{ block.shopify_attributes }}
+            >
               {{ block.settings.caption | escape }}
             </div>
           {%- when 'text' -%}
@@ -62,9 +68,15 @@
     display: flex;
   }
   /* Position the content block within the inner container */
-  .valor-rich-text--pos-left .valor-rich-text__inner { justify-content: flex-start; }
-  .valor-rich-text--pos-center .valor-rich-text__inner { justify-content: center; }
-  .valor-rich-text--pos-right .valor-rich-text__inner { justify-content: flex-end; }
+  .valor-rich-text--pos-left .valor-rich-text__inner {
+    justify-content: flex-start;
+  }
+  .valor-rich-text--pos-center .valor-rich-text__inner {
+    justify-content: center;
+  }
+  .valor-rich-text--pos-right .valor-rich-text__inner {
+    justify-content: flex-end;
+  }
 
   .valor-rich-text__content {
     max-width: 38rem;
@@ -72,11 +84,23 @@
     flex-direction: column;
     gap: 1rem;
   }
-  .valor-rich-text--full-width .valor-rich-text__content { max-width: none; width: 100%; }
+  .valor-rich-text--full-width .valor-rich-text__content {
+    max-width: none;
+    width: 100%;
+  }
 
-  .valor-rich-text--align-left .valor-rich-text__content { text-align: left; align-items: flex-start; }
-  .valor-rich-text--align-center .valor-rich-text__content { text-align: center; align-items: center; }
-  .valor-rich-text--align-right .valor-rich-text__content { text-align: right; align-items: flex-end; }
+  .valor-rich-text--align-left .valor-rich-text__content {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .valor-rich-text--align-center .valor-rich-text__content {
+    text-align: center;
+    align-items: center;
+  }
+  .valor-rich-text--align-right .valor-rich-text__content {
+    text-align: right;
+    align-items: flex-end;
+  }
 
   .valor-rich-text__caption {
     text-transform: uppercase;
@@ -84,17 +108,27 @@
     color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
     font-weight: 500;
   }
-  .valor-rich-text__caption--small { font-size: 0.75rem; }
-  .valor-rich-text__caption--medium { font-size: 0.875rem; }
-  .valor-rich-text__caption--large { font-size: 1rem; }
+  .valor-rich-text__caption--small {
+    font-size: 0.75rem;
+  }
+  .valor-rich-text__caption--medium {
+    font-size: 0.875rem;
+  }
+  .valor-rich-text__caption--large {
+    font-size: 1rem;
+  }
 
   .valor-rich-text__text {
     font-size: 1rem;
     line-height: 1.6;
     color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
   }
-  .valor-rich-text__text > *:first-child { margin-top: 0; }
-  .valor-rich-text__text > *:last-child { margin-bottom: 0; }
+  .valor-rich-text__text > *:first-child {
+    margin-top: 0;
+  }
+  .valor-rich-text__text > *:last-child {
+    margin-bottom: 0;
+  }
 
   .valor-rich-text__buttons {
     display: flex;
@@ -102,12 +136,15 @@
     gap: 0.75rem;
     margin-top: 0.5rem;
   }
-  .valor-rich-text--align-center .valor-rich-text__buttons { justify-content: center; }
-  .valor-rich-text--align-right .valor-rich-text__buttons { justify-content: flex-end; }
+  .valor-rich-text--align-center .valor-rich-text__buttons {
+    justify-content: center;
+  }
+  .valor-rich-text--align-right .valor-rich-text__buttons {
+    justify-content: flex-end;
+  }
 {% endstylesheet %}
 
 {% schema %}
-
 {
   "name": "Rich text",
   "tag": "section",
@@ -327,5 +364,4 @@
     }
   ]
 }
-
 {% endschema %}

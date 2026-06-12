@@ -147,7 +147,7 @@
   transition: opacity 0.15s ease;
 }
 
-.valor-cart-items[aria-busy='true'] {
+.valor-cart-items[aria-busy="true"] {
   opacity: 0.55;
   pointer-events: none;
 }
@@ -179,7 +179,7 @@
   padding-bottom: 0;
 }
 
-.valor-cart-item[data-line-busy='true'] {
+.valor-cart-item[data-line-busy="true"] {
   opacity: 0.5;
   pointer-events: none;
 }
@@ -294,7 +294,7 @@
 }
 
 .valor-cart-item__meta-item:not(:last-child)::after {
-  content: ' ·';
+  content: " ·";
 }
 
 .valor-cart-item__vendor {
@@ -389,7 +389,7 @@
   border-left: 3px solid var(--valor-color-error);
 }
 
-.valor-cart-item__error[data-has-error='true'] {
+.valor-cart-item__error[data-has-error="true"] {
   display: block;
 }
 
@@ -583,7 +583,9 @@
   padding: 0;
   margin-left: 0.25rem;
   flex: 0 0 auto;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .valor-cart__discount-remove:hover {
@@ -661,7 +663,10 @@
   border: var(--style-button-border-width, 1.5px) solid var(--color-button-outline-border, var(--color-foreground));
   border-radius: var(--style-border-radius-buttons, var(--style-border-radius-inputs, 4px));
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .valor-cart__discount-apply:hover:not(:disabled) {
@@ -682,7 +687,7 @@
   min-height: 1em;
 }
 
-.valor-cart__discount-message[data-state='success'] {
+.valor-cart__discount-message[data-state="success"] {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
@@ -693,17 +698,19 @@
   font-weight: 500;
 }
 
-.valor-cart__discount-message[data-state='success']::before {
-  content: '';
+.valor-cart__discount-message[data-state="success"]::before {
+  content: "";
   width: 1rem;
   height: 1rem;
   flex: 0 0 auto;
   background-color: currentColor;
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>") no-repeat center / contain;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>") no-repeat center / contain;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>")
+    no-repeat center / contain;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>")
+    no-repeat center / contain;
 }
 
-.valor-cart__discount-message[data-state='error'] {
+.valor-cart__discount-message[data-state="error"] {
   color: var(--valor-color-error);
 }
 
@@ -742,16 +749,17 @@
 }
 
 .valor-cart__shipping-discount-notice::before {
-  content: '';
+  content: "";
   width: 1rem;
   height: 1rem;
   margin-top: 0.125rem;
   flex: 0 0 auto;
   background-color: var(--valor-color-success);
-  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>") no-repeat center / contain;
-          mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>") no-repeat center / contain;
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>")
+    no-repeat center / contain;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>")
+    no-repeat center / contain;
 }
-
 
 /* Shipping note block */
 

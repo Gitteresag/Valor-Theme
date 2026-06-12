@@ -17,16 +17,20 @@
   endcase
 -%}
 
-<footer class="valor-footer" style="--valor-footer-padding-top: {{ section.settings.padding_top }}px; --valor-footer-padding-bottom: {{ section.settings.padding_bottom }}px; --valor-footer-margin-top: {{ section.settings.margin_top }}px; --valor-footer-social-size: {{ social_icon_scale }};">
-
-  {%- if section.blocks.size > 0 or section.settings.newsletter_enable or section.settings.enable_follow_on_shop or section.settings.show_social -%}
+<footer
+  class="valor-footer"
+  style="--valor-footer-padding-top: {{ section.settings.padding_top }}px; --valor-footer-padding-bottom: {{ section.settings.padding_bottom }}px; --valor-footer-margin-top: {{ section.settings.margin_top }}px; --valor-footer-social-size: {{ social_icon_scale }};"
+>
+  {%- if section.blocks.size > 0
+    or section.settings.newsletter_enable
+    or section.settings.enable_follow_on_shop
+    or section.settings.show_social
+  -%}
     <div class="valor-footer__top">
-
       {%- if section.blocks.size > 0 -%}
         <div class="valor-footer__blocks valor-footer__blocks--cols-{{ section.blocks.size | at_most: 4 }}">
           {%- for block in section.blocks -%}
             <div class="valor-footer__block valor-footer__block--{{ block.type }}" {{ block.shopify_attributes }}>
-
               {%- case block.type -%}
                 {%- when 'link_list' -%}
                   {%- if block.settings.menu != blank -%}
@@ -39,7 +43,10 @@
                     <ul class="valor-footer__menu" role="list">
                       {%- for link in block.settings.menu.links -%}
                         <li>
-                          <a href="{{ link.url }}" class="valor-footer__menu-link{% if link.active %} valor-footer__menu-link--active{% endif %}">
+                          <a
+                            href="{{ link.url }}"
+                            class="valor-footer__menu-link{% if link.active %} valor-footer__menu-link--active{% endif %}"
+                          >
                             {{ link.title | escape }}
                           </a>
                         </li>
@@ -61,9 +68,22 @@
                   {%- endif -%}
                   <div class="valor-footer__brand">
                     {%- if settings.brand_image != blank -%}
-                      {%- assign brand_image_height = settings.brand_image_width | divided_by: settings.brand_image.aspect_ratio -%}
-                      <div class="valor-footer__brand-image" style="max-width: min(100%, {{ settings.brand_image_width }}px);">
-                        {{ settings.brand_image | image_url: width: 1100 | image_tag: loading: 'lazy', widths: '50, 100, 150, 200, 300, 400, 550, 800, 1100', height: brand_image_height, width: settings.brand_image_width }}
+                      {%- assign brand_image_height = settings.brand_image_width
+                        | divided_by: settings.brand_image.aspect_ratio
+                      -%}
+                      <div
+                        class="valor-footer__brand-image"
+                        style="max-width: min(100%, {{ settings.brand_image_width }}px);"
+                      >
+                        {{
+                          settings.brand_image
+                          | image_url: width: 1100
+                          | image_tag:
+                            loading: 'lazy',
+                            widths: '50, 100, 150, 200, 300, 400, 550, 800, 1100',
+                            height: brand_image_height,
+                            width: settings.brand_image_width
+                        }}
                       </div>
                     {%- endif -%}
                     {%- if settings.brand_headline != blank -%}
@@ -84,7 +104,10 @@
                   <div class="valor-footer__image valor-footer__image--{{ block.settings.alignment | default: 'left' }}">
                     {%- if block.settings.image != blank -%}
                       {%- assign image_2x = block.settings.image_width | times: 2 | at_most: 5760 -%}
-                      <div class="valor-footer__image-wrapper" style="max-width: min(100%, {{ block.settings.image_width }}px);">
+                      <div
+                        class="valor-footer__image-wrapper"
+                        style="max-width: min(100%, {{ block.settings.image_width }}px);"
+                      >
                         <img
                           srcset="{{ block.settings.image | image_url: width: block.settings.image_width }} 1x, {{ block.settings.image | image_url: width: image_2x }} 2x"
                           src="{{ block.settings.image | image_url: width: 760 }}"
@@ -102,7 +125,10 @@
         </div>
       {%- endif -%}
 
-      {%- if section.settings.newsletter_enable or section.settings.enable_follow_on_shop or section.settings.show_social -%}
+      {%- if section.settings.newsletter_enable
+        or section.settings.enable_follow_on_shop
+        or section.settings.show_social
+      -%}
         <div class="valor-footer__newsletter-side">
           {%- if section.settings.newsletter_enable -%}
             {%- if section.settings.newsletter_heading != blank -%}
@@ -143,12 +169,19 @@
                 </button>
               </div>
               {%- if form.errors -%}
-                <small class="valor-footer__newsletter-message valor-footer__newsletter-message--error" id="ContactFooter-error">
-                  {{ form.errors.translated_fields.email | capitalize }} {{ form.errors.messages.email }}
+                <small
+                  class="valor-footer__newsletter-message valor-footer__newsletter-message--error"
+                  id="ContactFooter-error"
+                >
+                  {{ form.errors.translated_fields.email | capitalize }}
+                  {{ form.errors.messages.email }}
                 </small>
               {%- endif -%}
               {%- if form.posted_successfully? -%}
-                <p class="valor-footer__newsletter-message valor-footer__newsletter-message--success" id="ContactFooter-success">
+                <p
+                  class="valor-footer__newsletter-message valor-footer__newsletter-message--success"
+                  id="ContactFooter-success"
+                >
                   {{ 'newsletter.success' | t }}
                 </p>
               {%- endif -%}
@@ -171,13 +204,11 @@
           {%- endif -%}
         </div>
       {%- endif -%}
-
     </div>
   {%- endif -%}
 
   <div class="valor-footer__bottom">
     <div class="valor-footer__bottom-row">
-
       <div class="valor-footer__localization">
         {%- if section.settings.enable_country_selector and localization.available_countries.size > 1 -%}
           <valor-localization-form class="valor-localization valor-localization--align-left valor-localization--align-up">
@@ -207,16 +238,19 @@
           {%- endfor -%}
         </ul>
       {%- endif -%}
-
     </div>
 
     <div class="valor-footer__copyright">
-      <span class="valor-footer__copyright-text">&copy; {{ 'now' | date: '%Y' }}, {{ shop.name | link_to: routes.root_url }}</span>
+      <span class="valor-footer__copyright-text"
+        >&copy; {{ 'now' | date: '%Y' }}, {{ shop.name | link_to: routes.root_url -}}
+      </span>
       {%- if section.settings.show_policy -%}
         <ul class="valor-footer__policies" role="list">
           {%- for policy in shop.policies -%}
             {%- if policy != blank -%}
-              <li><a href="{{ policy.url }}">{{ policy.title | escape }}</a></li>
+              <li>
+                <a href="{{ policy.url }}">{{ policy.title | escape }}</a>
+              </li>
             {%- endif -%}
           {%- endfor -%}
         </ul>
@@ -402,8 +436,13 @@
     color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
     line-height: 1.5;
   }
-  .valor-footer__text p { margin: 0 0 0.5rem; }
-  .valor-footer__text a { color: var(--color-foreground); text-decoration: underline; }
+  .valor-footer__text p {
+    margin: 0 0 0.5rem;
+  }
+  .valor-footer__text a {
+    color: var(--color-foreground);
+    text-decoration: underline;
+  }
 
   /* Brand block */
   .valor-footer__brand {
@@ -428,11 +467,17 @@
     color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
     line-height: 1.5;
   }
-  .valor-footer__brand-description p { margin: 0 0 0.5rem; }
+  .valor-footer__brand-description p {
+    margin: 0 0 0.5rem;
+  }
 
   /* Image block */
-  .valor-footer__image--center { text-align: center; }
-  .valor-footer__image--right { text-align: right; }
+  .valor-footer__image--center {
+    text-align: center;
+  }
+  .valor-footer__image--right {
+    text-align: right;
+  }
   .valor-footer__image-wrapper {
     display: inline-block;
   }
@@ -492,7 +537,11 @@
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    transition:
+      opacity 0.15s ease,
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
   }
   .valor-footer__newsletter-button:hover {
     opacity: var(--button-hover-opacity, 0.85);
@@ -505,8 +554,12 @@
     margin: 0;
     font-size: 0.8125rem;
   }
-  .valor-footer__newsletter-message--error { color: var(--valor-color-error); }
-  .valor-footer__newsletter-message--success { color: #16a34a; }
+  .valor-footer__newsletter-message--error {
+    color: var(--valor-color-error);
+  }
+  .valor-footer__newsletter-message--success {
+    color: #16a34a;
+  }
 
   /* Follow on Shop button (Shop Pay rendered) */
   .valor-footer__follow-on-shop > * {
@@ -686,20 +739,14 @@
       var main = getMain();
       if (!main) return;
 
-      main.style.setProperty(
-        '--valor-main-locked-height',
-        Math.ceil(main.getBoundingClientRect().height) + 'px'
-      );
+      main.style.setProperty('--valor-main-locked-height', Math.ceil(main.getBoundingClientRect().height) + 'px');
     }
 
     function setFooterMenuHeight(block) {
       var menu = block.querySelector('.valor-footer__menu');
       if (!menu) return;
 
-      menu.style.setProperty(
-        '--valor-footer-menu-height',
-        Math.ceil(menu.scrollHeight + 24) + 'px'
-      );
+      menu.style.setProperty('--valor-footer-menu-height', Math.ceil(menu.scrollHeight + 24) + 'px');
     }
 
     function unlockMainHeightIfClosed() {
@@ -881,9 +928,9 @@
       "label": "Social icon size",
       "default": "medium",
       "options": [
-        { "value": "small",  "label": "Small" },
+        { "value": "small", "label": "Small" },
         { "value": "medium", "label": "Medium" },
-        { "value": "large",  "label": "Large" }
+        { "value": "large", "label": "Large" }
       ]
     },
     {
@@ -949,10 +996,7 @@
     }
   ],
   "default": {
-    "blocks": [
-      { "type": "link_list" },
-      { "type": "text" }
-    ]
+    "blocks": [{ "type": "link_list" }, { "type": "text" }]
   }
 }
 {% endschema %}

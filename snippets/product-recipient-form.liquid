@@ -35,7 +35,9 @@
         aria-controls="{{ recipient_id }}-fields"
         aria-expanded="{% if has_recipient_errors %}true{% else %}false{% endif %}"
         data-recipient-toggle
-        {% if has_recipient_errors %}checked{% endif %}
+        {% if has_recipient_errors %}
+          checked
+        {% endif %}
       >
       <label class="valor-recipient-form__checkbox-label" for="{{ recipient_id }}-checkbox">
         <span class="valor-recipient-form__checkbox-box" aria-hidden="true"></span>
@@ -55,7 +57,9 @@
       class="valor-recipient-form__errors"
       role="alert"
       data-recipient-errors
-      {% unless has_recipient_errors %}hidden{% endunless %}
+      {% unless has_recipient_errors %}
+        hidden
+      {% endunless %}
     >
       <p class="valor-recipient-form__errors-heading">{{ 'recipient.form.error_heading' | t }}</p>
       <ul data-recipient-error-list>
@@ -79,7 +83,9 @@
       id="{{ recipient_id }}-fields"
       class="valor-recipient-form__fields"
       data-recipient-fields
-      {% unless has_recipient_errors %}hidden{% endunless %}
+      {% unless has_recipient_errors %}
+        hidden
+      {% endunless %}
     >
       <div class="valor-recipient-form__field" data-recipient-field-row="email">
         <label class="valor-recipient-form__label" for="{{ recipient_id }}-email">
@@ -95,9 +101,16 @@
           placeholder="{{ 'recipient.form.email' | t }}"
           data-recipient-field
           data-recipient-email
-          {% unless has_recipient_errors %}disabled{% endunless %}
+          {% unless has_recipient_errors %}
+            disabled
+          {% endunless %}
         >
-        <p id="{{ recipient_id }}-email-error" class="valor-recipient-form__field-error" data-recipient-field-error="email" hidden></p>
+        <p
+          id="{{ recipient_id }}-email-error"
+          class="valor-recipient-form__field-error"
+          data-recipient-field-error="email"
+          hidden
+        ></p>
       </div>
 
       <div class="valor-recipient-form__field" data-recipient-field-row="name">
@@ -113,9 +126,16 @@
           autocomplete="name"
           placeholder="{{ 'recipient.form.name' | t }}"
           data-recipient-field
-          {% unless has_recipient_errors %}disabled{% endunless %}
+          {% unless has_recipient_errors %}
+            disabled
+          {% endunless %}
         >
-        <p id="{{ recipient_id }}-name-error" class="valor-recipient-form__field-error" data-recipient-field-error="name" hidden></p>
+        <p
+          id="{{ recipient_id }}-name-error"
+          class="valor-recipient-form__field-error"
+          data-recipient-field-error="name"
+          hidden
+        ></p>
       </div>
 
       <div class="valor-recipient-form__field" data-recipient-field-row="message">
@@ -130,10 +150,17 @@
           maxlength="200"
           placeholder="{{ 'recipient.form.message' | t }}"
           data-recipient-field
-          {% unless has_recipient_errors %}disabled{% endunless %}
+          {% unless has_recipient_errors %}
+            disabled
+          {% endunless %}
         >{{ form.message | escape }}</textarea>
         <p class="valor-recipient-form__hint">{{ 'recipient.form.max_characters' | t: max_chars: 200 }}</p>
-        <p id="{{ recipient_id }}-message-error" class="valor-recipient-form__field-error" data-recipient-field-error="message" hidden></p>
+        <p
+          id="{{ recipient_id }}-message-error"
+          class="valor-recipient-form__field-error"
+          data-recipient-field-error="message"
+          hidden
+        ></p>
       </div>
 
       <div class="valor-recipient-form__field" data-recipient-field-row="send_on">
@@ -149,9 +176,16 @@
           pattern="\d{4}-\d{2}-\d{2}"
           placeholder="{{ 'recipient.form.send_on' | t }}"
           data-recipient-field
-          {% unless has_recipient_errors %}disabled{% endunless %}
+          {% unless has_recipient_errors %}
+            disabled
+          {% endunless %}
         >
-        <p id="{{ recipient_id }}-send-on-error" class="valor-recipient-form__field-error" data-recipient-field-error="send_on" hidden></p>
+        <p
+          id="{{ recipient_id }}-send-on-error"
+          class="valor-recipient-form__field-error"
+          data-recipient-field-error="send_on"
+          hidden
+        ></p>
       </div>
 
       <input
@@ -159,7 +193,9 @@
         name="properties[__shopify_offset]"
         value=""
         data-recipient-offset
-        {% unless has_recipient_errors %}disabled{% endunless %}
+        {% unless has_recipient_errors %}
+          disabled
+        {% endunless %}
       >
     </div>
   </valor-recipient-form>

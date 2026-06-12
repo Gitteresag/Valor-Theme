@@ -25,19 +25,19 @@
  */
 
 (function () {
-  'use strict';
+  "use strict";
 
   if (window.ValorGridViewInitialized) return;
   window.ValorGridViewInitialized = true;
 
   var STORAGE_KEYS = {
-    desktop: 'valor:grid-view:desktop',
-    mobile: 'valor:grid-view:mobile'
+    desktop: "valor:grid-view:desktop",
+    mobile: "valor:grid-view:mobile",
   };
 
   var DEFAULTS = {
-    desktop: 'default',
-    mobile: 'default'
+    desktop: "default",
+    mobile: "default",
   };
 
   /* Whitelist of valid stored values per viewport. localStorage is
@@ -46,8 +46,8 @@
      Anything not in this list falls back to the default so the
      toggle UI never ends up in a "no button active" state. */
   var ALLOWED = {
-    desktop: ['default', 'compact'],
-    mobile: ['default', 'single']
+    desktop: ["default", "compact"],
+    mobile: ["default", "single"],
   };
 
   function readStored(viewport) {
@@ -71,42 +71,42 @@
   }
 
   function applyViews() {
-    var desktopView = readStored('desktop');
-    var mobileView = readStored('mobile');
+    var desktopView = readStored("desktop");
+    var mobileView = readStored("mobile");
 
-    var grids = document.querySelectorAll('.valor-collection__grid');
+    var grids = document.querySelectorAll(".valor-collection__grid");
     for (var i = 0; i < grids.length; i++) {
-      grids[i].setAttribute('data-grid-view-desktop', desktopView);
-      grids[i].setAttribute('data-grid-view-mobile', mobileView);
+      grids[i].setAttribute("data-grid-view-desktop", desktopView);
+      grids[i].setAttribute("data-grid-view-mobile", mobileView);
     }
 
-    var buttons = document.querySelectorAll('[data-grid-view-toggle]');
+    var buttons = document.querySelectorAll("[data-grid-view-toggle]");
     for (var j = 0; j < buttons.length; j++) {
       var btn = buttons[j];
-      var view = btn.getAttribute('data-grid-view-toggle');
-      var viewport = btn.getAttribute('data-grid-view-viewport');
-      var current = viewport === 'mobile' ? mobileView : desktopView;
-      btn.setAttribute('aria-pressed', current === view ? 'true' : 'false');
+      var view = btn.getAttribute("data-grid-view-toggle");
+      var viewport = btn.getAttribute("data-grid-view-viewport");
+      var current = viewport === "mobile" ? mobileView : desktopView;
+      btn.setAttribute("aria-pressed", current === view ? "true" : "false");
     }
   }
 
   function handleClick(event) {
-    var btn = event.target.closest && event.target.closest('[data-grid-view-toggle]');
+    var btn = event.target.closest && event.target.closest("[data-grid-view-toggle]");
     if (!btn) return;
     event.preventDefault();
 
-    var view = btn.getAttribute('data-grid-view-toggle');
-    var viewport = btn.getAttribute('data-grid-view-viewport') || 'desktop';
+    var view = btn.getAttribute("data-grid-view-toggle");
+    var viewport = btn.getAttribute("data-grid-view-viewport") || "desktop";
 
     writeStored(viewport, view);
     applyViews();
   }
 
-  document.addEventListener('click', handleClick);
-  document.addEventListener('valor:collection:refreshed', applyViews);
+  document.addEventListener("click", handleClick);
+  document.addEventListener("valor:collection:refreshed", applyViews);
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', applyViews);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", applyViews);
   } else {
     applyViews();
   }

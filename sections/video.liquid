@@ -152,12 +152,15 @@
     >
       {%- if use_cover -%}
         <div class="valor-video__cover" data-video-cover>
-          {{ section.settings.cover_image | image_url: width: 1500 | image_tag:
-            widths: '400, 600, 800, 1100, 1500, 2000',
-            sizes: '100vw',
-            class: 'valor-video__cover-img',
-            alt: cover_alt,
-            loading: 'lazy'
+          {{
+            section.settings.cover_image
+            | image_url: width: 1500
+            | image_tag:
+              widths: '400, 600, 800, 1100, 1500, 2000',
+              sizes: '100vw',
+              class: 'valor-video__cover-img',
+              alt: cover_alt,
+              loading: 'lazy'
           }}
           <button
             type="button"
@@ -172,17 +175,25 @@
         </div>
       {%- endif -%}
 
-      <div class="valor-video__media" data-video-media{% if use_cover %} hidden{% endif %}>
+      <div
+        class="valor-video__media"
+        data-video-media
+        {% if use_cover %}
+          hidden
+        {% endif %}
+      >
         {%- if shopify_video != blank -%}
-          {{ shopify_video | video_tag:
-            class: 'valor-video__el',
-            controls: false,
-            muted: video_muted,
-            autoplay: autoplay_video,
-            loop: section.settings.loop,
-            playsinline: true,
-            preload: 'metadata',
-            image_size: '1500x'
+          {{
+            shopify_video
+            | video_tag:
+              class: 'valor-video__el',
+              controls: false,
+              muted: video_muted,
+              autoplay: autoplay_video,
+              loop: section.settings.loop,
+              playsinline: true,
+              preload: 'metadata',
+              image_size: '1500x'
           }}
         {%- elsif provider == 'youtube' and yt_id != blank -%}
           {%- liquid
@@ -227,13 +238,18 @@
           <video
             class="valor-video__el"
             src="{{ external_url }}"
-            {% unless section.settings.show_play_button %}autoplay muted{% endunless %}
-            {% if section.settings.loop %}loop{% endif %}
+            {% unless section.settings.show_play_button %}
+              autoplay muted
+            {% endunless %}
+            {% if section.settings.loop %}
+              loop
+            {% endif %}
             playsinline
             preload="metadata"
-            {% if section.settings.show_play_button %}controls{% endif %}
-          >
-          </video>
+            {% if section.settings.show_play_button %}
+              controls
+            {% endif %}
+          ></video>
         {%- else -%}
           <div class="valor-video__placeholder">
             {{ 'lifestyle-1' | placeholder_svg_tag: 'valor-video__placeholder-svg' }}
@@ -253,10 +269,22 @@
           data-video-toggle
           aria-label="{{ 'video.play' | t | default: 'Play video' }}"
         >
-          <svg class="valor-video__play-icon valor-video__play-icon--play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+          <svg
+            class="valor-video__play-icon valor-video__play-icon--play"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+            focusable="false"
+          >
             <path d="M8 5v14l11-7z"/>
           </svg>
-          <svg class="valor-video__play-icon valor-video__play-icon--pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+          <svg
+            class="valor-video__play-icon valor-video__play-icon--pause"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+            focusable="false"
+          >
             <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
           </svg>
         </button>
@@ -274,12 +302,15 @@
       >
         {%- if use_mobile_cover -%}
           <div class="valor-video__cover" data-video-cover>
-            {{ section.settings.mobile_cover_image | image_url: width: 1100 | image_tag:
-              widths: '400, 600, 800, 1100, 1500',
-              sizes: '100vw',
-              class: 'valor-video__cover-img',
-              alt: mobile_cover_alt,
-              loading: 'lazy'
+            {{
+              section.settings.mobile_cover_image
+              | image_url: width: 1100
+              | image_tag:
+                widths: '400, 600, 800, 1100, 1500',
+                sizes: '100vw',
+                class: 'valor-video__cover-img',
+                alt: mobile_cover_alt,
+                loading: 'lazy'
             }}
             <button
               type="button"
@@ -294,17 +325,25 @@
           </div>
         {%- endif -%}
 
-        <div class="valor-video__media" data-video-media{% if use_mobile_cover %} hidden{% endif %}>
+        <div
+          class="valor-video__media"
+          data-video-media
+          {% if use_mobile_cover %}
+            hidden
+          {% endif %}
+        >
           {%- if mobile_shopify_video != blank -%}
-            {{ mobile_shopify_video | video_tag:
-              class: 'valor-video__el',
-              controls: false,
-              muted: video_muted,
-              autoplay: autoplay_video,
-              loop: section.settings.loop,
-              playsinline: true,
-              preload: 'metadata',
-              image_size: '1100x'
+            {{
+              mobile_shopify_video
+              | video_tag:
+                class: 'valor-video__el',
+                controls: false,
+                muted: video_muted,
+                autoplay: autoplay_video,
+                loop: section.settings.loop,
+                playsinline: true,
+                preload: 'metadata',
+                image_size: '1100x'
             }}
           {%- elsif mobile_provider == 'youtube' and mobile_yt_id != blank -%}
             {%- liquid
@@ -348,13 +387,18 @@
             <video
               class="valor-video__el"
               src="{{ mobile_external_url }}"
-              {% unless section.settings.show_play_button %}autoplay muted{% endunless %}
-              {% if section.settings.loop %}loop{% endif %}
+              {% unless section.settings.show_play_button %}
+                autoplay muted
+              {% endunless %}
+              {% if section.settings.loop %}
+                loop
+              {% endif %}
               playsinline
               preload="metadata"
-              {% if section.settings.show_play_button %}controls{% endif %}
-            >
-            </video>
+              {% if section.settings.show_play_button %}
+                controls
+              {% endif %}
+            ></video>
           {%- endif -%}
         </div>
 
@@ -365,10 +409,22 @@
             data-video-toggle
             aria-label="{{ 'video.play' | t | default: 'Play video' }}"
           >
-            <svg class="valor-video__play-icon valor-video__play-icon--play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+            <svg
+              class="valor-video__play-icon valor-video__play-icon--play"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
+            >
               <path d="M8 5v14l11-7z"/>
             </svg>
-            <svg class="valor-video__play-icon valor-video__play-icon--pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+            <svg
+              class="valor-video__play-icon valor-video__play-icon--pause"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden="true"
+              focusable="false"
+            >
               <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
             </svg>
           </button>
@@ -393,9 +449,15 @@
     padding: 0 clamp(1rem, 4vw, 3rem);
     box-sizing: border-box;
   }
-  .valor-video--small .valor-video__inner { max-width: 50rem; }
-  .valor-video--medium .valor-video__inner { max-width: 65rem; }
-  .valor-video--large .valor-video__inner { max-width: 80rem; }
+  .valor-video--small .valor-video__inner {
+    max-width: 50rem;
+  }
+  .valor-video--medium .valor-video__inner {
+    max-width: 65rem;
+  }
+  .valor-video--large .valor-video__inner {
+    max-width: 80rem;
+  }
   .valor-video--full .valor-video__inner {
     max-width: none;
     padding: 0;
@@ -410,9 +472,15 @@
   /* Heading alignment — left is default for editorial flow, center pairs
      well with full-width video sections. Inherits from text-align so it
      works regardless of width modifier. */
-  .valor-video__heading--align-left { text-align: left; }
-  .valor-video__heading--align-center { text-align: center; }
-  .valor-video__heading--align-right { text-align: right; }
+  .valor-video__heading--align-left {
+    text-align: left;
+  }
+  .valor-video__heading--align-center {
+    text-align: center;
+  }
+  .valor-video__heading--align-right {
+    text-align: right;
+  }
 
   /* Video frame — 16:9 by default, full-bleed image fills it */
   .valor-video__frame {
@@ -424,18 +492,32 @@
   }
 
   /* Mobile aspect-ratio variants for the mobile frame */
-  .valor-video__frame--aspect-9-16 { aspect-ratio: 9 / 16; }
-  .valor-video__frame--aspect-4-5 { aspect-ratio: 4 / 5; }
-  .valor-video__frame--aspect-1-1 { aspect-ratio: 1 / 1; }
-  .valor-video__frame--aspect-16-9 { aspect-ratio: 16 / 9; }
+  .valor-video__frame--aspect-9-16 {
+    aspect-ratio: 9 / 16;
+  }
+  .valor-video__frame--aspect-4-5 {
+    aspect-ratio: 4 / 5;
+  }
+  .valor-video__frame--aspect-1-1 {
+    aspect-ratio: 1 / 1;
+  }
+  .valor-video__frame--aspect-16-9 {
+    aspect-ratio: 16 / 9;
+  }
 
   /* Hide the mobile frame on desktop, hide the desktop frame on mobile —
      but only when a separate mobile video is configured. Otherwise the
      desktop frame is shown on every viewport (no mobile video set). */
-  .valor-video__frame--mobile { display: none; }
+  .valor-video__frame--mobile {
+    display: none;
+  }
   @media (max-width: 749px) {
-    .valor-video--has-mobile .valor-video__frame--desktop { display: none; }
-    .valor-video--has-mobile .valor-video__frame--mobile { display: block; }
+    .valor-video--has-mobile .valor-video__frame--desktop {
+      display: none;
+    }
+    .valor-video--has-mobile .valor-video__frame--mobile {
+      display: block;
+    }
   }
 
   .valor-video__media,
@@ -445,7 +527,9 @@
     width: 100%;
     height: 100%;
   }
-  .valor-video__media[hidden] { display: none; }
+  .valor-video__media[hidden] {
+    display: none;
+  }
 
   .valor-video__el,
   .valor-video__el--iframe,
@@ -490,7 +574,9 @@
     z-index: 2;
     -webkit-tap-highlight-color: transparent;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.15s ease, transform 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      transform 0.15s ease;
   }
   .valor-video__play svg {
     width: 30px;
@@ -520,10 +606,18 @@
   .valor-video__play--overlay:hover {
     background: rgba(0, 0, 0, 0.75);
   }
-  .valor-video__play-icon { display: inline-block; }
-  .valor-video__play-icon--pause { display: none; }
-  .valor-video__frame[data-playing='true'] .valor-video__play-icon--play { display: none; }
-  .valor-video__frame[data-playing='true'] .valor-video__play-icon--pause { display: inline-block; }
+  .valor-video__play-icon {
+    display: inline-block;
+  }
+  .valor-video__play-icon--pause {
+    display: none;
+  }
+  .valor-video__frame[data-playing='true'] .valor-video__play-icon--play {
+    display: none;
+  }
+  .valor-video__frame[data-playing='true'] .valor-video__play-icon--pause {
+    display: inline-block;
+  }
   /* Auto-hide the toggle while playing; reappear on hover/focus */
   .valor-video__frame[data-playing='true'] .valor-video__play--overlay {
     opacity: 0;

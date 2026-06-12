@@ -43,10 +43,18 @@
   background-color: color-mix(in srgb, var(--color-foreground) 4%, transparent);
   margin-bottom: 0.875rem;
 }
-.valor-card--ratio-square .valor-card__media    { aspect-ratio: 1 / 1; }
-.valor-card--ratio-portrait .valor-card__media  { aspect-ratio: 4 / 5; }
-.valor-card--ratio-landscape .valor-card__media { aspect-ratio: 4 / 3; }
-.valor-card--ratio-adapt .valor-card__media     { /* uses image's intrinsic ratio */ }
+.valor-card--ratio-square .valor-card__media {
+  aspect-ratio: 1 / 1;
+}
+.valor-card--ratio-portrait .valor-card__media {
+  aspect-ratio: 4 / 5;
+}
+.valor-card--ratio-landscape .valor-card__media {
+  aspect-ratio: 4 / 3;
+}
+.valor-card--ratio-adapt .valor-card__media {
+  /* uses image's intrinsic ratio */
+}
 
 .valor-card__image {
   width: 100%;
@@ -191,7 +199,9 @@
   background-color: var(--color-background);
   color: inherit;
   text-decoration: none;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
 @media (hover: hover) and (pointer: fine) {

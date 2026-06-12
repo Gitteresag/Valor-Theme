@@ -143,8 +143,5 @@
       }
     }
   },
-  "order": [
-    "main",
-    "related_products"
-  ]
+  "order": ["main", "related_products"]
 }

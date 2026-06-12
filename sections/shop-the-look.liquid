@@ -22,7 +22,9 @@
         <p class="valor-stl__eyebrow">{{ section.settings.eyebrow | escape }}</p>
       {%- endif -%}
       {%- if section.settings.heading != blank -%}
-        <h2 class="valor-stl__heading valor-heading valor-heading--{{ section.settings.heading_size }}">{{ section.settings.heading }}</h2>
+        <h2 class="valor-stl__heading valor-heading valor-heading--{{ section.settings.heading_size }}">
+          {{ section.settings.heading }}
+        </h2>
       {%- endif -%}
       {%- if section.settings.text != blank -%}
         <div class="valor-stl__text rte">{{ section.settings.text }}</div>
@@ -41,7 +43,9 @@
             width="{{ section_image.width }}"
             height="{{ section_image.height }}"
             loading="{{ image_loading }}"
-            {%- if image_fetchpriority == 'high' %} fetchpriority="high"{% endif -%}
+            {%- if image_fetchpriority == 'high' %}
+              fetchpriority="high"
+            {% endif -%}
           >
         {%- else -%}
           <div class="valor-stl__placeholder">
@@ -142,21 +146,50 @@
     display: grid;
     gap: clamp(2rem, 5vw, 4rem);
   }
-  .valor-stl__content { max-width: 42rem; display: flex; flex-direction: column; gap: 0.85rem; }
-  .valor-stl__eyebrow { margin: 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
-  .valor-stl__heading { margin: 0; }
-  .valor-stl__text { color: color-mix(in srgb, var(--color-foreground) 78%, transparent); }
-  .valor-stl__text > *:first-child { margin-top: 0; }
-  .valor-stl__text > *:last-child { margin-bottom: 0; }
-  .valor-stl__look { display: grid; gap: 1rem; }
+  .valor-stl__content {
+    max-width: 42rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+  .valor-stl__eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .valor-stl__heading {
+    margin: 0;
+  }
+  .valor-stl__text {
+    color: color-mix(in srgb, var(--color-foreground) 78%, transparent);
+  }
+  .valor-stl__text > *:first-child {
+    margin-top: 0;
+  }
+  .valor-stl__text > *:last-child {
+    margin-bottom: 0;
+  }
+  .valor-stl__look {
+    display: grid;
+    gap: 1rem;
+  }
   .valor-stl__image-wrap {
     position: relative;
     overflow: hidden;
     background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
   }
   .valor-stl__image,
-  .valor-stl__placeholder { width: 100%; height: auto; display: block; }
-  .valor-stl__placeholder-svg { width: 100%; height: auto; }
+  .valor-stl__placeholder {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .valor-stl__placeholder-svg {
+    width: 100%;
+    height: auto;
+  }
   .valor-stl__hotspot {
     position: absolute;
     left: var(--valor-hotspot-x, 50%);
@@ -178,7 +211,9 @@
     box-shadow: 0 0 0 0.4rem color-mix(in srgb, var(--color-background) 28%, transparent);
     list-style: none;
   }
-  .valor-stl__hotspot-button::-webkit-details-marker { display: none; }
+  .valor-stl__hotspot-button::-webkit-details-marker {
+    display: none;
+  }
   .valor-stl__hotspot-button span,
   .valor-stl__hotspot-button span::before {
     content: '';
@@ -188,8 +223,12 @@
     border-radius: 999px;
     background: currentColor;
   }
-  .valor-stl__hotspot-button span::before { transform: rotate(90deg); }
-  .valor-stl__hotspot[open] .valor-stl__hotspot-button span::before { display: none; }
+  .valor-stl__hotspot-button span::before {
+    transform: rotate(90deg);
+  }
+  .valor-stl__hotspot[open] .valor-stl__hotspot-button span::before {
+    display: none;
+  }
   .valor-stl__popover {
     position: absolute;
     left: 50%;
@@ -209,15 +248,38 @@
     color: inherit;
     text-decoration: none;
   }
-  .valor-stl__popover-card--placeholder { display: block; }
-  .valor-stl__popover-image { width: 4rem; aspect-ratio: 1 / 1; height: auto; object-fit: cover; background: color-mix(in srgb, var(--color-foreground) 5%, transparent); }
-  .valor-stl__popover-info { display: grid; gap: 0.2rem; }
+  .valor-stl__popover-card--placeholder {
+    display: block;
+  }
+  .valor-stl__popover-image {
+    width: 4rem;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    object-fit: cover;
+    background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+  }
+  .valor-stl__popover-info {
+    display: grid;
+    gap: 0.2rem;
+  }
   .valor-stl__popover-title,
-  .valor-stl__mobile-product-title { font-weight: 600; }
+  .valor-stl__mobile-product-title {
+    font-weight: 600;
+  }
   .valor-stl__popover-price,
-  .valor-stl__mobile-product-price { color: color-mix(in srgb, var(--color-foreground) 72%, transparent); font-size: 0.9rem; }
-  .valor-stl__popover-link { font-size: 0.85rem; text-decoration: underline; text-underline-offset: 0.2em; }
-  .valor-stl__mobile-products { display: grid; gap: 0.75rem; }
+  .valor-stl__mobile-product-price {
+    color: color-mix(in srgb, var(--color-foreground) 72%, transparent);
+    font-size: 0.9rem;
+  }
+  .valor-stl__popover-link {
+    font-size: 0.85rem;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .valor-stl__mobile-products {
+    display: grid;
+    gap: 0.75rem;
+  }
   .valor-stl__mobile-product {
     display: grid;
     grid-template-columns: 4rem 1fr;
@@ -228,16 +290,34 @@
     color: inherit;
     text-decoration: none;
   }
-  .valor-stl__mobile-product-image { width: 4rem; aspect-ratio: 1 / 1; height: auto; object-fit: cover; }
+  .valor-stl__mobile-product-image {
+    width: 4rem;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    object-fit: cover;
+  }
   @media (min-width: 990px) {
-    .valor-stl--layout-side_by_side .valor-stl__inner { grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.4fr); align-items: center; }
-    .valor-stl--layout-side_by_side.valor-stl--image-left .valor-stl__content { order: 2; }
-    .valor-stl--layout-side_by_side.valor-stl--image-left .valor-stl__look { order: 1; }
-    .valor-stl--image-narrow .valor-stl__inner { max-width: 64rem; }
-    .valor-stl__mobile-products { display: none; }
+    .valor-stl--layout-side_by_side .valor-stl__inner {
+      grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.4fr);
+      align-items: center;
+    }
+    .valor-stl--layout-side_by_side.valor-stl--image-left .valor-stl__content {
+      order: 2;
+    }
+    .valor-stl--layout-side_by_side.valor-stl--image-left .valor-stl__look {
+      order: 1;
+    }
+    .valor-stl--image-narrow .valor-stl__inner {
+      max-width: 64rem;
+    }
+    .valor-stl__mobile-products {
+      display: none;
+    }
   }
   @media (max-width: 749px) {
-    .valor-stl__hotspot { display: none; }
+    .valor-stl__hotspot {
+      display: none;
+    }
   }
 {% endstylesheet %}
 
@@ -249,7 +329,12 @@
   "settings": [
     { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
     { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Shop the look" },
-    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Connect lifestyle imagery with the products featured in it.</p>" },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Connect lifestyle imagery with the products featured in it.</p>"
+    },
     {
       "type": "select",
       "id": "heading_size",
@@ -283,8 +368,26 @@
       "default": "wide"
     },
     { "type": "header", "content": "Section padding" },
-    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
-    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
   ],
   "blocks": [
     {
@@ -293,18 +396,33 @@
       "settings": [
         { "type": "product", "id": "product", "label": "Product" },
         { "type": "text", "id": "label", "label": "Accessible label" },
-        { "type": "range", "id": "x_position", "label": "Horizontal position", "min": 5, "max": 95, "step": 1, "unit": "%", "default": 50 },
-        { "type": "range", "id": "y_position", "label": "Vertical position", "min": 5, "max": 95, "step": 1, "unit": "%", "default": 50 }
+        {
+          "type": "range",
+          "id": "x_position",
+          "label": "Horizontal position",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "y_position",
+          "label": "Vertical position",
+          "min": 5,
+          "max": 95,
+          "step": 1,
+          "unit": "%",
+          "default": 50
+        }
       ]
     }
   ],
   "presets": [
     {
       "name": "Shop the look",
-      "blocks": [
-        { "type": "hotspot" },
-        { "type": "hotspot" }
-      ]
+      "blocks": [{ "type": "hotspot" }, { "type": "hotspot" }]
     }
   ]
 }

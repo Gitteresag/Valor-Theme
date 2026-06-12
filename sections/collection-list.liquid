@@ -162,10 +162,18 @@
     display: grid;
     gap: var(--valor-grid-gap, 16px);
   }
-  .valor-collection-list__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .valor-collection-list__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .valor-collection-list__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .valor-collection-list__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .valor-collection-list__grid--cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .valor-collection-list__grid--cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .valor-collection-list__grid--cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .valor-collection-list__grid--cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
 
   @media (max-width: 989px) {
     .valor-collection-list__grid--cols-4,
@@ -263,9 +271,15 @@
     overflow: hidden;
     background-color: color-mix(in srgb, var(--color-foreground) 4%, transparent);
   }
-  .valor-collection-card--ratio-square .valor-collection-card__media { aspect-ratio: 1 / 1; }
-  .valor-collection-card--ratio-portrait .valor-collection-card__media { aspect-ratio: 4 / 5; }
-  .valor-collection-card--ratio-landscape .valor-collection-card__media { aspect-ratio: 16 / 9; }
+  .valor-collection-card--ratio-square .valor-collection-card__media {
+    aspect-ratio: 1 / 1;
+  }
+  .valor-collection-card--ratio-portrait .valor-collection-card__media {
+    aspect-ratio: 4 / 5;
+  }
+  .valor-collection-card--ratio-landscape .valor-collection-card__media {
+    aspect-ratio: 16 / 9;
+  }
 
   .valor-collection-card__image,
   .valor-collection-card__placeholder {
@@ -287,7 +301,7 @@
   .valor-collection-card__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.1) 50%, transparent 100%);
     pointer-events: none;
   }
 
@@ -322,7 +336,6 @@
 {% endstylesheet %}
 
 {% schema %}
-
 {
   "name": "Collection list",
   "tag": "section",
@@ -543,5 +556,4 @@
     }
   ]
 }
-
 {% endschema %}

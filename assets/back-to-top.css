@@ -29,7 +29,10 @@
   opacity: 0;
   transform: translateY(8px);
   pointer-events: none;
-  transition: opacity 0.22s ease, transform 0.22s ease, background-color 0.15s ease;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease,
+    background-color 0.15s ease;
 }
 
 .valor-back-to-top[hidden] {
@@ -67,14 +70,22 @@
 
 /* ===== Desktop position ===== */
 @media (min-width: 750px) {
-  .valor-back-to-top--desktop-right { right: 1.5rem; }
-  .valor-back-to-top--desktop-left { left: 1.5rem; }
+  .valor-back-to-top--desktop-right {
+    right: 1.5rem;
+  }
+  .valor-back-to-top--desktop-left {
+    left: 1.5rem;
+  }
 }
 
 /* ===== Mobile position ===== */
 @media (max-width: 749px) {
-  .valor-back-to-top--mobile-right { right: 1rem; }
-  .valor-back-to-top--mobile-left { left: 1rem; }
+  .valor-back-to-top--mobile-right {
+    right: 1rem;
+  }
+  .valor-back-to-top--mobile-left {
+    left: 1rem;
+  }
 
   /* Center on mobile → pill style, intentionally different from corner buttons */
   .valor-back-to-top--mobile-center {

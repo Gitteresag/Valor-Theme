@@ -19,15 +19,15 @@
 {{ 'page-layout.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
-  assign heading_size  = section.settings.heading_size  | default: 'large'
+  assign heading_size = section.settings.heading_size | default: 'large'
   assign heading_align = section.settings.heading_alignment | default: 'left'
-  assign layout        = section.settings.layout        | default: 'grid'
-  assign per_page      = section.settings.posts_per_page | default: 9
-  assign show_image    = section.settings.show_image
-  assign image_ratio   = section.settings.image_ratio   | default: 'landscape'
-  assign show_date     = section.settings.show_date
-  assign show_author   = section.settings.show_author
-  assign show_excerpt  = section.settings.show_excerpt
+  assign layout = section.settings.layout | default: 'grid'
+  assign per_page = section.settings.posts_per_page | default: 9
+  assign show_image = section.settings.show_image
+  assign image_ratio = section.settings.image_ratio | default: 'landscape'
+  assign show_date = section.settings.show_date
+  assign show_author = section.settings.show_author
+  assign show_excerpt = section.settings.show_excerpt
 -%}
 
 <div
@@ -52,18 +52,26 @@
             <li class="valor-blog__item">
               <article class="valor-blog-card">
                 {%- if show_image -%}
-                  <a href="{{ article.url }}" class="valor-blog-card__media valor-blog-card__media--{{ image_ratio }}" aria-hidden="true" tabindex="-1">
+                  <a
+                    href="{{ article.url }}"
+                    class="valor-blog-card__media valor-blog-card__media--{{ image_ratio }}"
+                    aria-hidden="true"
+                    tabindex="-1"
+                  >
                     {%- if article.image -%}
                       {%- assign card_alt = article.image.alt | default: article.title | escape -%}
-                      {{ article.image | image_url: width: 1100 | image_tag:
-                        loading: article_image_loading,
-                        fetchpriority: article_image_fetchpriority,
-                        widths: '350,500,750,1100',
-                        sizes: '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw',
-                        width: article.image.width,
-                        height: article.image.height,
-                        alt: card_alt,
-                        class: 'valor-blog-card__image'
+                      {{
+                        article.image
+                        | image_url: width: 1100
+                        | image_tag:
+                          loading: article_image_loading,
+                          fetchpriority: article_image_fetchpriority,
+                          widths: '350,500,750,1100',
+                          sizes: '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw',
+                          width: article.image.width,
+                          height: article.image.height,
+                          alt: card_alt,
+                          class: 'valor-blog-card__image'
                       }}
                     {%- else -%}
                       <div class="valor-blog-card__placeholder">
@@ -137,9 +145,15 @@
   .valor-blog__header {
     margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
   }
-  .valor-blog__header--left   { text-align: left; }
-  .valor-blog__header--center { text-align: center; }
-  .valor-blog__header--right  { text-align: right; }
+  .valor-blog__header--left {
+    text-align: left;
+  }
+  .valor-blog__header--center {
+    text-align: center;
+  }
+  .valor-blog__header--right {
+    text-align: right;
+  }
 
   .valor-blog__title {
     margin: 0;
@@ -160,10 +174,14 @@
     grid-template-columns: 1fr;
   }
   @media (min-width: 750px) {
-    .valor-blog__list--grid { grid-template-columns: repeat(2, 1fr); }
+    .valor-blog__list--grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
   @media (min-width: 990px) {
-    .valor-blog__list--grid { grid-template-columns: repeat(3, 1fr); }
+    .valor-blog__list--grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 
   /* List layout: full width, single column with media on the left
@@ -203,9 +221,15 @@
     background-color: color-mix(in srgb, var(--color-foreground) 4%, transparent);
     text-decoration: none;
   }
-  .valor-blog-card__media--landscape { aspect-ratio: 4 / 3; }
-  .valor-blog-card__media--square    { aspect-ratio: 1 / 1; }
-  .valor-blog-card__media--portrait  { aspect-ratio: 3 / 4; }
+  .valor-blog-card__media--landscape {
+    aspect-ratio: 4 / 3;
+  }
+  .valor-blog-card__media--square {
+    aspect-ratio: 1 / 1;
+  }
+  .valor-blog-card__media--portrait {
+    aspect-ratio: 3 / 4;
+  }
 
   .valor-blog-card__image {
     width: 100%;
@@ -215,7 +239,9 @@
     transition: transform 0.4s ease;
   }
   @media (hover: hover) and (pointer: fine) {
-    .valor-blog-card__media:hover .valor-blog-card__image { transform: scale(1.04); }
+    .valor-blog-card__media:hover .valor-blog-card__image {
+      transform: scale(1.04);
+    }
   }
 
   .valor-blog-card__placeholder {
@@ -277,7 +303,9 @@
     text-transform: uppercase;
     border-bottom: 1px solid var(--color-foreground);
     padding-bottom: 0.125rem;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
   }
   .valor-blog-card__cta:hover {
     color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
@@ -345,8 +373,8 @@
       "label": "Image ratio",
       "options": [
         { "value": "landscape", "label": "Landscape (4:3)" },
-        { "value": "square",    "label": "Square (1:1)" },
-        { "value": "portrait",  "label": "Portrait (3:4)" }
+        { "value": "square", "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (3:4)" }
       ],
       "default": "landscape"
     },

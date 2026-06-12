@@ -25,10 +25,10 @@
  */
 
 (function () {
-  if (typeof customElements === 'undefined') return;
-  if (customElements.get('valor-collection')) return;
+  if (typeof customElements === "undefined") return;
+  if (customElements.get("valor-collection")) return;
 
-  const SECTION_DATA_ATTR = 'data-collection-section-id';
+  const SECTION_DATA_ATTR = "data-collection-section-id";
 
   class ValorCollection extends HTMLElement {
     connectedCallback() {
@@ -74,16 +74,16 @@
       const self = this;
       let priceTimer = null;
 
-      this.addEventListener('change', function (e) {
-        const facetsForm = e.target.closest('[data-facets]');
+      this.addEventListener("change", function (e) {
+        const facetsForm = e.target.closest("[data-facets]");
         if (!facetsForm) return;
 
         // Sort selects can live inside the horizontal facets bar form.
         // They have their own handler below; don't also submit the
         // facets form or a sort change would trigger two AJAX requests.
-        if (e.target.closest('[data-collection-sort]')) return;
+        if (e.target.closest("[data-collection-sort]")) return;
 
-        if (e.target.matches('[data-facets-price-min], [data-facets-price-max]')) {
+        if (e.target.matches("[data-facets-price-min], [data-facets-price-max]")) {
           // Price inputs commit on blur or Enter; small debounce so
           // tabbing min → max doesn't fire two requests. Don't close
           // the drawer — user may still be editing the other bound.
@@ -101,12 +101,12 @@
 
       // Catch Enter inside price inputs so submit doesn't navigate
       // away from the page.
-      this.addEventListener('keydown', function (e) {
-        if (e.key !== 'Enter') return;
-        if (!e.target.matches('[data-facets-price-min], [data-facets-price-max]')) return;
+      this.addEventListener("keydown", function (e) {
+        if (e.key !== "Enter") return;
+        if (!e.target.matches("[data-facets-price-min], [data-facets-price-max]")) return;
         e.preventDefault();
         clearTimeout(priceTimer);
-        const facetsForm = e.target.closest('[data-facets]');
+        const facetsForm = e.target.closest("[data-facets]");
         if (facetsForm) self._submitFacets(facetsForm, { closeDrawerOnSuccess: false });
       });
     }
@@ -126,14 +126,14 @@
        single decisive choice, not a multi-step interaction. */
     _bindSortChange() {
       const self = this;
-      this.addEventListener('change', function (e) {
-        const sort = e.target.closest('[data-collection-sort]');
+      this.addEventListener("change", function (e) {
+        const sort = e.target.closest("[data-collection-sort]");
         if (!sort) return;
 
         const params = new URLSearchParams(window.location.search);
-        params.set('sort_by', sort.value);
-        params.delete('page'); // jump back to page 1 on sort change
-        self._fetchAndReplace('?' + params.toString(), true, { closeDrawerOnSuccess: true });
+        params.set("sort_by", sort.value);
+        params.delete("page"); // jump back to page 1 on sort change
+        self._fetchAndReplace("?" + params.toString(), true, { closeDrawerOnSuccess: true });
       });
     }
 
@@ -153,18 +153,18 @@
        the drawer wasn't open in the first place. */
     _bindLinkClicks() {
       const self = this;
-      this.addEventListener('click', function (e) {
+      this.addEventListener("click", function (e) {
         if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
 
         const link = e.target.closest(
-          '.valor-facets__pill, .valor-facets__clear, ' +
-          '.valor-facets-bar__pill, .valor-facets-bar__clear, ' +
-          '.valor-pagination a[href], ' +
-          '.valor-collection__empty a[href]'
+          ".valor-facets__pill, .valor-facets__clear, " +
+            ".valor-facets-bar__pill, .valor-facets-bar__clear, " +
+            ".valor-pagination a[href], " +
+            ".valor-collection__empty a[href]",
         );
         if (!link) return;
 
-        const href = link.getAttribute('href');
+        const href = link.getAttribute("href");
         if (!href) return;
         // Skip external / cross-origin links
         let parsed;
@@ -176,7 +176,7 @@
         if (parsed.origin !== window.location.origin) return;
 
         e.preventDefault();
-        self._fetchAndReplace(parsed.search || '?', true, { closeDrawerOnSuccess: true });
+        self._fetchAndReplace(parsed.search || "?", true, { closeDrawerOnSuccess: true });
       });
     }
 
@@ -193,16 +193,16 @@
       // checked / filled filter values from the form. This avoids stale
       // unchecked filters staying in the URL while keeping the search
       // query intact on the search results page.
-      params.delete('page');
+      params.delete("page");
       Array.from(params.keys()).forEach(function (key) {
-        if (key.indexOf('filter.') === 0) params.delete(key);
+        if (key.indexOf("filter.") === 0) params.delete(key);
       });
 
       for (const [key, value] of formData.entries()) {
-        if (value === '' || value == null) continue;
+        if (value === "" || value == null) continue;
         params.append(key, value);
       }
-      this._fetchAndReplace('?' + params.toString(), true, options);
+      this._fetchAndReplace("?" + params.toString(), true, options);
     }
 
     /* Section-level fetch: hits the current URL with the new params
@@ -222,20 +222,21 @@
       if (updateHistory == null) updateHistory = true;
       options = options || {};
       const self = this;
-      const sectionUrl = window.location.pathname + (search.startsWith('?') ? search : '?' + search);
-      const fetchUrl = window.location.pathname + (search.startsWith('?') ? search + '&' : '?') + 'section_id=' + this._sectionId;
+      const sectionUrl = window.location.pathname + (search.startsWith("?") ? search : "?" + search);
+      const fetchUrl =
+        window.location.pathname + (search.startsWith("?") ? search + "&" : "?") + "section_id=" + this._sectionId;
 
-      this.classList.add('valor-collection--loading');
+      this.classList.add("valor-collection--loading");
 
       fetch(fetchUrl)
         .then(function (r) {
-          if (!r.ok) throw new Error('Section fetch failed');
+          if (!r.ok) throw new Error("Section fetch failed");
           return r.text();
         })
         .then(function (html) {
-          const tmp = document.createElement('div');
+          const tmp = document.createElement("div");
           tmp.innerHTML = html;
-          const fresh = tmp.querySelector('[' + SECTION_DATA_ATTR + ']');
+          const fresh = tmp.querySelector("[" + SECTION_DATA_ATTR + "]");
           if (!fresh) {
             // Fallback: full reload to the new URL
             window.location.href = sectionUrl;
@@ -272,13 +273,13 @@
           //   2. closeDrawerOnSuccess=true (filter/sort/clear/pill):
           //      strip [data-drawer-open] and the body scroll-lock,
           //      add [data-drawer-skip-transition] up front.
-          const wasDrawerOpen = self.hasAttribute('data-drawer-open');
+          const wasDrawerOpen = self.hasAttribute("data-drawer-open");
           const shouldClose = options.closeDrawerOnSuccess === true && wasDrawerOpen;
 
           if (shouldClose) {
-            self.setAttribute('data-drawer-skip-transition', '');
-            self.removeAttribute('data-drawer-open');
-            document.body.classList.remove('valor-collection-drawer-open');
+            self.setAttribute("data-drawer-skip-transition", "");
+            self.removeAttribute("data-drawer-open");
+            document.body.classList.remove("valor-collection-drawer-open");
           }
 
           self.innerHTML = fresh.innerHTML;
@@ -287,7 +288,7 @@
             // The attribute was already on the host, but be explicit
             // for readability and for the (rare) case where the host
             // gets normalised somehow.
-            self.setAttribute('data-drawer-open', '');
+            self.setAttribute("data-drawer-open", "");
           }
 
           if (shouldClose) {
@@ -299,7 +300,7 @@
             //   animates from the closed position cleanly.
             requestAnimationFrame(function () {
               requestAnimationFrame(function () {
-                self.removeAttribute('data-drawer-skip-transition');
+                self.removeAttribute("data-drawer-skip-transition");
               });
             });
           }
@@ -308,49 +309,51 @@
           // skip when called from popstate, otherwise we'd push the
           // popped state right back onto the stack.
           if (updateHistory) {
-            window.history.pushState({}, '', sectionUrl);
+            window.history.pushState({}, "", sectionUrl);
           }
 
           // Update the document title from the fresh response
-          const newTitle = tmp.querySelector('title');
+          const newTitle = tmp.querySelector("title");
           if (newTitle) document.title = newTitle.textContent;
 
           // Notify other components (e.g. analytics) that the page
           // has refreshed in place
-          self.dispatchEvent(new CustomEvent('valor:collection:refreshed', {
-            bubbles: true
-          }));
+          self.dispatchEvent(
+            new CustomEvent("valor:collection:refreshed", {
+              bubbles: true,
+            }),
+          );
         })
         .catch(function (err) {
-          console.error('[Valor collection]', err);
+          console.error("[Valor collection]", err);
           window.location.href = sectionUrl;
         })
         .finally(function () {
-          self.classList.remove('valor-collection--loading');
+          self.classList.remove("valor-collection--loading");
         });
     }
 
     /* Mobile filter drawer */
     _bindDrawer() {
       const self = this;
-      this.addEventListener('click', function (e) {
-        if (e.target.closest('[data-facets-open]')) {
+      this.addEventListener("click", function (e) {
+        if (e.target.closest("[data-facets-open]")) {
           self._openDrawer();
-        } else if (e.target.closest('[data-facets-close]') || e.target.matches('.valor-collection__overlay')) {
+        } else if (e.target.closest("[data-facets-close]") || e.target.matches(".valor-collection__overlay")) {
           self._closeDrawer();
         }
       });
 
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && self.hasAttribute('data-drawer-open')) {
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && self.hasAttribute("data-drawer-open")) {
           self._closeDrawer();
         }
       });
     }
 
     _openDrawer() {
-      this.setAttribute('data-drawer-open', '');
-      document.body.classList.add('valor-collection-drawer-open');
+      this.setAttribute("data-drawer-open", "");
+      document.body.classList.add("valor-collection-drawer-open");
     }
 
     /* Animated close used by the X button, overlay click and ESC.
@@ -359,8 +362,8 @@
        [data-drawer-open] — there's no need for an instant variant
        here. */
     _closeDrawer() {
-      this.removeAttribute('data-drawer-open');
-      document.body.classList.remove('valor-collection-drawer-open');
+      this.removeAttribute("data-drawer-open");
+      document.body.classList.remove("valor-collection-drawer-open");
     }
 
     /* Horizontal filter bar (desktop) — click-down popovers using
@@ -393,64 +396,72 @@
       // Cancel native form submit so a stray Enter on a price input
       // doesn't navigate. _bindFilterChange already handles Enter
       // for those fields by calling _submitFacets directly.
-      this.addEventListener('submit', function (e) {
-        if (e.target.closest('[data-facets-bar]')) e.preventDefault();
+      this.addEventListener("submit", function (e) {
+        if (e.target.closest("[data-facets-bar]")) e.preventDefault();
       });
 
       // Toggle handler: when one <details> opens, close the others
       // and reposition the panel if it'd overflow.
-      this.addEventListener('toggle', function (e) {
-        const group = e.target;
-        if (!group.matches('[data-facets-bar-group]')) return;
-        if (!group.open) {
-          // Closed — reset alignment for next open
-          group.classList.remove('valor-facets-bar__group--align-right');
-          return;
-        }
-
-        // Close siblings
-        const allGroups = self.querySelectorAll('[data-facets-bar-group][open]');
-        allGroups.forEach(function (g) {
-          if (g !== group) g.removeAttribute('open');
-        });
-
-        // Reposition: measure the panel; if it overflows the viewport
-        // on the right, flip alignment so the panel anchors to the
-        // right edge of its summary instead of the left.
-        const panel = group.querySelector('.valor-facets-bar__panel');
-        if (panel) {
-          const rect = panel.getBoundingClientRect();
-          const overflowRight = rect.right > document.documentElement.clientWidth - 8;
-          if (overflowRight) {
-            group.classList.add('valor-facets-bar__group--align-right');
+      this.addEventListener(
+        "toggle",
+        function (e) {
+          const group = e.target;
+          if (!group.matches("[data-facets-bar-group]")) return;
+          if (!group.open) {
+            // Closed — reset alignment for next open
+            group.classList.remove("valor-facets-bar__group--align-right");
+            return;
           }
-        }
-      }, true);
+
+          // Close siblings
+          const allGroups = self.querySelectorAll("[data-facets-bar-group][open]");
+          allGroups.forEach(function (g) {
+            if (g !== group) g.removeAttribute("open");
+          });
+
+          // Reposition: measure the panel; if it overflows the viewport
+          // on the right, flip alignment so the panel anchors to the
+          // right edge of its summary instead of the left.
+          const panel = group.querySelector(".valor-facets-bar__panel");
+          if (panel) {
+            const rect = panel.getBoundingClientRect();
+            const overflowRight = rect.right > document.documentElement.clientWidth - 8;
+            if (overflowRight) {
+              group.classList.add("valor-facets-bar__group--align-right");
+            }
+          }
+        },
+        true,
+      );
 
       // Click outside / ESC to close any open popover
       this._closeBarPopoversOnOutside = function (e) {
-        if (e.target.closest('[data-facets-bar-group]')) return;
-        const open = self.querySelectorAll('[data-facets-bar-group][open]');
-        open.forEach(function (g) { g.removeAttribute('open'); });
+        if (e.target.closest("[data-facets-bar-group]")) return;
+        const open = self.querySelectorAll("[data-facets-bar-group][open]");
+        open.forEach(function (g) {
+          g.removeAttribute("open");
+        });
       };
-      document.addEventListener('click', this._closeBarPopoversOnOutside);
+      document.addEventListener("click", this._closeBarPopoversOnOutside);
 
       this._closeBarPopoversOnEsc = function (e) {
-        if (e.key !== 'Escape') return;
-        const open = self.querySelectorAll('[data-facets-bar-group][open]');
-        open.forEach(function (g) { g.removeAttribute('open'); });
+        if (e.key !== "Escape") return;
+        const open = self.querySelectorAll("[data-facets-bar-group][open]");
+        open.forEach(function (g) {
+          g.removeAttribute("open");
+        });
       };
-      document.addEventListener('keydown', this._closeBarPopoversOnEsc);
+      document.addEventListener("keydown", this._closeBarPopoversOnEsc);
     }
 
     disconnectedCallback() {
       // Avoid leaving stale document listeners around if the host is
       // removed (e.g. theme editor section swap).
       if (this._closeBarPopoversOnOutside) {
-        document.removeEventListener('click', this._closeBarPopoversOnOutside);
+        document.removeEventListener("click", this._closeBarPopoversOnOutside);
       }
       if (this._closeBarPopoversOnEsc) {
-        document.removeEventListener('keydown', this._closeBarPopoversOnEsc);
+        document.removeEventListener("keydown", this._closeBarPopoversOnEsc);
       }
     }
 
@@ -459,11 +470,11 @@
        back onto the stack. */
     _bindPopState() {
       const self = this;
-      window.addEventListener('popstate', function () {
+      window.addEventListener("popstate", function () {
         self._fetchAndReplace(window.location.search, false);
       });
     }
   }
 
-  customElements.define('valor-collection', ValorCollection);
+  customElements.define("valor-collection", ValorCollection);
 })();

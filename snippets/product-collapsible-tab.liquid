@@ -71,7 +71,11 @@
       {{- heading | default: 'Collapsible row' | escape -}}
     </p>
     <p class="valor-mp__collapsible-empty-text">
-      {{ 'sections.main_product.collapsible_empty_editor' | t | default: 'Add row content or select a page to show this collapsible row on the product page.' }}
+      {{
+        'sections.main_product.collapsible_empty_editor'
+        | t
+        | default: 'Add row content or select a page to show this collapsible row on the product page.'
+      }}
     </p>
   </div>
 {%- endif -%}

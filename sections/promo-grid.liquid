@@ -12,7 +12,9 @@
   {%- if section.settings.heading != blank or section.settings.text != blank -%}
     <div class="valor-promo-grid__header valor-promo-grid__header--{{ section.settings.heading_alignment }}">
       {%- if section.settings.heading != blank -%}
-        <h2 class="valor-promo-grid__heading valor-heading valor-heading--{{ section.settings.heading_size }}">{{ section.settings.heading }}</h2>
+        <h2 class="valor-promo-grid__heading valor-heading valor-heading--{{ section.settings.heading_size }}">
+          {{ section.settings.heading }}
+        </h2>
       {%- endif -%}
       {%- if section.settings.text != blank -%}
         <div class="valor-promo-grid__text rte">{{ section.settings.text }}</div>
@@ -46,44 +48,50 @@
           {{ block.shopify_attributes }}
         >
           {%- if has_link -%}
-            <a class="valor-promo-card__link" href="{{ block.settings.link }}" aria-label="{{ promo_aria_label | escape }}">
+            <a
+              class="valor-promo-card__link"
+              href="{{ block.settings.link }}"
+              aria-label="{{ promo_aria_label | escape }}"
+            >
           {%- endif -%}
-            <div class="valor-promo-card__media">
-              {%- if promo_image != blank -%}
-                <img
-                  class="valor-promo-card__image"
-                  srcset="{{ promo_image | image_url: width: 400 }} 400w, {{ promo_image | image_url: width: 650 }} 650w, {{ promo_image | image_url: width: 900 }} 900w, {{ promo_image | image_url: width: 1300 }} 1300w"
-                  src="{{ promo_image | image_url: width: 900 }}"
-                  sizes="(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw"
-                  alt="{{ promo_image.alt | escape }}"
-                  width="{{ promo_image.width }}"
-                  height="{{ promo_image.height }}"
-                  loading="{{ promo_loading }}"
-                  {%- if promo_fetchpriority == 'high' %} fetchpriority="high"{% endif -%}
-                >
-              {%- else -%}
-                {{ 'collection-1' | placeholder_svg_tag: 'valor-promo-card__placeholder' }}
-              {%- endif -%}
-              {%- if block.settings.overlay_opacity > 0 -%}
-                <span class="valor-promo-card__overlay" aria-hidden="true"></span>
-              {%- endif -%}
-            </div>
-            <div class="valor-promo-card__content">
-              {%- if block.settings.eyebrow != blank -%}
-                <p class="valor-promo-card__eyebrow">{{ block.settings.eyebrow | escape }}</p>
-              {%- endif -%}
-              {%- if block.settings.heading != blank -%}
-                <h3 class="valor-promo-card__heading">{{ block.settings.heading | escape }}</h3>
-              {%- endif -%}
-              {%- if block.settings.text != blank -%}
-                <div class="valor-promo-card__text rte">{{ block.settings.text }}</div>
-              {%- endif -%}
-              {%- if block.settings.button_label != blank -%}
-                <span class="valor-button valor-button--{% if block.settings.button_style_secondary %}secondary{% else %}primary{% endif %} valor-promo-card__button">
-                  {{ block.settings.button_label | escape }}
-                </span>
-              {%- endif -%}
-            </div>
+          <div class="valor-promo-card__media">
+            {%- if promo_image != blank -%}
+              <img
+                class="valor-promo-card__image"
+                srcset="{{ promo_image | image_url: width: 400 }} 400w, {{ promo_image | image_url: width: 650 }} 650w, {{ promo_image | image_url: width: 900 }} 900w, {{ promo_image | image_url: width: 1300 }} 1300w"
+                src="{{ promo_image | image_url: width: 900 }}"
+                sizes="(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw"
+                alt="{{ promo_image.alt | escape }}"
+                width="{{ promo_image.width }}"
+                height="{{ promo_image.height }}"
+                loading="{{ promo_loading }}"
+                {%- if promo_fetchpriority == 'high' %}
+                  fetchpriority="high"
+                {% endif -%}
+              >
+            {%- else -%}
+              {{ 'collection-1' | placeholder_svg_tag: 'valor-promo-card__placeholder' }}
+            {%- endif -%}
+            {%- if block.settings.overlay_opacity > 0 -%}
+              <span class="valor-promo-card__overlay" aria-hidden="true"></span>
+            {%- endif -%}
+          </div>
+          <div class="valor-promo-card__content">
+            {%- if block.settings.eyebrow != blank -%}
+              <p class="valor-promo-card__eyebrow">{{ block.settings.eyebrow | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.heading != blank -%}
+              <h3 class="valor-promo-card__heading">{{ block.settings.heading | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.text != blank -%}
+              <div class="valor-promo-card__text rte">{{ block.settings.text }}</div>
+            {%- endif -%}
+            {%- if block.settings.button_label != blank -%}
+              <span class="valor-button valor-button--{% if block.settings.button_style_secondary %}secondary{% else %}primary{% endif %} valor-promo-card__button">
+                {{ block.settings.button_label | escape }}
+              </span>
+            {%- endif -%}
+          </div>
           {%- if has_link -%}
             </a>
           {%- endif -%}
@@ -112,19 +120,36 @@
     background: var(--color-background);
     color: var(--color-foreground);
   }
-  .shopify-section > .valor-promo-grid--full { grid-column: 1 / -1; }
+  .shopify-section > .valor-promo-grid--full {
+    grid-column: 1 / -1;
+  }
   .valor-promo-grid__header {
     max-width: 48rem;
     margin: 0 auto 2rem;
     padding: 0 clamp(1rem, 4vw, 3rem);
   }
-  .valor-promo-grid__header--left { text-align: left; }
-  .valor-promo-grid__header--center { text-align: center; }
-  .valor-promo-grid__header--right { text-align: right; }
-  .valor-promo-grid__heading { margin: 0; }
-  .valor-promo-grid__text { margin-top: 0.75rem; color: color-mix(in srgb, var(--color-foreground) 78%, transparent); }
-  .valor-promo-grid__text > *:first-child { margin-top: 0; }
-  .valor-promo-grid__text > *:last-child { margin-bottom: 0; }
+  .valor-promo-grid__header--left {
+    text-align: left;
+  }
+  .valor-promo-grid__header--center {
+    text-align: center;
+  }
+  .valor-promo-grid__header--right {
+    text-align: right;
+  }
+  .valor-promo-grid__heading {
+    margin: 0;
+  }
+  .valor-promo-grid__text {
+    margin-top: 0.75rem;
+    color: color-mix(in srgb, var(--color-foreground) 78%, transparent);
+  }
+  .valor-promo-grid__text > *:first-child {
+    margin-top: 0;
+  }
+  .valor-promo-grid__text > *:last-child {
+    margin-bottom: 0;
+  }
   .valor-promo-grid__items {
     width: 100%;
     max-width: 75rem;
@@ -134,9 +159,15 @@
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  .valor-promo-grid--gap-small .valor-promo-grid__items { gap: 0.75rem; }
-  .valor-promo-grid--gap-medium .valor-promo-grid__items { gap: 1.25rem; }
-  .valor-promo-grid--gap-large .valor-promo-grid__items { gap: 2rem; }
+  .valor-promo-grid--gap-small .valor-promo-grid__items {
+    gap: 0.75rem;
+  }
+  .valor-promo-grid--gap-medium .valor-promo-grid__items {
+    gap: 1.25rem;
+  }
+  .valor-promo-grid--gap-large .valor-promo-grid__items {
+    gap: 2rem;
+  }
   .valor-promo-card {
     position: relative;
     overflow: hidden;
@@ -151,17 +182,32 @@
     color: inherit;
     text-decoration: none;
   }
-  .valor-promo-card__media { position: absolute; inset: 0; z-index: 0; }
+  .valor-promo-card__media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
   .valor-promo-card__image,
-  .valor-promo-card__placeholder { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .valor-promo-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
   .valor-promo-card__overlay {
     position: absolute;
     inset: 0;
     background: rgb(0 0 0 / var(--valor-promo-overlay, 0.2));
   }
-  .valor-promo-card--ratio-square { aspect-ratio: 1 / 1; }
-  .valor-promo-card--ratio-portrait { aspect-ratio: 4 / 5; }
-  .valor-promo-card--ratio-landscape { aspect-ratio: 16 / 10; }
+  .valor-promo-card--ratio-square {
+    aspect-ratio: 1 / 1;
+  }
+  .valor-promo-card--ratio-portrait {
+    aspect-ratio: 4 / 5;
+  }
+  .valor-promo-card--ratio-landscape {
+    aspect-ratio: 16 / 10;
+  }
   .valor-promo-card__content {
     position: relative;
     z-index: 1;
@@ -173,32 +219,93 @@
     padding: clamp(1.25rem, 4vw, 2rem);
     pointer-events: none;
   }
-  .valor-promo-card__button { pointer-events: none; }
-  .valor-promo-card--content-top-left .valor-promo-card__content { justify-content: flex-start; align-items: flex-start; }
-  .valor-promo-card--content-top-center .valor-promo-card__content { justify-content: flex-start; align-items: center; }
-  .valor-promo-card--content-middle-left .valor-promo-card__content { justify-content: center; align-items: flex-start; }
-  .valor-promo-card--content-middle-center .valor-promo-card__content { justify-content: center; align-items: center; }
-  .valor-promo-card--content-bottom-left .valor-promo-card__content { justify-content: flex-end; align-items: flex-start; }
-  .valor-promo-card--content-bottom-center .valor-promo-card__content { justify-content: flex-end; align-items: center; }
-  .valor-promo-card--align-left .valor-promo-card__content { text-align: left; }
-  .valor-promo-card--align-center .valor-promo-card__content { text-align: center; }
-  .valor-promo-card--text-light { color: #fff; }
-  .valor-promo-card--text-dark { color: #111; }
-  .valor-promo-card__eyebrow { margin: 0; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
-  .valor-promo-card__heading { margin: 0; font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.05; }
-  .valor-promo-card__text > *:first-child { margin-top: 0; }
-  .valor-promo-card__text > *:last-child { margin-bottom: 0; }
+  .valor-promo-card__button {
+    pointer-events: none;
+  }
+  .valor-promo-card--content-top-left .valor-promo-card__content {
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+  .valor-promo-card--content-top-center .valor-promo-card__content {
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .valor-promo-card--content-middle-left .valor-promo-card__content {
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .valor-promo-card--content-middle-center .valor-promo-card__content {
+    justify-content: center;
+    align-items: center;
+  }
+  .valor-promo-card--content-bottom-left .valor-promo-card__content {
+    justify-content: flex-end;
+    align-items: flex-start;
+  }
+  .valor-promo-card--content-bottom-center .valor-promo-card__content {
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .valor-promo-card--align-left .valor-promo-card__content {
+    text-align: left;
+  }
+  .valor-promo-card--align-center .valor-promo-card__content {
+    text-align: center;
+  }
+  .valor-promo-card--text-light {
+    color: #fff;
+  }
+  .valor-promo-card--text-dark {
+    color: #111;
+  }
+  .valor-promo-card__eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .valor-promo-card__heading {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    line-height: 1.05;
+  }
+  .valor-promo-card__text > *:first-child {
+    margin-top: 0;
+  }
+  .valor-promo-card__text > *:last-child {
+    margin-bottom: 0;
+  }
   @media (min-width: 750px) {
-    .valor-promo-grid--columns-2 .valor-promo-grid__items { grid-template-columns: repeat(2, 1fr); }
-    .valor-promo-grid--columns-3 .valor-promo-grid__items { grid-template-columns: repeat(3, 1fr); }
-    .valor-promo-grid--columns-4 .valor-promo-grid__items { grid-template-columns: repeat(4, 1fr); }
-    .valor-promo-card--size-wide { grid-column: span 2; }
-    .valor-promo-card--size-tall { grid-row: span 2; min-height: 36rem; }
-    .valor-promo-card--size-large { grid-column: span 2; grid-row: span 2; min-height: 36rem; }
+    .valor-promo-grid--columns-2 .valor-promo-grid__items {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .valor-promo-grid--columns-3 .valor-promo-grid__items {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .valor-promo-grid--columns-4 .valor-promo-grid__items {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .valor-promo-card--size-wide {
+      grid-column: span 2;
+    }
+    .valor-promo-card--size-tall {
+      grid-row: span 2;
+      min-height: 36rem;
+    }
+    .valor-promo-card--size-large {
+      grid-column: span 2;
+      grid-row: span 2;
+      min-height: 36rem;
+    }
   }
   @media (max-width: 749px) {
-    .valor-promo-grid__header { margin-bottom: 1.5rem; }
-    .valor-promo-card { min-height: 18rem; }
+    .valor-promo-grid__header {
+      margin-bottom: 1.5rem;
+    }
+    .valor-promo-card {
+      min-height: 18rem;
+    }
   }
 {% endstylesheet %}
 
@@ -232,7 +339,15 @@
       ],
       "default": "center"
     },
-    { "type": "range", "id": "columns_desktop", "label": "Columns on desktop", "min": 2, "max": 4, "step": 1, "default": 3 },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
     {
       "type": "select",
       "id": "image_ratio",
@@ -256,8 +371,26 @@
       "default": "medium"
     },
     { "type": "header", "content": "Section padding" },
-    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
-    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
   ],
   "blocks": [
     {
@@ -317,18 +450,23 @@
           ],
           "default": "light"
         },
-        { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 80, "step": 5, "unit": "%", "default": 25 }
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 80,
+          "step": 5,
+          "unit": "%",
+          "default": 25
+        }
       ]
     }
   ],
   "presets": [
     {
       "name": "Promo grid",
-      "blocks": [
-        { "type": "promo" },
-        { "type": "promo" },
-        { "type": "promo" }
-      ]
+      "blocks": [{ "type": "promo" }, { "type": "promo" }, { "type": "promo" }]
     }
   ]
 }

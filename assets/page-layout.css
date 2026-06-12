@@ -36,32 +36,60 @@
 /* Narrow keeps long-form text near the optimal reading measure
    (~65 characters per line). Medium suits typical pages with images
    and headings. Wide gives long visual content room to breathe. */
-.valor-page--narrow .valor-page__inner { max-width: 44rem; }
-.valor-page--medium .valor-page__inner { max-width: 56rem; }
-.valor-page--wide   .valor-page__inner { max-width: 72rem; }
+.valor-page--narrow .valor-page__inner {
+  max-width: 44rem;
+}
+.valor-page--medium .valor-page__inner {
+  max-width: 56rem;
+}
+.valor-page--wide .valor-page__inner {
+  max-width: 72rem;
+}
 
 .valor-page__header {
   margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
 }
-.valor-page__header--left   { text-align: left; }
-.valor-page__header--center { text-align: center; }
-.valor-page__header--right  { text-align: right; }
+.valor-page__header--left {
+  text-align: left;
+}
+.valor-page__header--center {
+  text-align: center;
+}
+.valor-page__header--right {
+  text-align: right;
+}
 
 /* Page content uses the global .rte rules from critical.css for
    headings, paragraphs, lists, blockquotes, links, etc. We only add
    a couple of fine-tuning rules here. */
-.valor-page__content > :first-child { margin-top: 0; }
-.valor-page__content > :last-child { margin-bottom: 0; }
-.valor-page__content--left   { text-align: left; }
-.valor-page__content--center { text-align: center; }
-.valor-page__content--right  { text-align: right; }
+.valor-page__content > :first-child {
+  margin-top: 0;
+}
+.valor-page__content > :last-child {
+  margin-bottom: 0;
+}
+.valor-page__content--left {
+  text-align: left;
+}
+.valor-page__content--center {
+  text-align: center;
+}
+.valor-page__content--right {
+  text-align: right;
+}
 
 /* Body size modifiers — sets the base font-size on the content
    container; rte's em-based child sizes scale proportionally so
    headings, paragraphs, and lists all grow/shrink together. */
-.valor-page__content--body-small  { font-size: var(--font-size-body-sm); }
-.valor-page__content--body-medium { font-size: var(--font-size-body-base); }
-.valor-page__content--body-large  { font-size: var(--font-size-body-lg); }
+.valor-page__content--body-small {
+  font-size: var(--font-size-body-sm);
+}
+.valor-page__content--body-medium {
+  font-size: var(--font-size-body-base);
+}
+.valor-page__content--body-large {
+  font-size: var(--font-size-body-lg);
+}
 
 .valor-page__content img {
   max-width: 100%;
@@ -71,4 +99,7 @@
 
 /* When the body is centered, also center block-level images so they
    don't hang to the left edge against centered surrounding text. */
-.valor-page__content--center img { margin-left: auto; margin-right: auto; }
+.valor-page__content--center img {
+  margin-left: auto;
+  margin-right: auto;
+}

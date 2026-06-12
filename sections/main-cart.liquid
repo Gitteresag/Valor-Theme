@@ -299,7 +299,9 @@
                               aria-label="{{ 'cart.active_discounts' | t }}"
                               data-active-discounts
                               data-remove-label="{{ 'cart.remove_discount' | t | escape }}"
-                              {% if code_discount_titles.size == 0 %}hidden{% endif %}
+                              {% if code_discount_titles.size == 0 %}
+                                hidden
+                              {% endif %}
                             >
                               {%- for code in code_discount_titles -%}
                                 <li class="valor-cart__active-discount" data-discount-code="{{ code | escape }}">
@@ -329,7 +331,10 @@
 
                       {%- when 'shipping_note' -%}
                         {%- if block.settings.note != blank -%}
-                          <div class="valor-cart__block valor-cart__block--shipping-note rte" {{ block.shopify_attributes }}>
+                          <div
+                            class="valor-cart__block valor-cart__block--shipping-note rte"
+                            {{ block.shopify_attributes }}
+                          >
                             {{ block.settings.note }}
                           </div>
                         {%- endif -%}

@@ -27,8 +27,20 @@
       {% endif %}
     >
       {%- if show_arrows -%}
-        <button type="button" class="valor-announcement-bar__arrow valor-announcement-bar__arrow--prev" data-prev aria-label="{{ 'sections.announcement_bar.previous' | t }}">
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <button
+          type="button"
+          class="valor-announcement-bar__arrow valor-announcement-bar__arrow--prev"
+          data-prev
+          aria-label="{{ 'sections.announcement_bar.previous' | t }}"
+        >
+          <svg
+            width="10"
+            height="16"
+            viewBox="0 0 10 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
             <path d="M8 14L2 8L8 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
@@ -52,8 +64,20 @@
       </div>
 
       {%- if show_arrows -%}
-        <button type="button" class="valor-announcement-bar__arrow valor-announcement-bar__arrow--next" data-next aria-label="{{ 'sections.announcement_bar.next' | t }}">
-          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <button
+          type="button"
+          class="valor-announcement-bar__arrow valor-announcement-bar__arrow--next"
+          data-next
+          aria-label="{{ 'sections.announcement_bar.next' | t }}"
+        >
+          <svg
+            width="10"
+            height="16"
+            viewBox="0 0 10 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
             <path d="M2 14L8 8L2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
         </button>
@@ -161,7 +185,12 @@
      uses the same ICIW-style background-position slide as the header so both
      surfaces change state together. */
   @supports selector(body:has(*)) {
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger[data-transparent-header-behavior="always"]) .valor-announcement-bar {
+    body:has(
+        #MainContent
+          > .shopify-section:first-child
+          .valor-hero--transparent-header-trigger[data-transparent-header-behavior='always']
+      )
+      .valor-announcement-bar {
       position: fixed;
       top: 0;
       left: 0;
@@ -186,7 +215,13 @@
       will-change: transform, opacity, background-position, color;
     }
 
-    html.valor-transparent-header-ready body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger[data-transparent-header-behavior="always"]) .valor-announcement-bar {
+    html.valor-transparent-header-ready
+      body:has(
+        #MainContent
+          > .shopify-section:first-child
+          .valor-hero--transparent-header-trigger[data-transparent-header-behavior='always']
+      )
+      .valor-announcement-bar {
       transition:
         transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
@@ -196,7 +231,12 @@
         visibility 0s linear 0s;
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger[data-transparent-header-behavior="always"]) .valor-announcement-bar--separator {
+    body:has(
+        #MainContent
+          > .shopify-section:first-child
+          .valor-hero--transparent-header-trigger[data-transparent-header-behavior='always']
+      )
+      .valor-announcement-bar--separator {
       border-bottom-color: rgba(255, 255, 255, 0.22);
     }
 
@@ -237,7 +277,6 @@
       visibility: hidden;
       pointer-events: none;
     }
-
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -273,12 +312,20 @@
 
       var prevBtn = bar.querySelector('[data-prev]');
       var nextBtn = bar.querySelector('[data-next]');
-      if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
-      if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); });
+      if (prevBtn)
+        prevBtn.addEventListener('click', function () {
+          goTo(current - 1);
+        });
+      if (nextBtn)
+        nextBtn.addEventListener('click', function () {
+          goTo(current + 1);
+        });
 
       if (bar.hasAttribute('data-auto-rotate')) {
         var speed = parseInt(bar.getAttribute('data-rotate-speed'), 10) * 1000;
-        setInterval(function () { goTo(current + 1); }, speed);
+        setInterval(function () {
+          goTo(current + 1);
+        }, speed);
       }
     });
   })();

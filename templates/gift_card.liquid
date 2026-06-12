@@ -41,7 +41,9 @@
     <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer></script>
 
     <style>
-      :root { color-scheme: light; }
+      :root {
+        color-scheme: light;
+      }
 
       body {
         margin: 0;
@@ -182,7 +184,11 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
         cursor: pointer;
-        transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        transition:
+          opacity 0.15s ease,
+          background-color 0.15s ease,
+          color 0.15s ease,
+          border-color 0.15s ease;
       }
       .valor-gift-card__button:hover {
         opacity: var(--button-hover-opacity, 0.85);
@@ -199,7 +205,10 @@
         opacity: var(--button-hover-opacity, 0.85);
         background-color: var(--color-button-outline-hover-bg, var(--color-foreground));
         color: var(--color-button-outline-hover-text, var(--color-background));
-        border-color: var(--color-button-outline-hover-border, var(--color-button-outline-hover-bg, var(--color-foreground)));
+        border-color: var(
+          --color-button-outline-hover-border,
+          var(--color-button-outline-hover-bg, var(--color-foreground))
+        );
       }
 
       .valor-gift-card__copy-success {
@@ -266,10 +275,10 @@
       <div class="valor-gift-card__hero">
         {%- if settings.logo != blank -%}
           {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
-          {{ settings.logo | image_url: width: 600 | image_tag:
-            class: 'valor-gift-card__hero-image',
-            alt: logo_alt,
-            loading: 'eager'
+          {{
+            settings.logo
+            | image_url: width: 600
+            | image_tag: class: 'valor-gift-card__hero-image', alt: logo_alt, loading: 'eager'
           }}
         {%- else -%}
           <img

@@ -50,10 +50,14 @@ valor-predictive-search[loading] .valor-psearch__results {
   animation: valor-psearch-spin 0.8s linear infinite;
 }
 @keyframes valor-psearch-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .valor-psearch__spinner { animation-duration: 2s; }
+  .valor-psearch__spinner {
+    animation-duration: 2s;
+  }
 }
 
 /* Results container */
@@ -105,7 +109,7 @@ valor-predictive-search[loading] .valor-psearch__results {
   transition: background-color 0.12s ease;
 }
 .valor-psearch__item:hover,
-.valor-psearch__item-wrap[aria-selected='true'] .valor-psearch__item {
+.valor-psearch__item-wrap[aria-selected="true"] .valor-psearch__item {
   background-color: color-mix(in srgb, var(--color-foreground, currentColor) 6%, transparent);
 }
 .valor-psearch__item--text {
@@ -190,7 +194,7 @@ valor-predictive-search[loading] .valor-psearch__results {
   text-align: left;
 }
 .valor-psearch__view-all:hover,
-.valor-psearch__view-all-wrap[aria-selected='true'] .valor-psearch__view-all {
+.valor-psearch__view-all-wrap[aria-selected="true"] .valor-psearch__view-all {
   background-color: color-mix(in srgb, var(--color-foreground, currentColor) 6%, transparent);
 }
 .valor-psearch__view-all-arrow {

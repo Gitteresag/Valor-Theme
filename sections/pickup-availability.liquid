@@ -86,7 +86,8 @@
             <address class="valor-pickup-drawer__address">
               {{ address | format_address }}
               {%- if address.phone != blank -%}
-                <br>{{ address.phone }}
+                <br>
+                {{ address.phone }}
               {%- endif -%}
             </address>
           </li>

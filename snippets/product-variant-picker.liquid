@@ -157,18 +157,26 @@
           <label
             class="{{ prefix }}__option-label"
             for="{{ prefix }}-select-{{ section_id }}-{{ option_index }}"
-          >{{ option.name }}</label>
+          >
+            {{- option.name -}}
+          </label>
           <select
             id="{{ prefix }}-select-{{ section_id }}-{{ option_index }}"
             class="{{ prefix }}__option-select"
             data-option-position="{{ option.position }}"
-            {% if prefix == 'valor-fp' %}data-section-id="{{ section_id }}"{% endif %}
+            {% if prefix == 'valor-fp' %}
+              data-section-id="{{ section_id }}"
+            {% endif %}
           >
             {%- for value in option.values -%}
               <option
                 value="{{ value | escape }}"
-                {% if option.selected_value == value %}selected{% endif %}
-              >{{ value }}</option>
+                {% if option.selected_value == value %}
+                  selected
+                {% endif %}
+              >
+                {{ value }}
+              </option>
             {%- endfor -%}
           </select>
         </div>
@@ -177,16 +185,24 @@
           <legend class="{{ prefix }}__option-label{% if render_size_text %} {{ prefix }}__option-label--size-text{% endif %}">
             <span class="{{ prefix }}__option-label-row">
               <span class="{{ prefix }}__option-label-text">
-                {{ option.name }}{%- unless render_size_text -%}: <span
-                  class="{{ prefix }}__option-selected"
-                  data-selected-for="option-{{ section_id }}-{{ option_index }}"
-                >{{ option.selected_value }}</span>{%- endunless -%}
+                {{ option.name }}
+                {%- unless render_size_text -%}
+                  :
+                  <span
+                    class="{{ prefix }}__option-selected"
+                    data-selected-for="option-{{ section_id }}-{{ option_index }}"
+                  >
+                    {{- option.selected_value -}}
+                  </span>
+                {%- endunless -%}
               </span>
               {%- if render_size_text -%}
                 <span
                   class="visually-hidden"
                   data-selected-for="option-{{ section_id }}-{{ option_index }}"
-                >{{ option.selected_value }}</span>
+                >
+                  {{- option.selected_value -}}
+                </span>
               {%- endif -%}
               {%- if is_size_option and size_guide_block != blank -%}
                 <span class="{{ prefix }}__option-size-guide">
@@ -205,8 +221,8 @@
                   assign is_selected = true
                 endif
 
-                assign swatch_color = nil
-                assign swatch_image_url = nil
+                assign swatch_color = null
+                assign swatch_image_url = null
                 if render_swatches
                   if value.swatch.color
                     assign swatch_color = 'rgb(' | append: value.swatch.color.rgb | append: ')'
@@ -229,10 +245,14 @@
                 name="options[{{ option.name | escape }}]"
                 value="{{ value | escape }}"
                 class="{{ prefix }}__option-input"
-                {% if is_selected %}checked{% endif %}
+                {% if is_selected %}
+                  checked
+                {% endif %}
                 data-option-position="{{ option.position }}"
                 data-option-display="option-{{ section_id }}-{{ option_index }}"
-                {% if prefix == 'valor-fp' %}data-section-id="{{ section_id }}"{% endif %}
+                {% if prefix == 'valor-fp' %}
+                  data-section-id="{{ section_id }}"
+                {% endif %}
               >
               <label
                 for="{{ input_id }}"

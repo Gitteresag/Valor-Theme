@@ -16,14 +16,21 @@
     assign pick_up_availabilities = variant.store_availabilities | where: 'pick_up_enabled', true
   -%}
 
-  <div class="valor-product-pickup" {% if block %}{{ block.shopify_attributes }}{% endif %}>
+  <div
+    class="valor-product-pickup"
+    {% if block %}
+      {{- block.shopify_attributes -}}
+    {% endif %}
+  >
     <valor-pickup-availability
       id="{{ pickup_id }}"
       class="valor-pickup"
       data-root-url="{{ routes.root_url }}"
       data-variant-id="{{ variant.id }}"
       data-pickup-id="{{ pickup_id }}"
-      {% if variant.available and pick_up_availabilities.size > 0 %}available{% endif %}
+      {% if variant.available and pick_up_availabilities.size > 0 %}
+        available
+      {% endif %}
     >
       <template>
         <valor-pickup-availability-preview class="valor-pickup__preview valor-pickup__preview--error">

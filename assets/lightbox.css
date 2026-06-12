@@ -105,15 +105,21 @@
   justify-content: center;
   z-index: 2;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.15s ease, opacity 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
 }
 .valor-lightbox__nav:hover,
 .valor-lightbox__nav:focus-visible {
   background: rgba(255, 255, 255, 0.22);
   outline: none;
 }
-.valor-lightbox__nav--prev { left: clamp(0.5rem, 2vw, 1.5rem); }
-.valor-lightbox__nav--next { right: clamp(0.5rem, 2vw, 1.5rem); }
+.valor-lightbox__nav--prev {
+  left: clamp(0.5rem, 2vw, 1.5rem);
+}
+.valor-lightbox__nav--next {
+  right: clamp(0.5rem, 2vw, 1.5rem);
+}
 .valor-lightbox__nav svg {
   width: 24px;
   height: 24px;
@@ -139,8 +145,8 @@
 }
 
 /* Hide counter & nav if only one image */
-.valor-lightbox[data-single='true'] .valor-lightbox__nav,
-.valor-lightbox[data-single='true'] .valor-lightbox__counter {
+.valor-lightbox[data-single="true"] .valor-lightbox__nav,
+.valor-lightbox[data-single="true"] .valor-lightbox__counter {
   display: none;
 }
 
@@ -163,8 +169,12 @@
   .valor-lightbox__nav:focus-visible {
     background: #fff;
   }
-  .valor-lightbox__nav--prev { left: 0.5rem; }
-  .valor-lightbox__nav--next { right: 0.5rem; }
+  .valor-lightbox__nav--prev {
+    left: 0.5rem;
+  }
+  .valor-lightbox__nav--next {
+    right: 0.5rem;
+  }
   .valor-lightbox__counter {
     bottom: auto;
     top: clamp(0.75rem, 2vw, 1.25rem);
@@ -178,5 +188,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .valor-lightbox { transition: none; }
+  .valor-lightbox {
+    transition: none;
+  }
 }

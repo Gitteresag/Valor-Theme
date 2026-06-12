@@ -33,9 +33,9 @@
 {%- endcomment -%}
 
 {{ 'product-card.css' | asset_url | stylesheet_tag }}
-{{ 'collection.css'   | asset_url | stylesheet_tag }}
-{{ 'facets-bar.css'   | asset_url | stylesheet_tag }}
-{{ 'search.css'       | asset_url | stylesheet_tag }}
+{{ 'collection.css' | asset_url | stylesheet_tag }}
+{{ 'facets-bar.css' | asset_url | stylesheet_tag }}
+{{ 'search.css' | asset_url | stylesheet_tag }}
 {%- comment -%}
   Predictive search assets are loaded once by layout/theme.liquid.
   This section only renders the search-page predictive-search markup.
@@ -44,19 +44,19 @@
 <script src="{{ 'grid-view.js' | asset_url }}" defer></script>
 
 {%- liquid
-  assign cols_desktop   = section.settings.columns_desktop | default: 4
-  assign cols_mobile    = section.settings.columns_mobile  | default: 2
-  assign per_page       = section.settings.products_per_page | default: 24
-  assign image_ratio    = section.settings.image_ratio | default: 'square'
+  assign cols_desktop = section.settings.columns_desktop | default: 4
+  assign cols_mobile = section.settings.columns_mobile | default: 2
+  assign per_page = section.settings.products_per_page | default: 24
+  assign image_ratio = section.settings.image_ratio | default: 'square'
   assign show_secondary = section.settings.show_secondary_image
-  assign show_vendor    = section.settings.show_vendor
+  assign show_vendor = section.settings.show_vendor
   assign enable_filtering = section.settings.enable_filtering
-  assign enable_sorting   = section.settings.enable_sorting
-  assign heading_size   = section.settings.heading_size | default: 'large'
-  assign heading_align  = section.settings.heading_alignment | default: 'center'
-  assign sort_by        = search.sort_by | default: search.default_sort_by
-  assign terms          = search.terms | escape
-  assign terms_url      = search.terms | url_encode
+  assign enable_sorting = section.settings.enable_sorting
+  assign heading_size = section.settings.heading_size | default: 'large'
+  assign heading_align = section.settings.heading_alignment | default: 'center'
+  assign sort_by = search.sort_by | default: search.default_sort_by
+  assign terms = search.terms | escape
+  assign terms_url = search.terms | url_encode
   assign search_clear_url = routes.search_url
   if terms_url != blank
     assign search_clear_url = search_clear_url | append: '?q=' | append: terms_url | append: '&options%5Bprefix%5D=last'
@@ -183,7 +183,18 @@
           class="valor-search__reset"
           aria-label="{{ 'general.search.reset' | t }}"
         >
-          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
@@ -193,7 +204,18 @@
           class="valor-search__submit"
           aria-label="{{ 'search.submit' | t }}"
         >
-          <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
           </svg>
@@ -272,7 +294,6 @@
     `?page=N` parameter applies to the right product source.
   {%- endcomment -%}
   {%- if search.performed and has_results -%}
-
     {%- paginate search.results by per_page -%}
       <div class="valor-search__toolbar valor-collection__toolbar--mobile">
         <span class="valor-search__count" role="status">
@@ -290,7 +311,20 @@
             data-facets-open
             aria-label="{{ 'collection.filters.filter_and_sort' | t }}"
           >
-            <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
             <span>{{ 'collection.filters.filter_and_sort' | t }}</span>
             {%- if active_filter_count > 0 -%}
               <span class="valor-collection__filter-count">{{ active_filter_count }}</span>
@@ -303,12 +337,12 @@
 
       {%- if has_filters or has_sorting -%}
         {%- render 'facets-bar',
-            results: search,
-            paginate: paginate,
-            enable_filtering: enable_filtering,
-            show_sort: true,
-            has_sorting: has_sorting,
-            results_count: search.results_count
+          results: search,
+          paginate: paginate,
+          enable_filtering: enable_filtering,
+          show_sort: true,
+          has_sorting: has_sorting,
+          results_count: search.results_count
         -%}
       {%- endif -%}
 
@@ -325,7 +359,12 @@
                 aria-label="{{ 'collection.sort_by' | t }}"
               >
                 {%- for option in search.sort_options -%}
-                  <option value="{{ option.value }}" {% if option.value == sort_by %}selected{% endif %}>
+                  <option
+                    value="{{ option.value }}"
+                    {% if option.value == sort_by %}
+                      selected
+                    {% endif %}
+                  >
                     {{ option.name }}
                   </option>
                 {%- endfor -%}
@@ -348,11 +387,11 @@
                 {%- case item.object_type -%}
                   {%- when 'product' -%}
                     {%- render 'product-card',
-                        product: item,
-                        image_ratio: image_ratio,
-                        show_secondary_image: show_secondary,
-                        show_vendor: show_vendor,
-                        show_price: true
+                      product: item,
+                      image_ratio: image_ratio,
+                      show_secondary_image: show_secondary,
+                      show_vendor: show_vendor,
+                      show_price: true
                     -%}
                   {%- when 'article' -%}
                     <a href="{{ item.url }}" class="valor-search__resource">
@@ -386,7 +425,9 @@
                   {%- when 'page' -%}
                     <a href="{{ item.url }}" class="valor-search__resource valor-search__resource--text">
                       <div class="valor-search__resource-body">
-                        <span class="valor-search__resource-badge">{{ 'templates.search.page' | t | default: 'Page' }}</span>
+                        <span class="valor-search__resource-badge">
+                          {{- 'templates.search.page' | t | default: 'Page' -}}
+                        </span>
                         <h2 class="valor-search__resource-title">{{ item.title | escape }}</h2>
                         {%- if item.content != blank -%}
                           <p class="valor-search__resource-excerpt">
@@ -406,7 +447,6 @@
     {%- endpaginate -%}
 
   {%- elsif search.performed -%}
-
     {%- if empty_collection.products.size > 0 and active_filter_count == 0 -%}
       <div class="valor-search__empty-toolbar">
         {%- render 'grid-view-toggle', viewport: 'desktop' -%}
@@ -422,11 +462,11 @@
             {%- for product in empty_collection.products limit: per_page -%}
               <li class="valor-search__grid-item">
                 {%- render 'product-card',
-                    product: product,
-                    image_ratio: image_ratio,
-                    show_secondary_image: show_secondary,
-                    show_vendor: show_vendor,
-                    show_price: true
+                  product: product,
+                  image_ratio: image_ratio,
+                  show_secondary_image: show_secondary,
+                  show_vendor: show_vendor,
+                  show_price: true
                 -%}
               </li>
             {%- endfor -%}
@@ -436,7 +476,6 @@
     {%- endif -%}
 
   {%- else -%}
-
     {%- if empty_collection.products.size > 0 -%}
       {%- paginate empty_collection.products by per_page -%}
         <div class="valor-search__empty-toolbar">
@@ -453,11 +492,11 @@
               {%- for product in empty_collection.products -%}
                 <li class="valor-search__grid-item">
                   {%- render 'product-card',
-                      product: product,
-                      image_ratio: image_ratio,
-                      show_secondary_image: show_secondary,
-                      show_vendor: show_vendor,
-                      show_price: true
+                    product: product,
+                    image_ratio: image_ratio,
+                    show_secondary_image: show_secondary,
+                    show_vendor: show_vendor,
+                    show_price: true
                   -%}
                 </li>
               {%- endfor -%}
@@ -468,7 +507,6 @@
         </div>
       {%- endpaginate -%}
     {%- endif -%}
-
   {%- endif -%}
 </valor-collection>
 
@@ -540,9 +578,9 @@
       "id": "image_ratio",
       "label": "Image ratio",
       "options": [
-        { "value": "adapt",     "label": "Adapt to image" },
-        { "value": "portrait",  "label": "Portrait (3:4)" },
-        { "value": "square",    "label": "Square (1:1)" },
+        { "value": "adapt", "label": "Adapt to image" },
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "square", "label": "Square (1:1)" },
         { "value": "landscape", "label": "Landscape (4:3)" }
       ],
       "default": "square"

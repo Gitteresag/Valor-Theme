@@ -24,16 +24,16 @@
   assign current_variant = product.selected_or_first_available_variant
   assign featured_media = current_variant.featured_media | default: product.featured_media
 
-  if enable_lightbox == nil
+  if enable_lightbox == null
     assign enable_lightbox = settings.gallery_enable_lightbox
   endif
-  if show_thumbnails == nil
+  if show_thumbnails == null
     assign show_thumbnails = settings.gallery_show_thumbnails
   endif
-  if show_arrows == nil
+  if show_arrows == null
     assign show_arrows = settings.gallery_show_arrows
   endif
-  if priority == nil
+  if priority == null
     assign priority = false
   endif
 
@@ -54,7 +54,7 @@
         {%- assign is_active = false -%}
         {%- if featured_media and media.id == featured_media.id -%}
           {%- assign is_active = true -%}
-        {%- elsif featured_media == nil and forloop.first -%}
+        {%- elsif featured_media == null and forloop.first -%}
           {%- assign is_active = true -%}
         {%- endif -%}
         <button
@@ -66,7 +66,9 @@
           data-media-srcset="{{ img | image_url: width: 600 }} 600w, {{ img | image_url: width: 1000 }} 1000w, {{ img | image_url: width: 1500 }} 1500w, {{ img | image_url: width: 2000 }} 2000w"
           data-media-alt="{{ img.alt | escape }}"
           aria-label="{{ 'accessibility.open_image' | t | default: 'Open image' }} {{ forloop.index }}"
-          {%- unless is_active %} hidden{% endunless -%}
+          {%- unless is_active %}
+            hidden
+          {% endunless -%}
         >
           <img
             src="{{ img | image_url: width: 800 }}"
@@ -76,10 +78,20 @@
             width="{{ img.width }}"
             height="{{ img.height }}"
             loading="{% if priority and is_active %}eager{% else %}lazy{% endif %}"
-            {%- if priority and is_active %} fetchpriority="high"{% endif -%}
+            {%- if priority and is_active %}
+              fetchpriority="high"
+            {% endif -%}
           >
           <span class="valor-product-media__zoom-hint" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              focusable="false"
+            >
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               <line x1="11" y1="8" x2="11" y2="14"></line>
@@ -97,7 +109,16 @@
             data-gallery-prev
             aria-label="{{ 'accessibility.previous' | t | default: 'Previous image' }}"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
               <polyline points="15 18 9 12 15 6"></polyline>
             </svg>
           </button>
@@ -107,7 +128,16 @@
             data-gallery-next
             aria-label="{{ 'accessibility.next' | t | default: 'Next image' }}"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
               <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </button>
@@ -125,7 +155,16 @@
           aria-label="{{ 'accessibility.previous' | t | default: 'Scroll thumbnails left' }}"
           hidden
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button>
@@ -135,7 +174,7 @@
             {%- assign is_active = false -%}
             {%- if featured_media and media.id == featured_media.id -%}
               {%- assign is_active = true -%}
-            {%- elsif featured_media == nil and forloop.first -%}
+            {%- elsif featured_media == null and forloop.first -%}
               {%- assign is_active = true -%}
             {%- endif -%}
             <button
@@ -164,7 +203,16 @@
           aria-label="{{ 'accessibility.next' | t | default: 'Scroll thumbnails right' }}"
           hidden
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
             <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </button>

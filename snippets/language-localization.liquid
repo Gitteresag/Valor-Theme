@@ -28,10 +28,15 @@
             href="#"
             hreflang="{{ language.iso_code }}"
             lang="{{ language.iso_code }}"
-            {% if language.iso_code == localization.language.iso_code %}aria-current="true"{% endif %}
+            {% if language.iso_code == localization.language.iso_code %}
+              aria-current="true"
+            {% endif %}
             data-value="{{ language.iso_code }}"
           >
-            <span class="valor-localization__check{% if language.iso_code != localization.language.iso_code %} valor-localization__check--hidden{% endif %}" aria-hidden="true">
+            <span
+              class="valor-localization__check{% if language.iso_code != localization.language.iso_code %} valor-localization__check--hidden{% endif %}"
+              aria-hidden="true"
+            >
               {{- 'icon-check.svg' | inline_asset_content -}}
             </span>
             <span>{{- language.endonym_name | capitalize -}}</span>

@@ -46,8 +46,12 @@
     <div class="valor-card-horizontal__title">{{ product.title | escape }}</div>
     <div class="valor-card-horizontal__price">
       {%- if product.compare_at_price > product.price -%}
-        <span class="valor-card-horizontal__price-current valor-card-horizontal__price-current--sale">{{ product.price | money }}</span>
-        <span class="valor-card-horizontal__price-compare"><s>{{ product.compare_at_price | money }}</s></span>
+        <span class="valor-card-horizontal__price-current valor-card-horizontal__price-current--sale">
+          {{- product.price | money -}}
+        </span>
+        <span class="valor-card-horizontal__price-compare"
+          ><s>{{ product.compare_at_price | money }}</s></span
+        >
       {%- elsif product.price_varies -%}
         {%- assign from_price = product.price | money -%}
         <span class="valor-card-horizontal__price-current">{{ 'product.from_price' | t: price: from_price }}</span>

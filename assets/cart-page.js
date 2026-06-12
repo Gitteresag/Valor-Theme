@@ -53,17 +53,17 @@
 (function () {
   if (window.ValorCartPage && window.ValorCartPage._initialized) return;
 
-  var CART_ICON_BUBBLE_SELECTOR = '.valor-header__cart';
-  var CART_COUNT_SELECTOR = '.valor-cart-count';
-  var CART_DRAWER_SECTION_ID = 'cart-drawer';
+  var CART_ICON_BUBBLE_SELECTOR = ".valor-header__cart";
+  var CART_COUNT_SELECTOR = ".valor-cart-count";
+  var CART_DRAWER_SECTION_ID = "cart-drawer";
 
   function routeRoot() {
-    return (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+    return (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || "/";
   }
   function cartUrl(path) {
     var root = routeRoot();
-    if (root.charAt(root.length - 1) !== '/') root += '/';
-    return root + path.replace(/^\//, '');
+    if (root.charAt(root.length - 1) !== "/") root += "/";
+    return root + path.replace(/^\//, "");
   }
 
   /* Update the header cart icon bubble manually. The cart-icon-bubble
@@ -80,21 +80,21 @@
     var cartLink = document.querySelector(CART_ICON_BUBBLE_SELECTOR);
     if (!cartLink) return;
     var bubble = cartLink.querySelector(CART_COUNT_SELECTOR);
-    var hiddenText = cartLink.querySelector('[data-cart-count-text]');
+    var hiddenText = cartLink.querySelector("[data-cart-count-text]");
     var count = cart.item_count;
 
     if (count > 0) {
       if (!bubble) {
-        bubble = document.createElement('span');
-        bubble.className = 'valor-cart-count';
-        bubble.setAttribute('aria-hidden', 'true');
+        bubble = document.createElement("span");
+        bubble.className = "valor-cart-count";
+        bubble.setAttribute("aria-hidden", "true");
         if (hiddenText) {
           cartLink.insertBefore(bubble, hiddenText);
         } else {
           cartLink.appendChild(bubble);
         }
       }
-      bubble.textContent = count < 100 ? String(count) : '';
+      bubble.textContent = count < 100 ? String(count) : "";
     } else if (bubble) {
       bubble.remove();
     }
@@ -102,17 +102,14 @@
     if (hiddenText) {
       var template = hiddenText.dataset.template;
       if (template) {
-        hiddenText.textContent = template.replace('%count%', count);
+        hiddenText.textContent = template.replace("%count%", count);
       }
     }
   }
 
   function broadcastCartState(cart) {
-    document.dispatchEvent(
-      new CustomEvent('valor:cart:updated', { detail: cart })
-    );
+    document.dispatchEvent(new CustomEvent("valor:cart:updated", { detail: cart }));
   }
-
 
   /* Collect customer-applied discount code titles for the active-codes
      list. Three sources mirror the Liquid logic at the top of
@@ -147,7 +144,7 @@
 
     if (Array.isArray(cart.cart_level_discount_applications)) {
       cart.cart_level_discount_applications.forEach(function (app) {
-        if (app && app.type === 'discount_code') add(app.title);
+        if (app && app.type === "discount_code") add(app.title);
       });
     }
 
@@ -155,7 +152,7 @@
       cart.items.forEach(function (item) {
         if (!item || !Array.isArray(item.line_level_discount_allocations)) return;
         item.line_level_discount_allocations.forEach(function (alloc) {
-          if (alloc && alloc.discount_application && alloc.discount_application.type === 'discount_code') {
+          if (alloc && alloc.discount_application && alloc.discount_application.type === "discount_code") {
             add(alloc.discount_application.title);
           }
         });
@@ -187,7 +184,7 @@
     var visibleSet = Object.create(null);
     if (Array.isArray(cart.cart_level_discount_applications)) {
       cart.cart_level_discount_applications.forEach(function (app) {
-        if (app && app.type === 'discount_code' && app.title) {
+        if (app && app.type === "discount_code" && app.title) {
           visibleSet[String(app.title).toLowerCase()] = true;
         }
       });
@@ -196,7 +193,7 @@
       cart.items.forEach(function (item) {
         if (!item || !Array.isArray(item.line_level_discount_allocations)) return;
         item.line_level_discount_allocations.forEach(function (alloc) {
-          if (alloc && alloc.discount_application && alloc.discount_application.type === 'discount_code') {
+          if (alloc && alloc.discount_application && alloc.discount_application.type === "discount_code") {
             visibleSet[String(alloc.discount_application.title).toLowerCase()] = true;
           }
         });
@@ -227,18 +224,20 @@
      create surface-specific behaviour we'd have to remember. */
   function syncShippingPills(host, cart) {
     if (!host || !cart) return;
-    var list = host.querySelector('[data-active-discounts]');
+    var list = host.querySelector("[data-active-discounts]");
     if (!list) return;
 
-    var isDrawer = host.tagName.toLowerCase() === 'valor-cart-drawer';
-    var base = isDrawer ? 'valor-cart-drawer' : 'valor-cart';
+    var isDrawer = host.tagName.toLowerCase() === "valor-cart-drawer";
+    var base = isDrawer ? "valor-cart-drawer" : "valor-cart";
     var shippingCodes = getShippingDiscountCodes(cart);
     var shippingSet = Object.create(null);
-    shippingCodes.forEach(function (c) { shippingSet[c.toLowerCase()] = c; });
+    shippingCodes.forEach(function (c) {
+      shippingSet[c.toLowerCase()] = c;
+    });
 
     // Drop any JS-injected shipping pills that no longer match the cart
-    list.querySelectorAll('[data-shipping-pill]').forEach(function (pill) {
-      var code = pill.getAttribute('data-discount-code') || '';
+    list.querySelectorAll("[data-shipping-pill]").forEach(function (pill) {
+      var code = pill.getAttribute("data-discount-code") || "";
       if (!shippingSet[code.toLowerCase()]) pill.parentNode && pill.parentNode.removeChild(pill);
     });
 
@@ -250,20 +249,20 @@
     });
 
     // Visibility: hide list if empty, show if any pills present
-    if (list.querySelector('[data-discount-code]')) {
-      list.removeAttribute('hidden');
+    if (list.querySelector("[data-discount-code]")) {
+      list.removeAttribute("hidden");
     } else {
-      list.setAttribute('hidden', '');
+      list.setAttribute("hidden", "");
     }
 
     // Notice: present iff at least one shipping pill is present
-    var notice = list.parentNode ? list.parentNode.querySelector('[data-shipping-discount-notice]') : null;
+    var notice = list.parentNode ? list.parentNode.querySelector("[data-shipping-discount-notice]") : null;
     if (shippingCodes.length > 0) {
       if (!notice) {
-        notice = document.createElement('p');
-        notice.className = base + '__shipping-discount-notice';
-        notice.setAttribute('data-shipping-discount-notice', '');
-        notice.textContent = host.dataset.stringsShippingNotice || 'Shipping discount will be applied at checkout.';
+        notice = document.createElement("p");
+        notice.className = base + "__shipping-discount-notice";
+        notice.setAttribute("data-shipping-discount-notice", "");
+        notice.textContent = host.dataset.stringsShippingNotice || "Shipping discount will be applied at checkout.";
         if (list.nextSibling) {
           list.parentNode.insertBefore(notice, list.nextSibling);
         } else {
@@ -276,34 +275,34 @@
   }
 
   function buildShippingPill(host, list, code, base) {
-    var li = document.createElement('li');
-    li.className = base + '__active-discount';
-    li.setAttribute('data-discount-code', code);
-    li.setAttribute('data-shipping-pill', '');
+    var li = document.createElement("li");
+    li.className = base + "__active-discount";
+    li.setAttribute("data-discount-code", code);
+    li.setAttribute("data-shipping-pill", "");
 
-    var label = document.createElement('span');
-    label.className = base + '__discount-label';
+    var label = document.createElement("span");
+    label.className = base + "__discount-label";
 
-    var icon = document.createElement('span');
-    icon.className = base + '__discount-icon';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = '\u2212';
+    var icon = document.createElement("span");
+    icon.className = base + "__discount-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "\u2212";
 
-    var title = document.createElement('span');
-    title.className = base + '__discount-title';
+    var title = document.createElement("span");
+    title.className = base + "__discount-title";
     title.textContent = code;
 
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = base + '__discount-remove';
-    btn.setAttribute('data-discount-remove', '');
-    btn.setAttribute('data-discount-code', code);
-    var removeLabel = host.dataset.stringsRemoveDiscount || (list.dataset.removeLabel || 'Remove discount');
-    btn.setAttribute('aria-label', removeLabel + ': ' + code);
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = base + "__discount-remove";
+    btn.setAttribute("data-discount-remove", "");
+    btn.setAttribute("data-discount-code", code);
+    var removeLabel = host.dataset.stringsRemoveDiscount || list.dataset.removeLabel || "Remove discount";
+    btn.setAttribute("aria-label", removeLabel + ": " + code);
     btn.innerHTML = '<span aria-hidden="true">\u00d7</span>';
-    btn.addEventListener('click', function (e) {
+    btn.addEventListener("click", function (e) {
       e.preventDefault();
-      if (typeof host.removeDiscount === 'function') host.removeDiscount(code);
+      if (typeof host.removeDiscount === "function") host.removeDiscount(code);
     });
 
     label.appendChild(icon);
@@ -316,20 +315,20 @@
   /* Minimal CSS.escape polyfill for attribute selectors. Discount codes
      can contain unusual characters (rare but allowed). */
   function cssEscape(value) {
-    if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(value);
+    if (window.CSS && typeof window.CSS.escape === "function") return window.CSS.escape(value);
     return String(value).replace(/[^a-zA-Z0-9_-]/g, function (c) {
-      return '\\' + c.charCodeAt(0).toString(16) + ' ';
+      return "\\" + c.charCodeAt(0).toString(16) + " ";
     });
   }
 
   /* ----- <valor-cart-page> custom element ----- */
-  if (!customElements.get('valor-cart-page')) {
+  if (!customElements.get("valor-cart-page")) {
     customElements.define(
-      'valor-cart-page',
+      "valor-cart-page",
       class ValorCartPage extends HTMLElement {
         connectedCallback() {
           this.sectionId = this.dataset.sectionId;
-          this.liveRegion = this.querySelector('[data-cart-live-region]');
+          this.liveRegion = this.querySelector("[data-cart-live-region]");
 
           if (!this._bound) {
             this._bindDelegatedEvents();
@@ -338,7 +337,7 @@
 
           if (!this._broadcastBound) {
             this._onExternalCartUpdate = this._onExternalCartUpdate.bind(this);
-            document.addEventListener('valor:cart:updated', this._onExternalCartUpdate);
+            document.addEventListener("valor:cart:updated", this._onExternalCartUpdate);
             this._broadcastBound = true;
           }
 
@@ -349,16 +348,20 @@
           if (!this._shippingSynced) {
             this._shippingSynced = true;
             var self = this;
-            fetch(cartUrl('cart.js'), { credentials: 'same-origin' })
-              .then(function (r) { return r.json(); })
-              .then(function (cart) { syncShippingPills(self, cart); })
+            fetch(cartUrl("cart.js"), { credentials: "same-origin" })
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (cart) {
+                syncShippingPills(self, cart);
+              })
               .catch(function () {});
           }
         }
 
         disconnectedCallback() {
           if (this._broadcastBound) {
-            document.removeEventListener('valor:cart:updated', this._onExternalCartUpdate);
+            document.removeEventListener("valor:cart:updated", this._onExternalCartUpdate);
             this._broadcastBound = false;
           }
         }
@@ -380,11 +383,11 @@
           /* All change events: quantity inputs (from <quantity-input>) and
              cart note textareas (which fire change on blur after value
              changes). One handler routes by data attribute. */
-          this.addEventListener('change', function (event) {
+          this.addEventListener("change", function (event) {
             var target = event.target;
             if (!target.matches) return;
 
-            if (target.matches('[data-quantity-field]')) {
+            if (target.matches("[data-quantity-field]")) {
               var line = parseInt(target.dataset.line, 10);
               var quantity = parseInt(target.value, 10);
               if (isNaN(line) || isNaN(quantity)) return;
@@ -392,7 +395,7 @@
               return;
             }
 
-            if (target.matches('[data-cart-note]')) {
+            if (target.matches("[data-cart-note]")) {
               self.updateNote(target.value);
               return;
             }
@@ -402,24 +405,24 @@
              and discount apply buttons. The discount UI intentionally uses
              a non-form wrapper because the cart checkout form already wraps
              the page layout; nested forms are invalid HTML. */
-          this.addEventListener('click', function (event) {
-            var discountApply = event.target.closest('[data-discount-apply]');
+          this.addEventListener("click", function (event) {
+            var discountApply = event.target.closest("[data-discount-apply]");
             if (discountApply) {
               event.preventDefault();
-              var discountForm = discountApply.closest('[data-discount-form]');
+              var discountForm = discountApply.closest("[data-discount-form]");
               self.submitDiscount(discountForm);
               return;
             }
 
-            var discountRemove = event.target.closest('[data-discount-remove]');
+            var discountRemove = event.target.closest("[data-discount-remove]");
             if (discountRemove) {
               event.preventDefault();
-              var code = discountRemove.getAttribute('data-discount-code');
+              var code = discountRemove.getAttribute("data-discount-code");
               if (code) self.removeDiscount(code);
               return;
             }
 
-            var lineRemove = event.target.closest('[data-line-remove]');
+            var lineRemove = event.target.closest("[data-line-remove]");
             if (lineRemove) {
               event.preventDefault();
               var line = parseInt(lineRemove.dataset.line, 10);
@@ -430,11 +433,11 @@
 
           /* Pressing Enter in the discount input applies the code without
              relying on a nested form submit. */
-          this.addEventListener('keydown', function (event) {
-            var input = event.target.closest('[data-discount-input]');
-            if (!input || event.key !== 'Enter') return;
+          this.addEventListener("keydown", function (event) {
+            var input = event.target.closest("[data-discount-input]");
+            if (!input || event.key !== "Enter") return;
             event.preventDefault();
-            self.submitDiscount(input.closest('[data-discount-form]'));
+            self.submitDiscount(input.closest("[data-discount-form]"));
           });
         }
 
@@ -455,16 +458,16 @@
             line: line,
             quantity: quantity,
             sections: this.getSectionsToRender(),
-            sections_url: window.location.pathname
+            sections_url: window.location.pathname,
           };
 
-          fetch(cartUrl('cart/change.js'), {
-            method: 'POST',
+          fetch(cartUrl("cart/change.js"), {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json'
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
           })
             .then(function (response) {
               return response.json().then(function (data) {
@@ -487,7 +490,7 @@
               return self.refreshSection();
             })
             .catch(function (err) {
-              console.error('[Valor cart] change failed:', err);
+              console.error("[Valor cart] change failed:", err);
               self.handleLineError(line, null, sourceInput);
               self.setLineBusy(line, false);
               self.setBusy(false);
@@ -496,8 +499,8 @@
 
         submitDiscount(form) {
           if (!form) return;
-          var input = form.querySelector('[data-discount-input]');
-          var code = input ? input.value.trim() : '';
+          var input = form.querySelector("[data-discount-input]");
+          var code = input ? input.value.trim() : "";
           if (!code) return;
           this.applyDiscount(code, form);
         }
@@ -508,10 +511,10 @@
            comma-separated list to cart/update.js without depending on
            cart.discount_codes (which is unreliable for line-level codes). */
         getExistingDiscountsFromDom() {
-          var nodes = this.querySelectorAll('[data-active-discounts] [data-discount-code]');
+          var nodes = this.querySelectorAll("[data-active-discounts] [data-discount-code]");
           var codes = [];
           for (var i = 0; i < nodes.length; i++) {
-            var c = nodes[i].getAttribute('data-discount-code');
+            var c = nodes[i].getAttribute("data-discount-code");
             if (c) codes.push(c);
           }
           return codes;
@@ -529,9 +532,9 @@
           var self = this;
           if (!this.sectionId) return;
 
-          var messageEl = form ? form.querySelector('[data-discount-message]') : null;
-          var applyBtn = form ? form.querySelector('[data-discount-apply]') : null;
-          this.setDiscountMessage(messageEl, '', null);
+          var messageEl = form ? form.querySelector("[data-discount-message]") : null;
+          var applyBtn = form ? form.querySelector("[data-discount-apply]") : null;
+          this.setDiscountMessage(messageEl, "", null);
           if (applyBtn) applyBtn.disabled = true;
           this.setBusy(true);
 
@@ -540,22 +543,26 @@
           // don't end up with "SAVE15,SAVE15" if the user re-enters a
           // code that's already applied.
           var lc = String(code).toLowerCase();
-          var combined = existing.filter(function (c) { return String(c).toLowerCase() !== lc; });
+          var combined = existing.filter(function (c) {
+            return String(c).toLowerCase() !== lc;
+          });
           combined.push(code);
 
-          fetch(cartUrl('cart/update.js'), {
-            method: 'POST',
+          fetch(cartUrl("cart/update.js"), {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json'
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
             body: JSON.stringify({
-              discount: combined.join(','),
+              discount: combined.join(","),
               sections: this.getSectionsToRender(),
-              sections_url: window.location.pathname
-            })
+              sections_url: window.location.pathname,
+            }),
           })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+              return r.json();
+            })
             .then(function (cart) {
               var applied = self._cartHasCode(cart, code);
 
@@ -582,32 +589,30 @@
                 });
 
                 if (!isShippingCode) {
-                  var freshMsg = self.querySelector('[data-discount-message]');
+                  var freshMsg = self.querySelector("[data-discount-message]");
                   if (freshMsg) {
-                    var tpl = self._getString('discount_applied') || '{{ code }} applied';
-                    freshMsg.textContent = tpl.replace('{{ code }}', code);
-                    freshMsg.setAttribute('data-state', 'success');
+                    var tpl = self._getString("discount_applied") || "{{ code }} applied";
+                    freshMsg.textContent = tpl.replace("{{ code }}", code);
+                    freshMsg.setAttribute("data-state", "success");
                   }
                 }
 
-                self.announce(self._getString('discount_added'));
+                self.announce(self._getString("discount_added"));
               } else {
                 // Code didn't take. Cart hasn't actually changed in a way
                 // we need to render, but we still need to clear our busy
                 // state and show the inline error.
-                var invalidMsg = self._getString('discount_invalid')
-                  || 'This discount code is not valid.';
-                self.setDiscountMessage(messageEl, invalidMsg, 'error');
+                var invalidMsg = self._getString("discount_invalid") || "This discount code is not valid.";
+                self.setDiscountMessage(messageEl, invalidMsg, "error");
                 self.announce(invalidMsg);
                 self.setBusy(false);
                 if (applyBtn) applyBtn.disabled = false;
               }
             })
             .catch(function (err) {
-              console.error('[Valor cart] discount apply failed:', err);
-              var errMsg = self._getString('error_generic')
-                || 'Something went wrong. Please try again.';
-              self.setDiscountMessage(messageEl, errMsg, 'error');
+              console.error("[Valor cart] discount apply failed:", err);
+              var errMsg = self._getString("error_generic") || "Something went wrong. Please try again.";
+              self.setDiscountMessage(messageEl, errMsg, "error");
               self.setBusy(false);
               if (applyBtn) applyBtn.disabled = false;
             });
@@ -624,32 +629,36 @@
 
           var existing = this.getExistingDiscountsFromDom();
           var lc = String(codeToRemove).toLowerCase();
-          var remaining = existing.filter(function (c) { return String(c).toLowerCase() !== lc; });
+          var remaining = existing.filter(function (c) {
+            return String(c).toLowerCase() !== lc;
+          });
 
           this.setBusy(true);
 
-          fetch(cartUrl('cart/update.js'), {
-            method: 'POST',
+          fetch(cartUrl("cart/update.js"), {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json'
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
             body: JSON.stringify({
-              discount: remaining.join(','),
+              discount: remaining.join(","),
               sections: this.getSectionsToRender(),
-              sections_url: window.location.pathname
-            })
+              sections_url: window.location.pathname,
+            }),
           })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+              return r.json();
+            })
             .then(function (cart) {
               if (self.applyCartResponse(cart)) {
-                self.announce(self._getString('discount_removed'));
+                self.announce(self._getString("discount_removed"));
               } else {
                 self.refreshSection();
               }
             })
             .catch(function (err) {
-              console.error('[Valor cart] discount remove failed:', err);
+              console.error("[Valor cart] discount remove failed:", err);
               self.refreshSection();
             });
         }
@@ -661,30 +670,32 @@
         updateNote(note) {
           var self = this;
 
-          fetch(cartUrl('cart/update.js'), {
-            method: 'POST',
+          fetch(cartUrl("cart/update.js"), {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json'
+              "Content-Type": "application/json",
+              Accept: "application/json",
             },
             body: JSON.stringify({
               note: note,
               sections: this.getSectionsToRender(),
-              sections_url: window.location.pathname
-            })
+              sections_url: window.location.pathname,
+            }),
           })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+              return r.json();
+            })
             .then(function (cart) {
               if (self.applyCartResponse(cart)) {
-                self.announce(self._getString('note_updated'));
+                self.announce(self._getString("note_updated"));
               } else {
                 self._suppressNextBroadcast = true;
                 broadcastCartState(cart);
-                self.announce(self._getString('note_updated'));
+                self.announce(self._getString("note_updated"));
               }
             })
             .catch(function (err) {
-              console.error('[Valor cart] note update failed:', err);
+              console.error("[Valor cart] note update failed:", err);
             });
         }
 
@@ -693,7 +704,7 @@
         getSectionsToRender() {
           var sections = [];
           if (this.sectionId) sections.push(this.sectionId);
-          if (document.getElementById('ValorCartDrawer')) {
+          if (document.getElementById("ValorCartDrawer")) {
             sections.push(CART_DRAWER_SECTION_ID);
           }
           return sections;
@@ -701,8 +712,8 @@
 
         renderExternalSections(sections) {
           if (!sections || !sections[CART_DRAWER_SECTION_ID]) return;
-          var drawer = document.getElementById('ValorCartDrawer');
-          if (drawer && typeof drawer.renderFromSections === 'function') {
+          var drawer = document.getElementById("ValorCartDrawer");
+          if (drawer && typeof drawer.renderFromSections === "function") {
             drawer.renderFromSections(sections);
           }
         }
@@ -732,14 +743,14 @@
         }
 
         renderSection(html) {
-          var doc = new DOMParser().parseFromString(html, 'text/html');
-          var fresh = doc.querySelector('valor-cart-page');
+          var doc = new DOMParser().parseFromString(html, "text/html");
+          var fresh = doc.querySelector("valor-cart-page");
           if (!fresh) {
             this.refreshSection();
             return;
           }
           this.innerHTML = fresh.innerHTML;
-          this.liveRegion = this.querySelector('[data-cart-live-region]');
+          this.liveRegion = this.querySelector("[data-cart-live-region]");
 
           // The empty-cart recommendations block is rendered as a SIBLING
           // of <valor-cart-page>, not a child, so it would otherwise be
@@ -753,8 +764,8 @@
           // immediately; adding the first item back should hide them).
           var parent = this.parentNode;
           if (parent) {
-            var freshRecs = doc.querySelector('.valor-cart__recommendations');
-            var currentRecs = parent.querySelector(':scope > .valor-cart__recommendations');
+            var freshRecs = doc.querySelector(".valor-cart__recommendations");
+            var currentRecs = parent.querySelector(":scope > .valor-cart__recommendations");
             if (freshRecs && currentRecs) {
               currentRecs.replaceWith(freshRecs);
             } else if (freshRecs && !currentRecs) {
@@ -774,14 +785,16 @@
           if (!this.sectionId) return;
 
           this.setBusy(true);
-          fetch(window.location.pathname + '?section_id=' + encodeURIComponent(this.sectionId))
-            .then(function (r) { return r.text(); })
+          fetch(window.location.pathname + "?section_id=" + encodeURIComponent(this.sectionId))
+            .then(function (r) {
+              return r.text();
+            })
             .then(function (html) {
               self.renderSection(html);
               self.setBusy(false);
             })
             .catch(function (err) {
-              console.error('[Valor cart] section refresh failed:', err);
+              console.error("[Valor cart] section refresh failed:", err);
               self.setBusy(false);
             });
         }
@@ -789,19 +802,19 @@
         /* ----- Loading state ----- */
 
         setBusy(isBusy) {
-          var items = this.querySelector('valor-cart-items');
-          if (items) items.setAttribute('aria-busy', isBusy ? 'true' : 'false');
+          var items = this.querySelector("valor-cart-items");
+          if (items) items.setAttribute("aria-busy", isBusy ? "true" : "false");
         }
 
         setLineBusy(line, isBusy) {
           var item = this.querySelector('[data-cart-item][data-line="' + line + '"]');
           if (!item) return;
-          var input = item.querySelector('[data-quantity-field]');
+          var input = item.querySelector("[data-quantity-field]");
           if (isBusy) {
-            item.setAttribute('data-line-busy', 'true');
+            item.setAttribute("data-line-busy", "true");
             if (input) input.disabled = true;
           } else {
-            item.removeAttribute('data-line-busy');
+            item.removeAttribute("data-line-busy");
             if (input) input.disabled = false;
           }
         }
@@ -809,9 +822,10 @@
         /* ----- Error & message handling ----- */
 
         handleLineError(line, errorData, sourceInput) {
-          var message = (errorData && (errorData.description || errorData.message))
-            || this._getString('error_generic')
-            || 'Something went wrong. Please try again.';
+          var message =
+            (errorData && (errorData.description || errorData.message)) ||
+            this._getString("error_generic") ||
+            "Something went wrong. Please try again.";
 
           this.showLineError(line, message);
           this.announce(message);
@@ -826,26 +840,26 @@
         showLineError(line, message) {
           var errorEl = this.querySelector('[data-line-error][data-line="' + line + '"]');
           if (!errorEl) return;
-          var small = errorEl.querySelector('small');
+          var small = errorEl.querySelector("small");
           if (small) small.textContent = message;
-          errorEl.setAttribute('data-has-error', 'true');
+          errorEl.setAttribute("data-has-error", "true");
         }
 
         clearLineError(line) {
           var errorEl = this.querySelector('[data-line-error][data-line="' + line + '"]');
           if (!errorEl) return;
-          var small = errorEl.querySelector('small');
-          if (small) small.textContent = '';
-          errorEl.removeAttribute('data-has-error');
+          var small = errorEl.querySelector("small");
+          if (small) small.textContent = "";
+          errorEl.removeAttribute("data-has-error");
         }
 
         setDiscountMessage(messageEl, text, state) {
           if (!messageEl) return;
-          messageEl.textContent = text || '';
+          messageEl.textContent = text || "";
           if (state) {
-            messageEl.setAttribute('data-state', state);
+            messageEl.setAttribute("data-state", state);
           } else {
-            messageEl.removeAttribute('data-state');
+            messageEl.removeAttribute("data-state");
           }
         }
 
@@ -853,7 +867,7 @@
 
         announce(message) {
           if (!this.liveRegion || !message) return;
-          this.liveRegion.textContent = '';
+          this.liveRegion.textContent = "";
           var self = this;
           setTimeout(function () {
             if (self.liveRegion) self.liveRegion.textContent = message;
@@ -862,29 +876,30 @@
 
         formatUpdateMessage(cart, line, quantity) {
           if (quantity === 0) {
-            return this._getString('item_removed') || 'Item removed.';
+            return this._getString("item_removed") || "Item removed.";
           }
           var subtotalStr = this._formatMoney(cart.items_subtotal_price || cart.total_price);
-          var tpl = this._getString('item_updated')
-            || 'Cart updated. Subtotal: {{ subtotal }}.';
-          return tpl.replace('{{ subtotal }}', subtotalStr).replace('{{subtotal}}', subtotalStr);
+          var tpl = this._getString("item_updated") || "Cart updated. Subtotal: {{ subtotal }}.";
+          return tpl.replace("{{ subtotal }}", subtotalStr).replace("{{subtotal}}", subtotalStr);
         }
 
         /* Read a string from the data-strings-* attribute on the host,
            falling back to undefined. Liquid populates these attributes
            from the locale file so messages stay translatable. */
         _getString(key) {
-          var camel = key.replace(/_([a-z])/g, function (_, c) { return c.toUpperCase(); });
-          return this.dataset['strings' + camel.charAt(0).toUpperCase() + camel.slice(1)];
+          var camel = key.replace(/_([a-z])/g, function (_, c) {
+            return c.toUpperCase();
+          });
+          return this.dataset["strings" + camel.charAt(0).toUpperCase() + camel.slice(1)];
         }
 
         _formatMoney(cents) {
-          if (typeof window.Shopify === 'object' && typeof window.Shopify.formatMoney === 'function') {
+          if (typeof window.Shopify === "object" && typeof window.Shopify.formatMoney === "function") {
             return window.Shopify.formatMoney(cents);
           }
           var amount = (cents / 100).toFixed(2);
-          var currency = (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) || '';
-          return currency ? currency + ' ' + amount : amount;
+          var currency = (window.Shopify && window.Shopify.currency && window.Shopify.currency.active) || "";
+          return currency ? currency + " " + amount : amount;
         }
 
         /* Check whether a cart object's discount_codes array contains the
@@ -904,7 +919,7 @@
           }
           return false;
         }
-      }
+      },
     );
   }
 

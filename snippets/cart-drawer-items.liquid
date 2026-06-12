@@ -11,15 +11,15 @@
       <li class="valor-cart-items__item" data-line="{{ forloop.index }}" data-key="{{ item.key }}">
         <a href="{{ item.url }}" class="valor-cart-items__image" data-cart-drawer-close>
           {%- if item.image -%}
-            {%- assign cart_drawer_image_alt = item.image.alt | default: item.product.title | default: item.title | escape -%}
+            {%- assign cart_drawer_image_alt = item.image.alt
+              | default: item.product.title
+              | default: item.title
+              | escape
+            -%}
             {{
               item.image
               | image_url: width: 200
-              | image_tag:
-                width: 100,
-                height: 100,
-                loading: 'lazy',
-                alt: cart_drawer_image_alt
+              | image_tag: width: 100, height: 100, loading: 'lazy', alt: cart_drawer_image_alt
             }}
           {%- endif -%}
         </a>
@@ -35,7 +35,10 @@
             </div>
           </div>
 
-          {%- if item.product.has_only_default_variant == false or item.properties.size > 0 or item.selling_plan_allocation -%}
+          {%- if item.product.has_only_default_variant == false
+            or item.properties.size > 0
+            or item.selling_plan_allocation
+          -%}
             <div class="valor-cart-items__variant">
               {%- if item.product.has_only_default_variant == false -%}
                 <span>{{ item.variant.title }}</span>
@@ -66,7 +69,9 @@
               {%- for discount in item.line_level_discount_allocations -%}
                 <li class="valor-cart-items__discount">
                   <span class="valor-cart-items__discount-icon" aria-hidden="true">−</span>
-                  <span class="valor-cart-items__discount-title">{{ discount.discount_application.title | escape }}</span>
+                  <span class="valor-cart-items__discount-title">
+                    {{- discount.discount_application.title | escape -}}
+                  </span>
                   <span class="valor-cart-items__discount-amount">(−{{ discount.amount | money }})</span>
                 </li>
               {%- endfor -%}
@@ -88,7 +93,9 @@
                 data-qty-change
                 data-line="{{ forloop.index }}"
                 data-direction="-1"
-              >−</button>
+              >
+                −
+              </button>
               <input
                 class="valor-cart-items__qty-input"
                 type="number"
@@ -106,7 +113,9 @@
                 data-qty-change
                 data-line="{{ forloop.index }}"
                 data-direction="1"
-              >+</button>
+              >
+                +
+              </button>
             </div>
 
             <button

@@ -38,7 +38,9 @@
           {%- endif -%}
           <{{ logo_tag }}
             class="valor-logo-list__item{% if block.settings.image == blank %} valor-logo-list__item--placeholder{% endif %}"
-            {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% endif %}
+            {% if block.settings.link != blank %}
+              href="{{ block.settings.link }}"
+            {% endif %}
             {{ block.shopify_attributes }}
           >
             {%- if block.settings.image != blank -%}
@@ -56,7 +58,11 @@
                 style="--valor-logo-max-height: {{ section.settings.logo_max_height }}px;"
               >
             {%- else -%}
-              <div class="valor-logo-list__placeholder" style="--valor-logo-max-height: {{ section.settings.logo_max_height }}px;" aria-hidden="true">
+              <div
+                class="valor-logo-list__placeholder"
+                style="--valor-logo-max-height: {{ section.settings.logo_max_height }}px;"
+                aria-hidden="true"
+              >
                 {{ 'logo' | placeholder_svg_tag: 'valor-logo-list__placeholder-svg' }}
               </div>
             {%- endif -%}
@@ -88,9 +94,18 @@
     flex-direction: column;
     gap: 0.5rem;
   }
-  .valor-logo-list--align-left .valor-logo-list__header { text-align: left; align-items: flex-start; }
-  .valor-logo-list--align-center .valor-logo-list__header { text-align: center; align-items: center; }
-  .valor-logo-list--align-right .valor-logo-list__header { text-align: right; align-items: flex-end; }
+  .valor-logo-list--align-left .valor-logo-list__header {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .valor-logo-list--align-center .valor-logo-list__header {
+    text-align: center;
+    align-items: center;
+  }
+  .valor-logo-list--align-right .valor-logo-list__header {
+    text-align: right;
+    align-items: flex-end;
+  }
 
   .valor-logo-list__caption {
     text-transform: uppercase;
@@ -107,19 +122,34 @@
     align-items: center;
     justify-items: center;
   }
-  .valor-logo-list__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .valor-logo-list__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .valor-logo-list__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
-  .valor-logo-list__grid--cols-6 { grid-template-columns: repeat(6, 1fr); }
+  .valor-logo-list__grid--cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .valor-logo-list__grid--cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .valor-logo-list__grid--cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .valor-logo-list__grid--cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
 
   @media (max-width: 989px) {
     .valor-logo-list__grid--cols-5,
-    .valor-logo-list__grid--cols-6 { grid-template-columns: repeat(4, 1fr); }
+    .valor-logo-list__grid--cols-6 {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 
   @media (max-width: 749px) {
-    .valor-logo-list__grid { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
-    .valor-logo-list__grid--cols-3 { grid-template-columns: repeat(2, 1fr); }
+    .valor-logo-list__grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+    .valor-logo-list__grid--cols-3 {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   /* Items */
@@ -133,7 +163,9 @@
     color: inherit;
     transition: opacity 0.15s ease;
   }
-  a.valor-logo-list__item:hover { opacity: 0.7; }
+  a.valor-logo-list__item:hover {
+    opacity: 0.7;
+  }
 
   .valor-logo-list__image {
     max-width: 100%;
@@ -165,7 +197,9 @@
   .valor-logo-list__grid--grayscale .valor-logo-list__image {
     filter: grayscale(100%);
     opacity: 0.7;
-    transition: filter 0.2s ease, opacity 0.2s ease;
+    transition:
+      filter 0.2s ease,
+      opacity 0.2s ease;
   }
   .valor-logo-list__grid--grayscale .valor-logo-list__item:hover .valor-logo-list__image {
     filter: grayscale(0%);
@@ -289,13 +323,7 @@
   "presets": [
     {
       "name": "Logo list",
-      "blocks": [
-        { "type": "logo" },
-        { "type": "logo" },
-        { "type": "logo" },
-        { "type": "logo" },
-        { "type": "logo" }
-      ]
+      "blocks": [{ "type": "logo" }, { "type": "logo" }, { "type": "logo" }, { "type": "logo" }, { "type": "logo" }]
     }
   ]
 }

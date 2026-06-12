@@ -61,16 +61,34 @@
               assign row_content = block.settings.page.content
             endif
           -%}
-          <details class="valor-collapsible-row"{% if is_open %} open{% endif %} {{ block.shopify_attributes }}>
+          <details
+            class="valor-collapsible-row"
+            {% if is_open %}
+              open
+            {% endif %}
+            {{ block.shopify_attributes }}
+          >
             <summary class="valor-collapsible-row__summary">
               {%- if block.settings.icon != 'none' and block.settings.icon != blank -%}
                 <span class="valor-collapsible-row__icon" aria-hidden="true">
                   {%- render 'icon-library', icon: block.settings.icon -%}
                 </span>
               {%- endif -%}
-              <span class="valor-collapsible-row__heading">{{ block.settings.heading | default: 'Collapsible row' | escape }}</span>
+              <span class="valor-collapsible-row__heading">
+                {{- block.settings.heading | default: 'Collapsible row' | escape -}}
+              </span>
               <span class="valor-collapsible-row__chevron" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  focusable="false"
+                >
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
               </span>
             </summary>
             <div class="valor-collapsible-row__content">
@@ -104,9 +122,18 @@
     flex-direction: column;
     gap: 0.5rem;
   }
-  .valor-collapsible--align-left .valor-collapsible__header { text-align: left; align-items: flex-start; }
-  .valor-collapsible--align-center .valor-collapsible__header { text-align: center; align-items: center; }
-  .valor-collapsible--align-right .valor-collapsible__header { text-align: right; align-items: flex-end; }
+  .valor-collapsible--align-left .valor-collapsible__header {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .valor-collapsible--align-center .valor-collapsible__header {
+    text-align: center;
+    align-items: center;
+  }
+  .valor-collapsible--align-right .valor-collapsible__header {
+    text-align: right;
+    align-items: flex-end;
+  }
 
   .valor-collapsible__caption {
     text-transform: uppercase;
@@ -128,20 +155,32 @@
       gap: clamp(2rem, 4vw, 4rem);
       align-items: start;
     }
-    .valor-collapsible--image_second .valor-collapsible__media { order: 2; }
+    .valor-collapsible--image_second .valor-collapsible__media {
+      order: 2;
+    }
   }
 
   /* Media */
-  .valor-collapsible__media { overflow: hidden; }
+  .valor-collapsible__media {
+    overflow: hidden;
+  }
   .valor-collapsible__image {
     width: 100%;
     height: auto;
     display: block;
     object-fit: cover;
   }
-  .valor-collapsible__image--small { aspect-ratio: 4 / 3; height: 100%; }
-  .valor-collapsible__image--large { aspect-ratio: 4 / 5; height: 100%; }
-  .valor-collapsible__image--adapt { aspect-ratio: auto; }
+  .valor-collapsible__image--small {
+    aspect-ratio: 4 / 3;
+    height: 100%;
+  }
+  .valor-collapsible__image--large {
+    aspect-ratio: 4 / 5;
+    height: 100%;
+  }
+  .valor-collapsible__image--adapt {
+    aspect-ratio: auto;
+  }
 
   /* Rows */
   .valor-collapsible__rows {
@@ -168,8 +207,12 @@
     user-select: none;
     transition: opacity 0.15s ease;
   }
-  .valor-collapsible-row__summary::-webkit-details-marker { display: none; }
-  .valor-collapsible-row__summary:hover { opacity: 0.75; }
+  .valor-collapsible-row__summary::-webkit-details-marker {
+    display: none;
+  }
+  .valor-collapsible-row__summary:hover {
+    opacity: 0.75;
+  }
 
   .valor-collapsible-row__icon {
     width: 22px;
@@ -212,11 +255,17 @@
     line-height: 1.6;
     color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
   }
-  .valor-collapsible-row__content > .rte > *:first-child { margin-top: 0; }
-  .valor-collapsible-row__content > .rte > *:last-child { margin-bottom: 0; }
+  .valor-collapsible-row__content > .rte > *:first-child {
+    margin-top: 0;
+  }
+  .valor-collapsible-row__content > .rte > *:last-child {
+    margin-bottom: 0;
+  }
 
   @media (prefers-reduced-motion: reduce) {
-    .valor-collapsible-row__chevron { transition: none; }
+    .valor-collapsible-row__chevron {
+      transition: none;
+    }
   }
 {% endstylesheet %}
 

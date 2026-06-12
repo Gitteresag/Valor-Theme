@@ -30,8 +30,13 @@
             {%- if section.settings.show_stars and block.settings.rating > 0 -%}
               <div class="valor-testimonial__stars" aria-label="{{ block.settings.rating }} out of 5 stars">
                 {%- for i in (1..5) -%}
-                  <span class="valor-testimonial__star{% if i > block.settings.rating %} valor-testimonial__star--empty{% endif %}" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  <span
+                    class="valor-testimonial__star{% if i > block.settings.rating %} valor-testimonial__star--empty{% endif %}"
+                    aria-hidden="true"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                      <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                    </svg>
                   </span>
                 {%- endfor -%}
               </div>
@@ -79,8 +84,14 @@
     flex-direction: column;
     gap: 0.5rem;
   }
-  .valor-testimonials--align-left .valor-testimonials__header { text-align: left; align-items: flex-start; }
-  .valor-testimonials--align-center .valor-testimonials__header { text-align: center; align-items: center; }
+  .valor-testimonials--align-left .valor-testimonials__header {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .valor-testimonials--align-center .valor-testimonials__header {
+    text-align: center;
+    align-items: center;
+  }
 
   .valor-testimonials__caption {
     text-transform: uppercase;
@@ -95,15 +106,28 @@
     display: grid;
     gap: clamp(1rem, 2.5vw, 2rem);
   }
-  .valor-testimonials__grid--cols-1 { grid-template-columns: 1fr; }
-  .valor-testimonials__grid--cols-1 .valor-testimonial { max-width: 42rem; margin: 0 auto; }
-  .valor-testimonials__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .valor-testimonials__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .valor-testimonials__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .valor-testimonials__grid--cols-1 {
+    grid-template-columns: 1fr;
+  }
+  .valor-testimonials__grid--cols-1 .valor-testimonial {
+    max-width: 42rem;
+    margin: 0 auto;
+  }
+  .valor-testimonials__grid--cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .valor-testimonials__grid--cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .valor-testimonials__grid--cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 
   @media (max-width: 989px) {
     .valor-testimonials__grid--cols-3,
-    .valor-testimonials__grid--cols-4 { grid-template-columns: repeat(2, 1fr); }
+    .valor-testimonials__grid--cols-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
   @media (max-width: 749px) {
@@ -140,7 +164,9 @@
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
-    .valor-testimonials__grid--swipe-mobile::-webkit-scrollbar { display: none; }
+    .valor-testimonials__grid--swipe-mobile::-webkit-scrollbar {
+      display: none;
+    }
     .valor-testimonials__grid--swipe-mobile > * {
       flex: 0 0 80%;
       scroll-snap-align: start;
@@ -173,8 +199,14 @@
     height: 16px;
     display: inline-flex;
   }
-  .valor-testimonial__star svg { width: 100%; height: 100%; display: block; }
-  .valor-testimonial__star--empty { color: color-mix(in srgb, var(--color-foreground) 18%, transparent); }
+  .valor-testimonial__star svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .valor-testimonial__star--empty {
+    color: color-mix(in srgb, var(--color-foreground) 18%, transparent);
+  }
 
   .valor-testimonial__quote {
     margin: 0;
@@ -327,11 +359,7 @@
   "presets": [
     {
       "name": "Testimonials",
-      "blocks": [
-        { "type": "testimonial" },
-        { "type": "testimonial" },
-        { "type": "testimonial" }
-      ]
+      "blocks": [{ "type": "testimonial" }, { "type": "testimonial" }, { "type": "testimonial" }]
     }
   ]
 }

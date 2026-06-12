@@ -68,7 +68,9 @@
     aria-label="{{ quantity_decrease_label | escape }}"
     aria-controls="{{ quantity_id | escape }}"
     data-quantity-minus
-    {% if disabled %}disabled{% endif %}
+    {% if disabled %}
+      disabled
+    {% endif %}
   >
     <span aria-hidden="true" class="valor-quantity__icon">
       <svg viewBox="0 0 10 10" focusable="false">
@@ -85,18 +87,30 @@
     value="{{ quantity_value }}"
     min="{{ quantity_min }}"
     data-min="{{ quantity_data_min }}"
-    {% if max != blank %}max="{{ max }}" data-max="{{ max }}"{% endif %}
+    {% if max != blank %}
+      max="{{ max }}" data-max="{{ max }}"
+    {% endif %}
     step="{{ quantity_step }}"
     data-step="{{ quantity_step }}"
     inputmode="numeric"
     autocomplete="off"
     aria-label="{{ quantity_aria_label | escape }}"
     data-quantity-field
-    {% if data_line != blank %}data-line="{{ data_line }}"{% endif %}
-    {% if data_key != blank %}data-key="{{ data_key | escape }}"{% endif %}
-    {% if data_variant_id != blank %}data-variant-id="{{ data_variant_id }}"{% endif %}
-    {% if form_id != blank %}form="{{ form_id | escape }}"{% endif %}
-    {% if disabled %}disabled{% endif %}
+    {% if data_line != blank %}
+      data-line="{{ data_line }}"
+    {% endif %}
+    {% if data_key != blank %}
+      data-key="{{ data_key | escape }}"
+    {% endif %}
+    {% if data_variant_id != blank %}
+      data-variant-id="{{ data_variant_id }}"
+    {% endif %}
+    {% if form_id != blank %}
+      form="{{ form_id | escape }}"
+    {% endif %}
+    {% if disabled %}
+      disabled
+    {% endif %}
   >
 
   <button
@@ -106,7 +120,9 @@
     aria-label="{{ quantity_increase_label | escape }}"
     aria-controls="{{ quantity_id | escape }}"
     data-quantity-plus
-    {% if disabled %}disabled{% endif %}
+    {% if disabled %}
+      disabled
+    {% endif %}
   >
     <span aria-hidden="true" class="valor-quantity__icon">
       <svg viewBox="0 0 10 10" focusable="false">

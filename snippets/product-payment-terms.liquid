@@ -14,11 +14,21 @@
 {%- assign payment_terms_form_id = form_id | default: 'product-payment-terms' -%}
 
 {%- if variant != blank -%}
-  <div class="{{ payment_terms_class }}" {% if block %}{{ block.shopify_attributes }}{% endif %}>
+  <div
+    class="{{ payment_terms_class }}"
+    {% if block %}
+      {{- block.shopify_attributes -}}
+    {% endif %}
+  >
     {%- if form -%}
       {{ form | payment_terms }}
     {%- elsif product != blank -%}
-      {%- form 'product', product, id: payment_terms_form_id, class: 'valor-product-payment-terms__form', novalidate: 'novalidate' -%}
+      {%- form 'product',
+        product,
+        id: payment_terms_form_id,
+        class: 'valor-product-payment-terms__form',
+        novalidate: 'novalidate'
+      -%}
         <input
           type="hidden"
           name="id"

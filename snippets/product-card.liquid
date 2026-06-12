@@ -12,7 +12,7 @@
 {%- liquid
   assign image_ratio = image_ratio | default: 'adapt'
   assign card_variant = product.selected_or_first_available_variant
-  if show_price == nil
+  if show_price == null
     assign show_price = true
   endif
 -%}
@@ -51,9 +51,13 @@
       {%- endif -%}
 
       {%- if product.compare_at_price > product.price and product.available and settings.show_sale_badge -%}
-        <span class="valor-card__badge valor-card__badge--sale">{{ settings.sale_badge_text | default: 'Sale' | escape }}</span>
+        <span class="valor-card__badge valor-card__badge--sale">
+          {{- settings.sale_badge_text | default: 'Sale' | escape -}}
+        </span>
       {%- elsif product.available == false and settings.show_soldout_badge -%}
-        <span class="valor-card__badge valor-card__badge--soldout">{{ settings.soldout_badge_text | default: 'Sold out' | escape }}</span>
+        <span class="valor-card__badge valor-card__badge--soldout">
+          {{- settings.soldout_badge_text | default: 'Sold out' | escape -}}
+        </span>
       {%- endif -%}
     </div>
 
@@ -66,7 +70,9 @@
         <div class="valor-card__price">
           {%- if product.compare_at_price > product.price -%}
             <span class="valor-card__price-current valor-card__price-current--sale">{{ product.price | money }}</span>
-            <span class="valor-card__price-compare"><s>{{ product.compare_at_price | money }}</s></span>
+            <span class="valor-card__price-compare"
+              ><s>{{ product.compare_at_price | money }}</s></span
+            >
           {%- elsif product.price_varies -%}
             {%- assign from_price = product.price | money -%}
             <span class="valor-card__price-current">{{ 'product.from_price' | t: price: from_price }}</span>

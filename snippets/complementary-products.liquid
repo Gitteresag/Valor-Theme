@@ -56,7 +56,9 @@
 <div
   class="valor-mp__complementary"
   {{ block.shopify_attributes }}
-  {%- unless has_complementary or request.design_mode %} hidden{% endunless -%}
+  {%- unless has_complementary or request.design_mode %}
+    hidden
+  {% endunless -%}
 >
   {%- if heading != blank -%}
     <h3 class="valor-mp__complementary-heading">{{ heading | escape }}</h3>
@@ -68,7 +70,9 @@
     data-section-id="{{ section_id }}"
     data-product-id="{{ product.id }}"
     data-reveal-host=".valor-mp__complementary"
-    {%- if has_complementary %} data-loaded="true"{% endif -%}
+    {%- if has_complementary %}
+      data-loaded="true"
+    {% endif -%}
   >
     {%- if has_complementary -%}
       {%- for recommendation in recommendations.products limit: limit -%}
@@ -76,7 +80,13 @@
       {%- endfor -%}
     {%- elsif request.design_mode -%}
       <div class="valor-mp__complementary-editor">
-        <p>{{ 'sections.main_product.complementary_empty_editor' | t | default: 'Complementary products will appear here once they are set up in the Shopify Search & Discovery app.' }}</p>
+        <p>
+          {{
+            'sections.main_product.complementary_empty_editor'
+            | t
+            | default: 'Complementary products will appear here once they are set up in the Shopify Search & Discovery app.'
+          }}
+        </p>
       </div>
     {%- endif -%}
   </product-recommendations>

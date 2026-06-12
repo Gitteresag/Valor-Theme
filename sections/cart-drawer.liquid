@@ -158,7 +158,9 @@
               aria-label="{{ 'cart.active_discounts' | t }}"
               data-active-discounts
               data-remove-label="{{ 'cart.remove_discount' | t | escape }}"
-              {% if code_discount_titles.size == 0 %}hidden{% endif %}
+              {% if code_discount_titles.size == 0 %}
+                hidden
+              {% endif %}
             >
               {%- for code in code_discount_titles -%}
                 <li class="valor-cart-drawer__active-discount" data-discount-code="{{ code | escape }}">
@@ -293,7 +295,9 @@
     height: 2.75rem;
     margin-right: -0.625rem;
   }
-  .valor-cart-drawer__close:focus { outline: none; }
+  .valor-cart-drawer__close:focus {
+    outline: none;
+  }
   .valor-cart-drawer__close:focus-visible {
     outline: 2px solid var(--color-foreground);
     outline-offset: 2px;
@@ -370,7 +374,9 @@
     font-size: 0.9375rem;
     list-style: none;
   }
-  .valor-cart-drawer__note-summary::-webkit-details-marker { display: none; }
+  .valor-cart-drawer__note-summary::-webkit-details-marker {
+    display: none;
+  }
   .valor-cart-drawer__note-chevron {
     display: flex;
     align-items: center;
@@ -396,7 +402,9 @@
     min-height: 4rem;
     border-radius: 0;
   }
-  .valor-cart-drawer__note-input:focus { outline: none; }
+  .valor-cart-drawer__note-input:focus {
+    outline: none;
+  }
 
   /* Discount */
   .valor-cart-drawer__discount-row {
@@ -431,13 +439,19 @@
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
   }
   .valor-cart-drawer__discount-apply:hover {
     opacity: var(--button-hover-opacity, 0.85);
     background: var(--color-button-outline-hover-bg, var(--color-foreground));
     color: var(--color-button-outline-hover-text, var(--color-background));
-    border-color: var(--color-button-outline-hover-border, var(--color-button-outline-hover-bg, var(--color-foreground)));
+    border-color: var(
+      --color-button-outline-hover-border,
+      var(--color-button-outline-hover-bg, var(--color-foreground))
+    );
   }
   .valor-cart-drawer__discount-message {
     margin: 0.375rem 0 0;
@@ -461,8 +475,10 @@
     height: 1rem;
     flex: 0 0 auto;
     background-color: currentColor;
-    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>") no-repeat center / contain;
-            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>") no-repeat center / contain;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>")
+      no-repeat center / contain;
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>")
+      no-repeat center / contain;
   }
   .valor-cart-drawer__discount-message[data-state='error'] {
     color: var(--valor-color-error);
@@ -505,8 +521,10 @@
     margin-top: 0.125rem;
     flex: 0 0 auto;
     background-color: var(--valor-color-success);
-    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>") no-repeat center / contain;
-            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>") no-repeat center / contain;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>")
+      no-repeat center / contain;
+    mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z'/></svg>")
+      no-repeat center / contain;
   }
   .valor-cart-drawer__discount-label {
     display: inline-flex;
@@ -554,7 +572,9 @@
     padding: 0;
     margin-left: 0.25rem;
     flex: 0 0 auto;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
   }
   .valor-cart-drawer__discount-remove:hover {
     background: var(--color-foreground);

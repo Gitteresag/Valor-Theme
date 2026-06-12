@@ -36,9 +36,15 @@
   display: block;
   object-fit: cover;
 }
-.valor-collection__banner--height-small .valor-collection__banner-image  { aspect-ratio: 4 / 1; }
-.valor-collection__banner--height-medium .valor-collection__banner-image { aspect-ratio: 3 / 1; }
-.valor-collection__banner--height-large .valor-collection__banner-image  { aspect-ratio: 2 / 1; }
+.valor-collection__banner--height-small .valor-collection__banner-image {
+  aspect-ratio: 4 / 1;
+}
+.valor-collection__banner--height-medium .valor-collection__banner-image {
+  aspect-ratio: 3 / 1;
+}
+.valor-collection__banner--height-large .valor-collection__banner-image {
+  aspect-ratio: 2 / 1;
+}
 
 /* === Header ====================================================== */
 .valor-collection__header {
@@ -47,9 +53,15 @@
 /* Alignment modifiers — let the merchant choose how the title and
    description sit relative to the page width. Defaults to center to
    match the original collection page look. */
-.valor-collection__header--left   { text-align: left; }
-.valor-collection__header--center { text-align: center; }
-.valor-collection__header--right  { text-align: right; }
+.valor-collection__header--left {
+  text-align: left;
+}
+.valor-collection__header--center {
+  text-align: center;
+}
+.valor-collection__header--right {
+  text-align: right;
+}
 .valor-collection__title {
   /* Font size and weight come from .valor-heading--{size} classes in
      the critical stylesheet — keeps this title visually consistent
@@ -65,14 +77,26 @@
   color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
   line-height: 1.6;
 }
-.valor-collection__description--left   { text-align: left; }
-.valor-collection__description--center { text-align: center; }
-.valor-collection__description--right  { text-align: right; }
+.valor-collection__description--left {
+  text-align: left;
+}
+.valor-collection__description--center {
+  text-align: center;
+}
+.valor-collection__description--right {
+  text-align: right;
+}
 /* Body size modifiers — affects the description's base font-size;
    rte child elements scale proportionally via em-based sizing. */
-.valor-collection__description--body-small  { font-size: var(--font-size-body-sm); }
-.valor-collection__description--body-medium { font-size: var(--font-size-body-md); }
-.valor-collection__description--body-large  { font-size: var(--font-size-body-lg); }
+.valor-collection__description--body-small {
+  font-size: var(--font-size-body-sm);
+}
+.valor-collection__description--body-medium {
+  font-size: var(--font-size-body-md);
+}
+.valor-collection__description--body-large {
+  font-size: var(--font-size-body-lg);
+}
 
 /* === Toolbar (count + filter button + sort) ====================== */
 .valor-collection__toolbar {
@@ -128,7 +152,9 @@
 }
 .valor-collection__sort {
   padding: 0.5rem 1.75rem 0.5rem 0.75rem;
-  background: var(--color-background) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 0.5rem center;
+  background: var(--color-background)
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>")
+    no-repeat right 0.5rem center;
   border: 1px solid var(--valor-border-strong);
   border-radius: var(--style-border-radius-inputs, 4px);
   color: var(--color-foreground);
@@ -291,13 +317,25 @@
     gap: 1.5rem;
   }
 }
-.valor-collection__grid--mobile-1 { grid-template-columns: 1fr; }
-.valor-collection__grid--mobile-2 { grid-template-columns: repeat(2, 1fr); }
+.valor-collection__grid--mobile-1 {
+  grid-template-columns: 1fr;
+}
+.valor-collection__grid--mobile-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
 @media (min-width: 750px) {
-  .valor-collection__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .valor-collection__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
-  .valor-collection__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .valor-collection__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .valor-collection__grid--cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .valor-collection__grid--cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .valor-collection__grid--cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .valor-collection__grid--cols-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
 
 /* Grid-view overrides set by grid-view.js based on visitor's toggle
@@ -324,11 +362,17 @@
   gap: 0.25rem;
 }
 
-.valor-grid-view-toggle--desktop { display: none; }
+.valor-grid-view-toggle--desktop {
+  display: none;
+}
 
 @media (min-width: 750px) {
-  .valor-grid-view-toggle--desktop { display: inline-flex; }
-  .valor-grid-view-toggle--mobile  { display: none; }
+  .valor-grid-view-toggle--desktop {
+    display: inline-flex;
+  }
+  .valor-grid-view-toggle--mobile {
+    display: none;
+  }
 }
 
 .valor-grid-view-toggle__btn {
@@ -343,7 +387,9 @@
   color: color-mix(in srgb, var(--color-foreground) 55%, transparent);
   cursor: pointer;
   border-radius: 0.25rem;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .valor-grid-view-toggle__btn:hover {
@@ -455,7 +501,9 @@
   display: none;
 }
 @media (max-width: 749.98px) {
-  .valor-facets__close { display: inline-flex; }
+  .valor-facets__close {
+    display: inline-flex;
+  }
 }
 
 /* Active filter pills */
@@ -503,7 +551,9 @@
   font-size: var(--font-size-body-md);
   font-weight: 500;
 }
-.valor-facets__group-summary::-webkit-details-marker { display: none; }
+.valor-facets__group-summary::-webkit-details-marker {
+  display: none;
+}
 .valor-facets__group-icon {
   transition: transform 0.2s ease;
 }

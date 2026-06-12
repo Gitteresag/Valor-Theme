@@ -12,35 +12,35 @@ class ValorBackToTop extends HTMLButtonElement {
   }
 
   connectedCallback() {
-    this.removeAttribute('hidden');
-    this.addEventListener('click', this.handleClick);
-    window.addEventListener('scroll', this.handleScroll, { passive: true });
+    this.removeAttribute("hidden");
+    this.addEventListener("click", this.handleClick);
+    window.addEventListener("scroll", this.handleScroll, { passive: true });
     this.onScroll(); // initial state in case page loads scrolled
   }
 
   disconnectedCallback() {
-    this.removeEventListener('click', this.handleClick);
-    window.removeEventListener('scroll', this.handleScroll);
+    this.removeEventListener("click", this.handleClick);
+    window.removeEventListener("scroll", this.handleScroll);
   }
 
   onScroll() {
     const scrolled = window.scrollY || window.pageYOffset;
     if (scrolled > this.threshold) {
-      this.classList.add('is-visible');
+      this.classList.add("is-visible");
     } else {
-      this.classList.remove('is-visible');
+      this.classList.remove("is-visible");
     }
   }
 
   onClick() {
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     window.scrollTo({
       top: 0,
-      behavior: reduceMotion ? 'auto' : 'smooth',
+      behavior: reduceMotion ? "auto" : "smooth",
     });
   }
 }
 
-if (!customElements.get('valor-back-to-top')) {
-  customElements.define('valor-back-to-top', ValorBackToTop, { extends: 'button' });
+if (!customElements.get("valor-back-to-top")) {
+  customElements.define("valor-back-to-top", ValorBackToTop, { extends: "button" });
 }

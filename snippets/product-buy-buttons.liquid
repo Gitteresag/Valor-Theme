@@ -42,7 +42,9 @@
       type="submit"
       name="add"
       class="valor-button valor-button--primary valor-mp__add"
-      {% unless variant.available %}disabled{% endunless %}
+      {% unless variant.available %}
+        disabled
+      {% endunless %}
       data-add-button
     >
       <span data-add-button-text>

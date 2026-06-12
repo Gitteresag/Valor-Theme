@@ -57,41 +57,41 @@
 
 {%- comment -%} Organization — emitted on every page {%- endcomment -%}
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": {{ shop.name | json }},
-  "url": {{ request.origin | json }}
-  {%- if logo_image != blank -%}
-    ,"logo": {{ logo_image | image_url: width: 500 | prepend: 'https:' | json }}
-  {%- endif -%}
-  {%- if brand_description != blank -%}
-    ,"description": {{ brand_description | json }}
-  {%- endif -%}
-  {%- if social_urls.size > 0 -%}
-    ,"sameAs": [
-      {%- for url in social_urls -%}
-        {{ url | json }}{%- unless forloop.last -%},{%- endunless -%}
-      {%- endfor -%}
-    ]
-  {%- endif -%}
-}
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": {{ shop.name | json }},
+    "url": {{ request.origin | json }}
+    {%- if logo_image != blank -%}
+      ,"logo": {{ logo_image | image_url: width: 500 | prepend: 'https:' | json }}
+    {%- endif -%}
+    {%- if brand_description != blank -%}
+      ,"description": {{ brand_description | json }}
+    {%- endif -%}
+    {%- if social_urls.size > 0 -%}
+      ,"sameAs": [
+        {%- for url in social_urls -%}
+          {{ url | json }}{%- unless forloop.last -%},{%- endunless -%}
+        {%- endfor -%}
+      ]
+    {%- endif -%}
+  }
 </script>
 
 {%- if request.page_type == 'index' -%}
   {%- assign search_target = request.origin | append: routes.search_url | append: '?q={search_term_string}' -%}
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": {{ shop.name | json }},
-    "url": {{ request.origin | json }},
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {{ search_target | json }},
-      "query-input": "required name=search_term_string"
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": {{ shop.name | json }},
+      "url": {{ request.origin | json }},
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {{ search_target | json }},
+        "query-input": "required name=search_term_string"
+      }
     }
-  }
   </script>
 {%- endif -%}
 

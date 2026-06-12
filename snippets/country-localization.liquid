@@ -88,17 +88,23 @@
               <a
                 class="valor-localization__link"
                 href="#"
-                {% if country.iso_code == localization.country.iso_code %}aria-current="true"{% endif %}
+                {% if country.iso_code == localization.country.iso_code %}
+                  aria-current="true"
+                {% endif %}
                 data-value="{{ country.iso_code }}"
                 id="{{ localPosition }}-popular-{{ country.iso_code }}"
               >
-                <span class="valor-localization__check{% if country.iso_code != localization.country.iso_code %} valor-localization__check--hidden{% endif %}" aria-hidden="true">
+                <span
+                  class="valor-localization__check{% if country.iso_code != localization.country.iso_code %} valor-localization__check--hidden{% endif %}"
+                  aria-hidden="true"
+                >
                   {{- 'icon-check.svg' | inline_asset_content -}}
                 </span>
                 <span class="valor-localization__country-name">{{- country.name -}}</span>
                 {%- if show_currencies -%}
                   <span class="valor-localization__currency">
-                    {{- country.currency.iso_code }} {{ country.currency.symbol -}}
+                    {{- country.currency.iso_code }}
+                    {{ country.currency.symbol -}}
                   </span>
                 {%- endif -%}
               </a>
@@ -113,17 +119,23 @@
             <a
               class="valor-localization__link"
               href="#"
-              {% if country.iso_code == localization.country.iso_code %}aria-current="true"{% endif %}
+              {% if country.iso_code == localization.country.iso_code %}
+                aria-current="true"
+              {% endif %}
               data-value="{{ country.iso_code }}"
               id="{{ localPosition }}-{{ country.iso_code }}"
             >
-              <span class="valor-localization__check{% if country.iso_code != localization.country.iso_code %} valor-localization__check--hidden{% endif %}" aria-hidden="true">
+              <span
+                class="valor-localization__check{% if country.iso_code != localization.country.iso_code %} valor-localization__check--hidden{% endif %}"
+                aria-hidden="true"
+              >
                 {{- 'icon-check.svg' | inline_asset_content -}}
               </span>
               <span class="valor-localization__country-name">{{- country.name -}}</span>
               {%- if show_currencies -%}
                 <span class="valor-localization__currency">
-                  {{- country.currency.iso_code }} {{ country.currency.symbol -}}
+                  {{- country.currency.iso_code }}
+                  {{ country.currency.symbol -}}
                 </span>
               {%- endif -%}
             </a>

@@ -1,169 +1,171 @@
 <valor-sticky-header data-sticky-type="{{ section.settings.sticky_header_type | default: 'always' }}">
-<header
-  class="valor-header valor-header--logo-{{ section.settings.logo_position }}{% if settings.transparent_logo != blank %} valor-header--has-transparent-logo{% endif %}"
-  style="--header-logo-height: {{ settings.logo_height }}px; --header-logo-height-mobile: {{ settings.logo_height_mobile | default: 32 }}px;"
->
-  <button
-    type="button"
-    class="valor-header__menu-toggle"
-    aria-label="{{ 'accessibility.open_menu' | t }}"
-    aria-controls="MobileDrawer"
-    aria-expanded="false"
-    data-drawer-toggle
+  <header
+    class="valor-header valor-header--logo-{{ section.settings.logo_position }}{% if settings.transparent_logo != blank %} valor-header--has-transparent-logo{% endif %}"
+    style="--header-logo-height: {{ settings.logo_height }}px; --header-logo-height-mobile: {{ settings.logo_height_mobile | default: 32 }}px;"
   >
-    <span class="valor-header__menu-toggle-icon valor-header__menu-toggle-icon--open" aria-hidden="true">
-      {{ 'icon-menu.svg' | inline_asset_content }}
-    </span>
-    <span class="valor-header__menu-toggle-icon valor-header__menu-toggle-icon--close" aria-hidden="true">
-      {{ 'icon-close.svg' | inline_asset_content }}
-    </span>
-  </button>
+    <button
+      type="button"
+      class="valor-header__menu-toggle"
+      aria-label="{{ 'accessibility.open_menu' | t }}"
+      aria-controls="MobileDrawer"
+      aria-expanded="false"
+      data-drawer-toggle
+    >
+      <span class="valor-header__menu-toggle-icon valor-header__menu-toggle-icon--open" aria-hidden="true">
+        {{ 'icon-menu.svg' | inline_asset_content }}
+      </span>
+      <span class="valor-header__menu-toggle-icon valor-header__menu-toggle-icon--close" aria-hidden="true">
+        {{ 'icon-close.svg' | inline_asset_content }}
+      </span>
+    </button>
 
-  {%- liquid
-    assign logo_tag = 'div'
-    if request.page_type == 'index'
-      assign logo_tag = 'h1'
-    endif
-  -%}
+    {%- liquid
+      assign logo_tag = 'div'
+      if request.page_type == 'index'
+        assign logo_tag = 'h1'
+      endif
+    -%}
 
-  <{{ logo_tag }} class="valor-header__title">
-    <a href="{{ routes.root_url }}" class="valor-header__title-link">
-      {%- if settings.logo != blank -%}
-        {%- comment -%}
-          Default logo wrapper. Always rendered when logo is set.
-          When a transparent_logo is also set AND transparent header is
-          active (CSS handles the activation via :has() on the body),
-          this default wrapper is hidden and the transparent one shown.
-          Scrolling restores the default. The toggle is purely CSS — no
-          JS, no flash on load.
-        {%- endcomment -%}
-        <span class="valor-header__logo-wrapper valor-header__logo-wrapper--default">
-          {{
-            settings.logo
-            | image_url: width: 600
-            | image_tag:
-              loading: 'eager',
-              fetchpriority: 'high',
-              width: settings.logo.width,
-              height: settings.logo.height,
-              class: 'valor-header__logo-image',
-              alt: shop.name
-          }}
-        </span>
-
-        {%- if settings.transparent_logo != blank -%}
-          <span class="valor-header__logo-wrapper valor-header__logo-wrapper--transparent">
+    <{{ logo_tag }} class="valor-header__title">
+      <a href="{{ routes.root_url }}" class="valor-header__title-link">
+        {%- if settings.logo != blank -%}
+          {%- comment -%}
+            Default logo wrapper. Always rendered when logo is set.
+            When a transparent_logo is also set AND transparent header is
+            active (CSS handles the activation via :has() on the body),
+            this default wrapper is hidden and the transparent one shown.
+            Scrolling restores the default. The toggle is purely CSS — no
+            JS, no flash on load.
+          {%- endcomment -%}
+          <span class="valor-header__logo-wrapper valor-header__logo-wrapper--default">
             {{
-              settings.transparent_logo
+              settings.logo
               | image_url: width: 600
               | image_tag:
                 loading: 'eager',
                 fetchpriority: 'high',
-                width: settings.transparent_logo.width,
-                height: settings.transparent_logo.height,
+                width: settings.logo.width,
+                height: settings.logo.height,
                 class: 'valor-header__logo-image',
                 alt: shop.name
             }}
           </span>
-        {%- endif -%}
-      {%- else -%}
-        <span class="valor-header__logo-text">{{ shop.name }}</span>
-      {%- endif -%}
-    </a>
-  </{{ logo_tag }}>
 
-  <nav class="valor-header__menu">
-    <ul class="valor-header__menu-list">
-      {% for link in section.settings.menu.links %}
-        <li class="valor-header__menu-item">
-          {%- if link.links.size > 0 -%}
-            <a href="{{ link.url }}" class="valor-header__menu-link valor-header__menu-link--has-submenu">
-              <span>{{ link.title }}</span>
-              <span class="valor-header__menu-chevron" aria-hidden="true">
-                {{ 'icon-chevron-down.svg' | inline_asset_content }}
-              </span>
-            </a>
-            <ul class="valor-header__submenu">
-              <li class="valor-header__submenu-view-all">
-                <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
-              </li>
-              {% for child in link.links %}
-                <li>
-                  <a href="{{ child.url }}">{{ child.title }}</a>
-                </li>
-              {% endfor %}
-            </ul>
-          {%- else -%}
-            <a href="{{ link.url }}" class="valor-header__menu-link">{{ link.title }}</a>
+          {%- if settings.transparent_logo != blank -%}
+            <span class="valor-header__logo-wrapper valor-header__logo-wrapper--transparent">
+              {{
+                settings.transparent_logo
+                | image_url: width: 600
+                | image_tag:
+                  loading: 'eager',
+                  fetchpriority: 'high',
+                  width: settings.transparent_logo.width,
+                  height: settings.transparent_logo.height,
+                  class: 'valor-header__logo-image',
+                  alt: shop.name
+              }}
+            </span>
           {%- endif -%}
-        </li>
-      {% endfor %}
-    </ul>
-  </nav>
-
-  <div class="valor-header__icons">
-    {%- liquid
-      assign show_country_selector = false
-      assign show_language_selector = false
-      if section.settings.enable_country_selector and localization.available_countries.size > 1
-        assign show_country_selector = true
-      endif
-      if section.settings.enable_language_selector and localization.available_languages.size > 1
-        assign show_language_selector = true
-      endif
-    -%}
-
-    {%- if show_country_selector or show_language_selector -%}
-      <div class="valor-header__localization">
-        {%- if show_country_selector -%}
-          <valor-localization-form class="valor-localization">
-            {%- form 'localization', id: 'HeaderCountryForm', class: 'valor-localization__form' -%}
-              <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
-              {%- render 'country-localization', localPosition: 'HeaderCountry' -%}
-            {%- endform -%}
-          </valor-localization-form>
-        {%- endif -%}
-
-        {%- if show_language_selector -%}
-          <valor-localization-form class="valor-localization">
-            {%- form 'localization', id: 'HeaderLanguageForm', class: 'valor-localization__form' -%}
-              <h2 class="visually-hidden" id="HeaderLanguageLabel">{{ 'localization.language_label' | t }}</h2>
-              {%- render 'language-localization', localPosition: 'HeaderLanguage' -%}
-            {%- endform -%}
-          </valor-localization-form>
-        {%- endif -%}
-      </div>
-    {%- endif -%}
-
-    {%- if section.settings.enable_search -%}
-      {%- render 'header-search', input_id: 'ValorSearchInput' -%}
-    {%- endif -%}
-
-    {% if shop.customer_accounts_enabled %}
-      <shopify-account menu="{{ section.settings.customer_account_menu }}">
-        {%- if section.settings.enable_customer_avatar and customer and customer.has_avatar? -%}
-          {{ customer | avatar }}
         {%- else -%}
-          {{ 'icon-account.svg' | inline_asset_content }}
+          <span class="valor-header__logo-text">{{ shop.name }}</span>
         {%- endif -%}
-      </shopify-account>
-    {% endif %}
+      </a>
+    </{{ logo_tag }}>
 
-    <a href="{{ routes.cart_url }}" class="valor-header__cart">
-      {{ 'icon-cart.svg' | inline_asset_content }}
-      {%- if cart.item_count > 0 -%}
-        <span class="valor-cart-count" aria-hidden="true">
-          {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- endif -%}
-        </span>
+    <nav class="valor-header__menu">
+      <ul class="valor-header__menu-list">
+        {% for link in section.settings.menu.links %}
+          <li class="valor-header__menu-item">
+            {%- if link.links.size > 0 -%}
+              <a href="{{ link.url }}" class="valor-header__menu-link valor-header__menu-link--has-submenu">
+                <span>{{ link.title }}</span>
+                <span class="valor-header__menu-chevron" aria-hidden="true">
+                  {{ 'icon-chevron-down.svg' | inline_asset_content }}
+                </span>
+              </a>
+              <ul class="valor-header__submenu">
+                <li class="valor-header__submenu-view-all">
+                  <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
+                </li>
+                {% for child in link.links %}
+                  <li>
+                    <a href="{{ child.url }}">{{ child.title }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {%- else -%}
+              <a href="{{ link.url }}" class="valor-header__menu-link">{{ link.title }}</a>
+            {%- endif -%}
+          </li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="valor-header__icons">
+      {%- liquid
+        assign show_country_selector = false
+        assign show_language_selector = false
+        if section.settings.enable_country_selector and localization.available_countries.size > 1
+          assign show_country_selector = true
+        endif
+        if section.settings.enable_language_selector and localization.available_languages.size > 1
+          assign show_language_selector = true
+        endif
+      -%}
+
+      {%- if show_country_selector or show_language_selector -%}
+        <div class="valor-header__localization">
+          {%- if show_country_selector -%}
+            <valor-localization-form class="valor-localization">
+              {%- form 'localization', id: 'HeaderCountryForm', class: 'valor-localization__form' -%}
+                <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
+                {%- render 'country-localization', localPosition: 'HeaderCountry' -%}
+              {%- endform -%}
+            </valor-localization-form>
+          {%- endif -%}
+
+          {%- if show_language_selector -%}
+            <valor-localization-form class="valor-localization">
+              {%- form 'localization', id: 'HeaderLanguageForm', class: 'valor-localization__form' -%}
+                <h2 class="visually-hidden" id="HeaderLanguageLabel">{{ 'localization.language_label' | t }}</h2>
+                {%- render 'language-localization', localPosition: 'HeaderLanguage' -%}
+              {%- endform -%}
+            </valor-localization-form>
+          {%- endif -%}
+        </div>
       {%- endif -%}
-      <span
-        class="visually-hidden"
-        data-cart-count-text
-        data-template="{{ 'cart.title' | t }} (%count%)"
-      >{{ 'cart.title' | t }} ({{ cart.item_count }})</span>
-    </a>
-  </div>
-</header>
+
+      {%- if section.settings.enable_search -%}
+        {%- render 'header-search', input_id: 'ValorSearchInput' -%}
+      {%- endif -%}
+
+      {% if shop.customer_accounts_enabled %}
+        <shopify-account menu="{{ section.settings.customer_account_menu }}">
+          {%- if section.settings.enable_customer_avatar and customer and customer.has_avatar? -%}
+            {{ customer | avatar }}
+          {%- else -%}
+            {{ 'icon-account.svg' | inline_asset_content }}
+          {%- endif -%}
+        </shopify-account>
+      {% endif %}
+
+      <a href="{{ routes.cart_url }}" class="valor-header__cart">
+        {{ 'icon-cart.svg' | inline_asset_content }}
+        {%- if cart.item_count > 0 -%}
+          <span class="valor-cart-count" aria-hidden="true">
+            {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- endif -%}
+          </span>
+        {%- endif -%}
+        <span
+          class="visually-hidden"
+          data-cart-count-text
+          data-template="{{ 'cart.title' | t }} (%count%)"
+        >
+          {{- 'cart.title' | t }} ({{ cart.item_count }})</span
+        >
+      </a>
+    </div>
+  </header>
 </valor-sticky-header>
 
 <div
@@ -285,31 +287,102 @@
       {%- if has_social -%}
         <ul class="valor-mobile-drawer__social">
           {%- if settings.social_instagram_url != blank -%}
-            <li><a href="{{ settings.social_instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">{{ 'icon-instagram.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a
+                href="{{ settings.social_instagram_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+              >
+                {{- 'icon-instagram.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
           {%- if settings.social_facebook_url != blank -%}
-            <li><a href="{{ settings.social_facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">{{ 'icon-facebook.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a
+                href="{{ settings.social_facebook_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+              >
+                {{- 'icon-facebook.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
           {%- if settings.social_x_url != blank -%}
-            <li><a href="{{ settings.social_x_url }}" target="_blank" rel="noopener noreferrer" aria-label="X">{{ 'icon-x.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a href="{{ settings.social_x_url }}" target="_blank" rel="noopener noreferrer" aria-label="X">
+                {{- 'icon-x.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
           {%- if settings.social_tiktok_url != blank -%}
-            <li><a href="{{ settings.social_tiktok_url }}" target="_blank" rel="noopener noreferrer" aria-label="TikTok">{{ 'icon-tiktok.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a href="{{ settings.social_tiktok_url }}" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+                {{- 'icon-tiktok.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
           {%- if settings.social_pinterest_url != blank -%}
-            <li><a href="{{ settings.social_pinterest_url }}" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">{{ 'icon-pinterest.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a
+                href="{{ settings.social_pinterest_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Pinterest"
+              >
+                {{- 'icon-pinterest.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
           {%- if settings.social_youtube_url != blank -%}
-            <li><a href="{{ settings.social_youtube_url }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">{{ 'icon-youtube.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a
+                href="{{ settings.social_youtube_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+              >
+                {{- 'icon-youtube.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
           {%- if settings.social_linkedin_url != blank -%}
-            <li><a href="{{ settings.social_linkedin_url }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">{{ 'icon-linkedin.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a
+                href="{{ settings.social_linkedin_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+              >
+                {{- 'icon-linkedin.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
           {%- if settings.social_threads_url != blank -%}
-            <li><a href="{{ settings.social_threads_url }}" target="_blank" rel="noopener noreferrer" aria-label="Threads">{{ 'icon-threads.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a
+                href="{{ settings.social_threads_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Threads"
+              >
+                {{- 'icon-threads.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
           {%- if settings.social_snapchat_url != blank -%}
-            <li><a href="{{ settings.social_snapchat_url }}" target="_blank" rel="noopener noreferrer" aria-label="Snapchat">{{ 'icon-snapchat.svg' | inline_asset_content }}</a></li>
+            <li>
+              <a
+                href="{{ settings.social_snapchat_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Snapchat"
+              >
+                {{- 'icon-snapchat.svg' | inline_asset_content -}}
+              </a>
+            </li>
           {%- endif -%}
         </ul>
       {%- endif -%}
@@ -1370,11 +1443,7 @@
       z-index: 120;
       color: #fff;
       background-color: transparent;
-      background-image: linear-gradient(
-        to bottom,
-        var(--color-background) 50%,
-        rgba(0, 0, 0, 0) 50%
-      );
+      background-image: linear-gradient(to bottom, var(--color-background) 50%, rgba(0, 0, 0, 0) 50%);
       background-size: 100% 200%;
       background-position: 0 100%;
       border-bottom: 0;
@@ -1392,7 +1461,8 @@
        The first homepage image banner is the only section that may activate
        this state. The full-width Shopify section wrapper owns the visual
        background so there is only one surface to animate. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header {
       position: absolute;
       top: var(--valor-announcement-height, 0px);
       left: 0;
@@ -1403,7 +1473,9 @@
       border-bottom: 0;
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header > valor-sticky-header {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header
+      > valor-sticky-header {
       display: block;
       position: relative;
       z-index: 1;
@@ -1412,7 +1484,9 @@
 
     /* Soft full-bleed top shadow for image readability. It lives behind the
        header content and fades out when the pinned header becomes solid. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header > valor-sticky-header::before {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header
+      > valor-sticky-header::before {
       content: '';
       position: absolute;
       top: 0;
@@ -1454,7 +1528,8 @@
        Do not switch between absolute and fixed while scrolling. In pinned
        mode the header is fixed from the beginning and one full-width wrapper
        background slides from transparent to solid via background-position. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned {
       position: fixed;
       top: var(--valor-announcement-height, 0px);
       left: 0;
@@ -1463,11 +1538,7 @@
       z-index: 120;
       color: #fff;
       background-color: transparent;
-      background-image: linear-gradient(
-        to bottom,
-        var(--color-background) 50%,
-        rgba(0, 0, 0, 0) 50%
-      );
+      background-image: linear-gradient(to bottom, var(--color-background) 50%, rgba(0, 0, 0, 0) 50%);
       background-size: 100% 200%;
       background-position: 0 100%;
       border-bottom: 0;
@@ -1481,7 +1552,8 @@
     /* Solid-state divider. Use a pseudo-element instead of border so the
        transparent top state remains completely clean and no layout height
        changes occur when the header becomes solid. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned::after {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned::after {
       content: '';
       position: absolute;
       left: 0;
@@ -1495,23 +1567,34 @@
       transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid::after {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid::after {
       opacity: 1;
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned .valor-header {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned
+      .valor-header {
       background: transparent;
       color: inherit;
       border-bottom: 0;
     }
 
-    html:not(.valor-transparent-header-ready) body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned,
-    html:not(.valor-transparent-header-ready) body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned::after,
-    html:not(.valor-transparent-header-ready) body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header > valor-sticky-header::before {
+    html:not(.valor-transparent-header-ready)
+      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned,
+    html:not(.valor-transparent-header-ready)
+      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned::after,
+    html:not(.valor-transparent-header-ready)
+      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header
+      > valor-sticky-header::before {
       transition: none;
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid {
       top: 0;
       color: var(--color-foreground);
       background-position: 0 0;
@@ -1521,16 +1604,20 @@
       z-index: 2000;
     }
 
-
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid > valor-sticky-header::before {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid
+      > valor-sticky-header::before {
       opacity: 0;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned {
+      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+        .valor-section-header.valor-section-header--transparent-pinned {
         transition: none;
       }
-      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header > valor-sticky-header::before {
+      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+        .valor-section-header
+        > valor-sticky-header::before {
         transition: none;
       }
     }
@@ -1538,18 +1625,28 @@
     /* Logo swap — only applies when --has-transparent-logo modifier is
        on <header>, which is set in Liquid only if settings.transparent_logo
        is non-blank. Top/transparent state: show transparent logo. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header--has-transparent-logo .valor-header__logo-wrapper--default {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-header--has-transparent-logo
+      .valor-header__logo-wrapper--default {
       display: none;
     }
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header--has-transparent-logo .valor-header__logo-wrapper--transparent {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-header--has-transparent-logo
+      .valor-header__logo-wrapper--transparent {
       display: inline-block;
     }
 
     /* Solid pinned state: restore normal logo. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid .valor-header--has-transparent-logo .valor-header__logo-wrapper--default {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid
+      .valor-header--has-transparent-logo
+      .valor-header__logo-wrapper--default {
       display: inline-block;
     }
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid .valor-header--has-transparent-logo .valor-header__logo-wrapper--transparent {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid
+      .valor-header--has-transparent-logo
+      .valor-header__logo-wrapper--transparent {
       display: none;
     }
 
@@ -1613,12 +1710,13 @@
           }
 
           this.transparentHero = document.querySelector(
-            '#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger'
+            '#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger',
           );
           this.hasTransparentHeader = !!this.transparentHero;
 
           if (this.hasTransparentHeader) {
-            this.transparentBehavior = this.transparentHero.getAttribute('data-transparent-header-behavior') || 'always';
+            this.transparentBehavior =
+              this.transparentHero.getAttribute('data-transparent-header-behavior') || 'always';
             if (this.transparentBehavior !== 'none' && this.transparentBehavior !== 'always') {
               this.transparentBehavior = 'always';
             }
@@ -1651,7 +1749,7 @@
             'valor-section-header--sticky',
             'valor-section-header--animate',
             'valor-section-header--transparent-pinned',
-            'valor-section-header--transparent-solid'
+            'valor-section-header--transparent-solid',
           );
         }
 
@@ -1683,7 +1781,7 @@
             }
           });
         }
-      }
+      },
     );
   }
 </script>
@@ -1742,28 +1840,32 @@
     // Editor can re-render header markup, and solid transparent-header
     // state can otherwise leave the old listener attached to a stale node.
     if (drawer) {
-      document.addEventListener('click', function (event) {
-        var toggleTarget = event.target.closest('[data-drawer-toggle]');
-        var closeTarget = event.target.closest('[data-drawer-close]');
+      document.addEventListener(
+        'click',
+        function (event) {
+          var toggleTarget = event.target.closest('[data-drawer-toggle]');
+          var closeTarget = event.target.closest('[data-drawer-close]');
 
-        if (toggleTarget) {
-          event.preventDefault();
-          activeToggle = toggleTarget;
-          if (drawer.hasAttribute('data-open')) {
-            closeDrawer();
-          } else {
-            openDrawer();
+          if (toggleTarget) {
+            event.preventDefault();
+            activeToggle = toggleTarget;
+            if (drawer.hasAttribute('data-open')) {
+              closeDrawer();
+            } else {
+              openDrawer();
+            }
+            return;
           }
-          return;
-        }
 
-        if (closeTarget) {
-          event.preventDefault();
-          closeDrawer();
-          var toggle = getToggle();
-          if (toggle) toggle.focus();
-        }
-      }, true);
+          if (closeTarget) {
+            event.preventDefault();
+            closeDrawer();
+            var toggle = getToggle();
+            if (toggle) toggle.focus();
+          }
+        },
+        true,
+      );
 
       // Click outside (backdrop) also closes the drawer.
       if (backdrop) {
@@ -1796,7 +1898,9 @@
           if (drawer && drawer.hasAttribute('data-open')) closeDrawer();
           searchModal.showModal();
           if (searchInput) {
-            setTimeout(function () { searchInput.focus(); }, 0);
+            setTimeout(function () {
+              searchInput.focus();
+            }, 0);
           }
         });
       });

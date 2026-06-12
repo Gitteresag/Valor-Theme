@@ -67,7 +67,10 @@
               endif
             endif
           -%}
-          <details class="valor-facets-bar__group{% if filter_active %} valor-facets-bar__group--active{% endif %}" data-facets-bar-group>
+          <details
+            class="valor-facets-bar__group{% if filter_active %} valor-facets-bar__group--active{% endif %}"
+            data-facets-bar-group
+          >
             <summary class="valor-facets-bar__summary">
               <span class="valor-facets-bar__summary-label">
                 {{ filter.label }}
@@ -75,7 +78,21 @@
                   <span class="valor-facets-bar__summary-count">({{ filter.active_values.size }})</span>
                 {%- endif -%}
               </span>
-              <svg class="valor-facets-bar__summary-icon" aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              <svg
+                class="valor-facets-bar__summary-icon"
+                aria-hidden="true"
+                focusable="false"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
             </summary>
 
             <div class="valor-facets-bar__panel" role="group" aria-label="{{ filter.label | escape }}">
@@ -90,11 +107,26 @@
                             name="{{ value.param_name }}"
                             value="{{ value.value }}"
                             class="valor-facets-bar__checkbox"
-                            {% if value.active %}checked{% endif %}
-                            {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                            {% if value.active %}
+                              checked
+                            {% endif %}
+                            {% if value.count == 0 and value.active == false %}
+                              disabled
+                            {% endif %}
                           >
                           <span class="valor-facets-bar__check-box" aria-hidden="true">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="3"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
                           </span>
                           <span class="valor-facets-bar__option-label">{{ value.label }}</span>
                           {%- if value.count > 0 and value.active == false -%}
@@ -115,10 +147,23 @@
                             name="{{ value.param_name }}"
                             value="{{ value.value }}"
                             class="valor-facets-bar__checkbox"
-                            {% if value.active %}checked{% endif %}
+                            {% if value.active %}
+                              checked
+                            {% endif %}
                           >
                           <span class="valor-facets-bar__check-box" aria-hidden="true">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="3"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            >
+                              <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
                           </span>
                           <span class="valor-facets-bar__option-label">{{ value.label }}</span>
                         </label>
@@ -190,7 +235,12 @@
             aria-label="{{ 'collection.sort_by' | t }}"
           >
             {%- for option in results.sort_options -%}
-              <option value="{{ option.value }}" {% if option.value == sort_by %}selected{% endif %}>
+              <option
+                value="{{ option.value }}"
+                {% if option.value == sort_by %}
+                  selected
+                {% endif %}
+              >
                 {{ option.name }}
               </option>
             {%- endfor -%}
@@ -206,20 +256,54 @@
         {%- for value in filter.active_values -%}
           <a class="valor-facets-bar__pill" href="{{ value.url_to_remove }}" role="listitem">
             <span>{{ filter.label }}: {{ value.label }}</span>
-            <svg aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </a>
         {%- endfor -%}
         {%- if filter.type == 'price_range' -%}
           {%- if filter.min_value.value or filter.max_value.value -%}
-          <a class="valor-facets-bar__pill" href="{{ filter.url_to_remove }}" role="listitem">
-            <span>
-              {{ filter.label }}:
-              {%- if filter.min_value.value -%} {{ filter.min_value.value | money }}{%- else -%} {{ 0 | money }}{%- endif -%}
-              –
-              {%- if filter.max_value.value -%} {{ filter.max_value.value | money }}{%- else -%} {{ filter.range_max | money }}{%- endif -%}
-            </span>
-            <svg aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-          </a>
+            <a class="valor-facets-bar__pill" href="{{ filter.url_to_remove }}" role="listitem">
+              <span>
+                {{ filter.label }}:
+                {%- if filter.min_value.value -%}
+                  {{ filter.min_value.value | money }}
+                {%- else -%}
+                  {{ 0 | money }}
+                {%- endif -%}
+                –
+                {%- if filter.max_value.value -%}
+                  {{ filter.max_value.value | money }}
+                {%- else -%}
+                  {{ filter.range_max | money }}
+                {%- endif -%}
+              </span>
+              <svg
+                aria-hidden="true"
+                focusable="false"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </a>
           {%- endif -%}
         {%- endif -%}
       {%- endfor -%}

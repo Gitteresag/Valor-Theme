@@ -23,7 +23,9 @@
 <p
   class="{{ unit_price_class }}"
   data-unit-price-wrapper
-  {% unless has_unit_price %}hidden{% endunless %}
+  {% unless has_unit_price %}
+    hidden
+  {% endunless %}
 >
   <span class="visually-hidden">{{ 'product.unit_price' | t }}</span>
   <span data-unit-price>

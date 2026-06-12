@@ -32,15 +32,19 @@
   /* Alignment — controls where the line sits within its container.
      Has no visual effect when width-mode = full and the line fills 100%,
      but it still applies to width-mode = container/custom. */
-  .valor-separator--align-left   { justify-content: flex-start; }
-  .valor-separator--align-center { justify-content: center; }
-  .valor-separator--align-right  { justify-content: flex-end; }
+  .valor-separator--align-left {
+    justify-content: flex-start;
+  }
+  .valor-separator--align-center {
+    justify-content: center;
+  }
+  .valor-separator--align-right {
+    justify-content: flex-end;
+  }
 
   /* The line itself. Width depends on the mode below. */
   .valor-separator__line {
-    border-top:
-      var(--valor-separator-thickness, 1px)
-      var(--valor-separator-style, solid)
+    border-top: var(--valor-separator-thickness, 1px) var(--valor-separator-style, solid)
       var(--valor-separator-color, currentColor);
     /* Border-only — no box height. The padding on .valor-separator gives
        the section its visible height. */
@@ -83,7 +87,7 @@
       "id": "line_style",
       "label": "Line style",
       "options": [
-        { "value": "solid",  "label": "Solid" },
+        { "value": "solid", "label": "Solid" },
         { "value": "dashed", "label": "Dashed" },
         { "value": "dotted", "label": "Dotted" },
         { "value": "double", "label": "Double" }
@@ -117,8 +121,8 @@
       "label": "Width",
       "options": [
         { "value": "container", "label": "Container width" },
-        { "value": "full",      "label": "Full viewport width" },
-        { "value": "custom",    "label": "Custom" }
+        { "value": "full", "label": "Full viewport width" },
+        { "value": "custom", "label": "Custom" }
       ],
       "default": "container"
     },
@@ -138,9 +142,9 @@
       "id": "alignment",
       "label": "Alignment",
       "options": [
-        { "value": "left",   "label": "Left" },
+        { "value": "left", "label": "Left" },
         { "value": "center", "label": "Center" },
-        { "value": "right",  "label": "Right" }
+        { "value": "right", "label": "Right" }
       ],
       "default": "center",
       "info": "Has no effect when Width is set to Full viewport width."

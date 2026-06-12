@@ -122,10 +122,7 @@ body {
  * the entire viewport.
  */
 .shopify-section {
-  --content-width: min(
-    calc(var(--page-width) - var(--page-margin) * 2),
-    calc(100% - var(--page-margin) * 2)
-  );
+  --content-width: min(calc(var(--page-width) - var(--page-margin) * 2), calc(100% - var(--page-margin) * 2));
   --content-margin: minmax(var(--page-margin), 1fr);
   --content-grid: var(--content-margin) var(--content-width) var(--content-margin);
 
@@ -177,7 +174,11 @@ body {
   border-radius: var(--style-border-radius-buttons, var(--style-border-radius-inputs, 4px));
   border: var(--style-button-border-width, 1.5px) solid transparent;
   cursor: pointer;
-  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
   line-height: 1.2;
 }
 /* Buttons inside .rte content (Page, Policy, Article body) need to
@@ -270,11 +271,21 @@ body {
      bottom margin keeps heading close to its own paragraph (proximity). */
   margin: 1.6em 0 0.75em;
 }
-.rte h1 { font-size: calc(var(--font-heading-scale, 1) * clamp(1.75rem, 3.5vw, 2.25rem)); }
-.rte h2 { font-size: calc(var(--font-heading-scale, 1) * clamp(1.5rem, 3vw, 1.875rem)); }
-.rte h3 { font-size: calc(var(--font-heading-scale, 1) * clamp(1.25rem, 2.5vw, 1.5rem)); }
-.rte h4 { font-size: calc(var(--font-heading-scale, 1) * 1.125rem); }
-.rte h5 { font-size: calc(var(--font-heading-scale, 1) * 1rem); }
+.rte h1 {
+  font-size: calc(var(--font-heading-scale, 1) * clamp(1.75rem, 3.5vw, 2.25rem));
+}
+.rte h2 {
+  font-size: calc(var(--font-heading-scale, 1) * clamp(1.5rem, 3vw, 1.875rem));
+}
+.rte h3 {
+  font-size: calc(var(--font-heading-scale, 1) * clamp(1.25rem, 2.5vw, 1.5rem));
+}
+.rte h4 {
+  font-size: calc(var(--font-heading-scale, 1) * 1.125rem);
+}
+.rte h5 {
+  font-size: calc(var(--font-heading-scale, 1) * 1rem);
+}
 .rte h6 {
   font-size: calc(var(--font-heading-scale, 1) * 0.9375rem);
   text-transform: uppercase;
@@ -290,16 +301,24 @@ body {
   text-decoration: none;
 }
 
-.rte strong { font-weight: var(--font-body--weight-bold); }
-.rte em { font-style: italic; }
+.rte strong {
+  font-weight: var(--font-body--weight-bold);
+}
+.rte em {
+  font-style: italic;
+}
 
 .rte ul,
 .rte ol {
   margin: 0 0 1em;
   padding-left: 1.5em;
 }
-.rte ul { list-style: disc; }
-.rte ol { list-style: decimal; }
+.rte ul {
+  list-style: disc;
+}
+.rte ol {
+  list-style: decimal;
+}
 .rte li {
   margin: 0.25em 0;
 }
@@ -399,6 +418,12 @@ body {
    rich-text or image-with-text block, for example), add an "Extra large"
    or "Display" option to that section's schema rather than reusing the
    existing small/medium/large names with different sizes. */
-.valor-heading--small  { font-size: var(--font-size-heading-md); }
-.valor-heading--medium { font-size: var(--font-size-heading-lg); }
-.valor-heading--large  { font-size: var(--font-size-heading-xl); }
+.valor-heading--small {
+  font-size: var(--font-size-heading-md);
+}
+.valor-heading--medium {
+  font-size: var(--font-size-heading-lg);
+}
+.valor-heading--large {
+  font-size: var(--font-size-heading-xl);
+}

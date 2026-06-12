@@ -6,7 +6,7 @@
  */
 
 (function () {
-  'use strict';
+  "use strict";
 
   if (window.ValorPredictiveSearchInitialized) return;
   window.ValorPredictiveSearchInitialized = true;
@@ -17,7 +17,9 @@
       const ctx = this;
       const args = arguments;
       clearTimeout(t);
-      t = setTimeout(function () { fn.apply(ctx, args); }, wait);
+      t = setTimeout(function () {
+        fn.apply(ctx, args);
+      }, wait);
     };
   }
 
@@ -27,35 +29,35 @@
       this.input = this.querySelector('input[type="search"]');
       this.resetButton = this.querySelector('button[type="reset"]');
       this.cachedResults = {};
-      this.predictiveSearchResults = this.querySelector('[data-predictive-search]');
-      this.allPredictiveSearchInstances = document.querySelectorAll('valor-predictive-search');
+      this.predictiveSearchResults = this.querySelector("[data-predictive-search]");
+      this.allPredictiveSearchInstances = document.querySelectorAll("valor-predictive-search");
       this.isOpen = false;
       this.abortController = new AbortController();
-      this.searchTerm = '';
+      this.searchTerm = "";
 
       if (!this.input || !this.input.form || !this.predictiveSearchResults) {
-        console.warn('[Valor predictive search] Required search elements were not found.');
+        console.warn("[Valor predictive search] Required search elements were not found.");
         return;
       }
 
-      this.input.form.addEventListener('reset', this.onFormReset.bind(this));
+      this.input.form.addEventListener("reset", this.onFormReset.bind(this));
 
       this.input.addEventListener(
-        'input',
+        "input",
         valorPredictiveDebounce(function (event) {
           this.onChange(event);
-        }, 300).bind(this)
+        }, 300).bind(this),
       );
 
       this.setupEventListeners();
     }
 
     setupEventListeners() {
-      this.input.form.addEventListener('submit', this.onFormSubmit.bind(this));
-      this.input.addEventListener('focus', this.onFocus.bind(this));
-      this.addEventListener('focusout', this.onFocusOut.bind(this));
-      this.addEventListener('keyup', this.onKeyup.bind(this));
-      this.addEventListener('keydown', this.onKeydown.bind(this));
+      this.input.form.addEventListener("submit", this.onFormSubmit.bind(this));
+      this.input.addEventListener("focus", this.onFocus.bind(this));
+      this.addEventListener("focusout", this.onFocusOut.bind(this));
+      this.addEventListener("keyup", this.onKeyup.bind(this));
+      this.addEventListener("keydown", this.onKeydown.bind(this));
     }
 
     connectedCallback() {
@@ -65,11 +67,11 @@
     /* From SearchForm — toggle reset button visibility */
     toggleResetButton() {
       if (!this.resetButton) return;
-      const isHidden = this.resetButton.hasAttribute('hidden');
+      const isHidden = this.resetButton.hasAttribute("hidden");
       if (this.input.value.length > 0 && isHidden) {
-        this.resetButton.removeAttribute('hidden');
+        this.resetButton.removeAttribute("hidden");
       } else if (this.input.value.length === 0 && !isHidden) {
-        this.resetButton.setAttribute('hidden', '');
+        this.resetButton.setAttribute("hidden", "");
       }
     }
 
@@ -85,7 +87,7 @@
       this.toggleResetButton();
       const newSearchTerm = this.getQuery();
       if (!this.searchTerm || !newSearchTerm.startsWith(this.searchTerm)) {
-        const wrapper = this.querySelector('#predictive-search-results-groups-wrapper');
+        const wrapper = this.querySelector("#predictive-search-results-groups-wrapper");
         if (wrapper) wrapper.remove();
       }
 
@@ -109,10 +111,10 @@
     onFormReset(event) {
       event.preventDefault();
       if (this.shouldResetForm()) {
-        this.input.value = '';
+        this.input.value = "";
         this.input.focus();
         this.toggleResetButton();
-        this.searchTerm = '';
+        this.searchTerm = "";
         this.abortController.abort();
         this.abortController = new AbortController();
         this.closeResults(true);
@@ -124,7 +126,7 @@
       if (!currentSearchTerm.length) return;
       if (this.searchTerm !== currentSearchTerm) {
         this.onChange();
-      } else if (this.getAttribute('results') === 'true') {
+      } else if (this.getAttribute("results") === "true") {
         this.open();
       } else {
         this.getSearchResults(this.searchTerm);
@@ -141,29 +143,29 @@
       if (!this.getQuery().length) this.close(true);
       event.preventDefault();
       switch (event.code) {
-        case 'ArrowUp':
-          this.switchOption('up');
+        case "ArrowUp":
+          this.switchOption("up");
           break;
-        case 'ArrowDown':
-          this.switchOption('down');
+        case "ArrowDown":
+          this.switchOption("down");
           break;
-        case 'Enter':
+        case "Enter":
           this.selectOption();
           break;
       }
     }
 
     onKeydown(event) {
-      if (event.code === 'ArrowUp' || event.code === 'ArrowDown') {
+      if (event.code === "ArrowUp" || event.code === "ArrowDown") {
         event.preventDefault();
       }
     }
 
     updateSearchForTerm(previousTerm, newTerm) {
-      const searchForTextElement = this.querySelector('[data-predictive-search-search-for-text]');
+      const searchForTextElement = this.querySelector("[data-predictive-search-search-for-text]");
       const currentButtonText = searchForTextElement && searchForTextElement.innerText;
       if (currentButtonText) {
-        const matches = currentButtonText.match(new RegExp(previousTerm, 'g'));
+        const matches = currentButtonText.match(new RegExp(previousTerm, "g"));
         if (matches && matches.length > 1) return;
         const newButtonText = currentButtonText.replace(previousTerm, newTerm);
         searchForTextElement.innerText = newButtonText;
@@ -171,12 +173,12 @@
     }
 
     switchOption(direction) {
-      if (!this.getAttribute('open')) return;
-      const moveUp = direction === 'up';
+      if (!this.getAttribute("open")) return;
+      const moveUp = direction === "up";
       const selectedElement = this.querySelector('[aria-selected="true"]');
-      const allVisibleElements = Array.from(
-        this.querySelectorAll('li, button.valor-psearch__view-all')
-      ).filter((element) => element.offsetParent !== null);
+      const allVisibleElements = Array.from(this.querySelectorAll("li, button.valor-psearch__view-all")).filter(
+        (element) => element.offsetParent !== null,
+      );
       let activeElementIndex = 0;
       if (moveUp && !selectedElement) return;
 
@@ -187,7 +189,7 @@
         i++;
       }
 
-      if (this.statusElement) this.statusElement.textContent = '';
+      if (this.statusElement) this.statusElement.textContent = "";
 
       if (!moveUp && selectedElement) {
         activeElementIndex = selectedElementIndex === allVisibleElements.length - 1 ? 0 : selectedElementIndex + 1;
@@ -197,9 +199,9 @@
 
       if (activeElementIndex === selectedElementIndex) return;
       const activeElement = allVisibleElements[activeElementIndex];
-      activeElement.setAttribute('aria-selected', true);
-      if (selectedElement) selectedElement.setAttribute('aria-selected', false);
-      if (this.input) this.input.setAttribute('aria-activedescendant', activeElement.id || '');
+      activeElement.setAttribute("aria-selected", true);
+      if (selectedElement) selectedElement.setAttribute("aria-selected", false);
+      if (this.input) this.input.setAttribute("aria-activedescendant", activeElement.id || "");
     }
 
     selectOption() {
@@ -208,7 +210,7 @@
     }
 
     getSearchResults(searchTerm) {
-      const queryKey = searchTerm.replace(' ', '-').toLowerCase();
+      const queryKey = searchTerm.replace(" ", "-").toLowerCase();
       this.setLiveRegionLoadingState();
 
       if (this.cachedResults[queryKey]) {
@@ -216,16 +218,15 @@
         return;
       }
 
-      const baseUrl =
-        (window.routes && window.routes.predictive_search_url) || '/search/suggest';
+      const baseUrl = (window.routes && window.routes.predictive_search_url) || "/search/suggest";
 
       const params = new URLSearchParams({
         q: searchTerm,
-        section_id: 'predictive-search',
-        'resources[type]': 'product,collection,page,article,query',
-        'resources[limit]': '4',
-        'resources[options][unavailable_products]': 'hide',
-        'resources[options][fields]': 'title,product_type,variants.title,vendor'
+        section_id: "predictive-search",
+        "resources[type]": "product,collection,page,article,query",
+        "resources[limit]": "4",
+        "resources[options][unavailable_products]": "hide",
+        "resources[options][fields]": "title,product_type,variants.title,vendor",
       });
 
       const url = `${baseUrl}?${params.toString()}`;
@@ -240,11 +241,11 @@
           return response.text();
         })
         .then((text) => {
-          const parsed = new DOMParser().parseFromString(text, 'text/html');
-          const sectionEl = parsed.querySelector('#shopify-section-predictive-search');
+          const parsed = new DOMParser().parseFromString(text, "text/html");
+          const sectionEl = parsed.querySelector("#shopify-section-predictive-search");
           if (!sectionEl) {
             // Fallback: some themes use .shopify-section class wrapper instead of ID
-            const fallback = parsed.querySelector('.shopify-section');
+            const fallback = parsed.querySelector(".shopify-section");
             if (fallback) {
               const resultsMarkup = fallback.innerHTML;
               this.allPredictiveSearchInstances.forEach((instance) => {
@@ -264,44 +265,44 @@
           this.renderSearchResults(resultsMarkup);
         })
         .catch((error) => {
-          if (error && (error.code === 20 || error.name === 'AbortError')) return;
+          if (error && (error.code === 20 || error.name === "AbortError")) return;
           this.close();
-          console.error('[Valor predictive search]', error);
+          console.error("[Valor predictive search]", error);
         });
     }
 
     setLiveRegionLoadingState() {
-      this.statusElement = this.statusElement || this.querySelector('[data-predictive-search-status]');
-      this.loadingText = this.loadingText || this.getAttribute('data-loading-text') || 'Loading...';
+      this.statusElement = this.statusElement || this.querySelector("[data-predictive-search-status]");
+      this.loadingText = this.loadingText || this.getAttribute("data-loading-text") || "Loading...";
       this.setLiveRegionText(this.loadingText);
-      this.setAttribute('loading', true);
+      this.setAttribute("loading", true);
     }
 
     setLiveRegionText(statusText) {
       if (!this.statusElement) return;
-      this.statusElement.setAttribute('aria-hidden', 'false');
+      this.statusElement.setAttribute("aria-hidden", "false");
       this.statusElement.textContent = statusText;
       setTimeout(() => {
-        if (this.statusElement) this.statusElement.setAttribute('aria-hidden', 'true');
+        if (this.statusElement) this.statusElement.setAttribute("aria-hidden", "true");
       }, 1000);
     }
 
     renderSearchResults(resultsMarkup) {
       this.predictiveSearchResults.innerHTML = resultsMarkup;
-      this.setAttribute('results', true);
+      this.setAttribute("results", true);
       this.setLiveRegionResults();
       this.open();
     }
 
     setLiveRegionResults() {
-      this.removeAttribute('loading');
-      const lr = this.querySelector('[data-predictive-search-live-region-count-value]');
+      this.removeAttribute("loading");
+      const lr = this.querySelector("[data-predictive-search-live-region-count-value]");
       if (lr) this.setLiveRegionText(lr.textContent);
     }
 
     open() {
-      this.setAttribute('open', true);
-      if (this.input) this.input.setAttribute('aria-expanded', true);
+      this.setAttribute("open", true);
+      if (this.input) this.input.setAttribute("aria-expanded", true);
       this.isOpen = true;
     }
 
@@ -312,21 +313,21 @@
 
     closeResults(clearSearchTerm = false) {
       if (clearSearchTerm) {
-        this.input.value = '';
-        this.removeAttribute('results');
+        this.input.value = "";
+        this.removeAttribute("results");
       }
       const selected = this.querySelector('[aria-selected="true"]');
-      if (selected) selected.setAttribute('aria-selected', false);
+      if (selected) selected.setAttribute("aria-selected", false);
       if (this.input) {
-        this.input.setAttribute('aria-activedescendant', '');
-        this.input.setAttribute('aria-expanded', false);
+        this.input.setAttribute("aria-activedescendant", "");
+        this.input.setAttribute("aria-expanded", false);
       }
-      this.removeAttribute('loading');
-      this.removeAttribute('open');
+      this.removeAttribute("loading");
+      this.removeAttribute("open");
     }
   }
 
-  if (!customElements.get('valor-predictive-search')) {
-    customElements.define('valor-predictive-search', ValorPredictiveSearchEl);
+  if (!customElements.get("valor-predictive-search")) {
+    customElements.define("valor-predictive-search", ValorPredictiveSearchEl);
   }
 })();

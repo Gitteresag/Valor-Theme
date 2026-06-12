@@ -22,9 +22,15 @@
   margin-bottom: 2.5rem;
   padding: 0 clamp(1rem, 4vw, 3rem);
 }
-.valor-search__header--left   { text-align: left; }
-.valor-search__header--center { text-align: center; }
-.valor-search__header--right  { text-align: right; }
+.valor-search__header--left {
+  text-align: left;
+}
+.valor-search__header--center {
+  text-align: center;
+}
+.valor-search__header--right {
+  text-align: right;
+}
 
 .valor-search__title {
   margin: 0 0 1.5rem;
@@ -41,7 +47,9 @@
   border: 1px solid var(--valor-border-strong);
   border-radius: var(--style-border-radius-inputs, 4px);
   overflow: hidden;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .valor-search__field:focus-within {
@@ -106,7 +114,9 @@
   color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
   cursor: pointer;
   text-decoration: none;
-  transition: color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .valor-search__input:not(:placeholder-shown) ~ .valor-search__reset {
@@ -165,7 +175,6 @@
   padding: 0 clamp(1rem, 4vw, 3rem);
   margin-bottom: 1.5rem;
 }
-
 
 @media (min-width: 750px) {
   .valor-search__toolbar.valor-collection__toolbar--mobile {
@@ -261,7 +270,9 @@
   border: 1px solid var(--valor-border-strong);
   border-radius: var(--style-border-radius-inputs, 4px);
   padding: 1.25rem;
-  transition: border-color 0.15s ease, background-color 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .valor-search__resource--text:hover {

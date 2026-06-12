@@ -42,11 +42,17 @@
       {%- for block in section.blocks -%}
         {%- case block.type -%}
           {%- when 'heading' -%}
-            <h2 class="valor-iwt__heading valor-heading valor-heading--{{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+            <h2
+              class="valor-iwt__heading valor-heading valor-heading--{{ block.settings.heading_size }}"
+              {{ block.shopify_attributes }}
+            >
               {{ block.settings.heading }}
             </h2>
           {%- when 'caption' -%}
-            <div class="valor-iwt__caption valor-iwt__caption--{{ block.settings.text_size }}" {{ block.shopify_attributes }}>
+            <div
+              class="valor-iwt__caption valor-iwt__caption--{{ block.settings.text_size }}"
+              {{ block.shopify_attributes }}
+            >
               {{ block.settings.caption | escape }}
             </div>
           {%- when 'text' -%}
@@ -99,19 +105,33 @@
     display: block;
     object-fit: cover;
   }
-  .valor-iwt__placeholder-svg { width: 100%; height: auto; }
+  .valor-iwt__placeholder-svg {
+    width: 100%;
+    height: auto;
+  }
 
   /* Heights — sets media aspect ratio */
-  .valor-iwt--height-small .valor-iwt__media { aspect-ratio: 4 / 3; }
-  .valor-iwt--height-medium .valor-iwt__media { aspect-ratio: 1 / 1; }
-  .valor-iwt--height-large .valor-iwt__media { aspect-ratio: 4 / 5; }
-  .valor-iwt--height-adapt .valor-iwt__media { aspect-ratio: auto; }
+  .valor-iwt--height-small .valor-iwt__media {
+    aspect-ratio: 4 / 3;
+  }
+  .valor-iwt--height-medium .valor-iwt__media {
+    aspect-ratio: 1 / 1;
+  }
+  .valor-iwt--height-large .valor-iwt__media {
+    aspect-ratio: 4 / 5;
+  }
+  .valor-iwt--height-adapt .valor-iwt__media {
+    aspect-ratio: auto;
+  }
   .valor-iwt--height-small .valor-iwt__image,
   .valor-iwt--height-medium .valor-iwt__image,
   .valor-iwt--height-large .valor-iwt__image,
   .valor-iwt--height-small .valor-iwt__placeholder,
   .valor-iwt--height-medium .valor-iwt__placeholder,
-  .valor-iwt--height-large .valor-iwt__placeholder { height: 100%; object-fit: cover; }
+  .valor-iwt--height-large .valor-iwt__placeholder {
+    height: 100%;
+    object-fit: cover;
+  }
 
   /* Content */
   .valor-iwt__content {
@@ -119,12 +139,27 @@
     flex-direction: column;
     gap: 1rem;
   }
-  .valor-iwt__content--pos-top { justify-content: flex-start; }
-  .valor-iwt__content--pos-middle { justify-content: center; }
-  .valor-iwt__content--pos-bottom { justify-content: flex-end; }
-  .valor-iwt__content--align-left { text-align: left; align-items: flex-start; }
-  .valor-iwt__content--align-center { text-align: center; align-items: center; }
-  .valor-iwt__content--align-right { text-align: right; align-items: flex-end; }
+  .valor-iwt__content--pos-top {
+    justify-content: flex-start;
+  }
+  .valor-iwt__content--pos-middle {
+    justify-content: center;
+  }
+  .valor-iwt__content--pos-bottom {
+    justify-content: flex-end;
+  }
+  .valor-iwt__content--align-left {
+    text-align: left;
+    align-items: flex-start;
+  }
+  .valor-iwt__content--align-center {
+    text-align: center;
+    align-items: center;
+  }
+  .valor-iwt__content--align-right {
+    text-align: right;
+    align-items: flex-end;
+  }
 
   .valor-iwt__caption {
     text-transform: uppercase;
@@ -132,19 +167,31 @@
     color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
     font-weight: 500;
   }
-  .valor-iwt__caption--small { font-size: 0.75rem; }
-  .valor-iwt__caption--medium { font-size: 0.875rem; }
-  .valor-iwt__caption--large { font-size: 1rem; }
+  .valor-iwt__caption--small {
+    font-size: 0.75rem;
+  }
+  .valor-iwt__caption--medium {
+    font-size: 0.875rem;
+  }
+  .valor-iwt__caption--large {
+    font-size: 1rem;
+  }
 
   .valor-iwt__text {
     font-size: 1rem;
     line-height: 1.6;
     color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
   }
-  .valor-iwt__text > *:first-child { margin-top: 0; }
-  .valor-iwt__text > *:last-child { margin-bottom: 0; }
+  .valor-iwt__text > *:first-child {
+    margin-top: 0;
+  }
+  .valor-iwt__text > *:last-child {
+    margin-bottom: 0;
+  }
 
-  .valor-iwt__button-wrap { margin-top: 0.5rem; }
+  .valor-iwt__button-wrap {
+    margin-top: 0.5rem;
+  }
 
   /* Desktop layout — side by side. The media-width settings explicitly
      target the media column so they work the same regardless of order. */
@@ -155,26 +202,44 @@
       align-items: stretch;
     }
     /* Image first (default DOM order): media in column 1 */
-    .valor-iwt--image-small.valor-iwt--image_first .valor-iwt__inner { grid-template-columns: 1fr 2fr; }
-    .valor-iwt--image-large.valor-iwt--image_first .valor-iwt__inner { grid-template-columns: 2fr 1fr; }
+    .valor-iwt--image-small.valor-iwt--image_first .valor-iwt__inner {
+      grid-template-columns: 1fr 2fr;
+    }
+    .valor-iwt--image-large.valor-iwt--image_first .valor-iwt__inner {
+      grid-template-columns: 2fr 1fr;
+    }
 
     /* Text first: visually swap by reordering, AND swap the column widths so
        "Small image" still means small image in either layout. */
-    .valor-iwt--text_first .valor-iwt__media { order: 2; }
-    .valor-iwt--image-small.valor-iwt--text_first .valor-iwt__inner { grid-template-columns: 2fr 1fr; }
-    .valor-iwt--image-large.valor-iwt--text_first .valor-iwt__inner { grid-template-columns: 1fr 2fr; }
+    .valor-iwt--text_first .valor-iwt__media {
+      order: 2;
+    }
+    .valor-iwt--image-small.valor-iwt--text_first .valor-iwt__inner {
+      grid-template-columns: 2fr 1fr;
+    }
+    .valor-iwt--image-large.valor-iwt--text_first .valor-iwt__inner {
+      grid-template-columns: 1fr 2fr;
+    }
   }
 
   /* Mobile alignment override */
   @media (max-width: 749px) {
-    .valor-iwt__content--mobile-left { text-align: left; align-items: flex-start; }
-    .valor-iwt__content--mobile-center { text-align: center; align-items: center; }
-    .valor-iwt__content--mobile-right { text-align: right; align-items: flex-end; }
+    .valor-iwt__content--mobile-left {
+      text-align: left;
+      align-items: flex-start;
+    }
+    .valor-iwt__content--mobile-center {
+      text-align: center;
+      align-items: center;
+    }
+    .valor-iwt__content--mobile-right {
+      text-align: right;
+      align-items: flex-end;
+    }
   }
 {% endstylesheet %}
 
 {% schema %}
-
 {
   "name": "Image with text",
   "tag": "section",
@@ -462,5 +527,4 @@
     }
   ]
 }
-
 {% endschema %}

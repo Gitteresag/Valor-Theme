@@ -49,11 +49,11 @@
 {%- endcomment -%}
 
 {%- liquid
-  assign sticky          = section.settings.enable_sticky_info
-  assign media_width     = section.settings.media_width
-  assign media_position  = section.settings.media_position
-  assign media_fit       = section.settings.media_fit
-  assign media_aspect    = section.settings.media_aspect_ratio
+  assign sticky = section.settings.enable_sticky_info
+  assign media_width = section.settings.media_width
+  assign media_position = section.settings.media_position
+  assign media_fit = section.settings.media_fit
+  assign media_aspect = section.settings.media_aspect_ratio
   assign current_variant = product.selected_or_first_available_variant
   assign product_form_id = 'product-form-' | append: section.id
 
@@ -89,7 +89,7 @@
     endif
   endfor
 
-  assign inline_size_guide_block = nil
+  assign inline_size_guide_block = null
   if use_inline_size_guide
     for candidate_block in section.blocks
       if candidate_block.type == 'popup' and candidate_block.settings.display_style == 'inline_size'
@@ -108,14 +108,14 @@
   <div class="valor-mp__inner">
     <div class="valor-mp__media" data-mp-gallery="{{ section.id }}">
       {%- render 'product-media-gallery',
-          product: product,
-          section_id: section.id,
-          aspect: media_aspect,
-          enable_lightbox: enable_lightbox,
-          show_thumbnails: show_thumbnails,
-          show_arrows: show_arrows,
-          media_fit: media_fit,
-          priority: true
+        product: product,
+        section_id: section.id,
+        aspect: media_aspect,
+        enable_lightbox: enable_lightbox,
+        show_thumbnails: show_thumbnails,
+        show_arrows: show_arrows,
+        media_fit: media_fit,
+        priority: true
       -%}
     </div>
 
@@ -145,7 +145,6 @@
       </script>
       {%- for block in section.blocks -%}
         {%- case block.type -%}
-
           {%- when '@app' -%}
             {%- render block -%}
 
@@ -174,7 +173,10 @@
             {%- endif -%}
 
           {%- when 'title' -%}
-            <h1 class="valor-mp__title valor-heading valor-heading--{{ block.settings.heading_size | default: 'medium' }}" {{ block.shopify_attributes }}>
+            <h1
+              class="valor-mp__title valor-heading valor-heading--{{ block.settings.heading_size | default: 'medium' }}"
+              {{ block.shopify_attributes }}
+            >
               {{- product.title | escape -}}
             </h1>
 
@@ -182,12 +184,16 @@
             {%- render 'product-price', variant: current_variant, block: block -%}
 
           {%- when 'payment_terms' -%}
-            {%- assign payment_terms_form_id = 'payment-terms-' | append: section.id | append: '-' | append: block.id -%}
+            {%- assign payment_terms_form_id = 'payment-terms-'
+              | append: section.id
+              | append: '-'
+              | append: block.id
+            -%}
             {%- render 'product-payment-terms',
-                product: product,
-                variant: current_variant,
-                block: block,
-                form_id: payment_terms_form_id
+              product: product,
+              variant: current_variant,
+              block: block,
+              form_id: payment_terms_form_id
             -%}
 
           {%- when 'sku' -%}
@@ -198,44 +204,36 @@
 
           {%- when 'variant_picker' -%}
             {%- render 'product-variant-picker',
-                product: product,
-                block: block,
-                section_id: section.id,
-                class_prefix: 'valor-mp',
-                size_guide_block: inline_size_guide_block
+              product: product,
+              block: block,
+              section_id: section.id,
+              class_prefix: 'valor-mp',
+              size_guide_block: inline_size_guide_block
             -%}
 
           {%- when 'quantity_selector' -%}
             {%- render 'product-quantity',
-                product: product,
-                variant: current_variant,
-                block: block,
-                section_id: section.id,
-                form_id: product_form_id
+              product: product,
+              variant: current_variant,
+              block: block,
+              section_id: section.id,
+              form_id: product_form_id
             -%}
 
           {%- when 'buy_buttons' -%}
             {%- render 'product-buy-buttons',
-                product: product,
-                variant: current_variant,
-                block: block,
-                form_id: product_form_id,
-                section: section
+              product: product,
+              variant: current_variant,
+              block: block,
+              form_id: product_form_id,
+              section: section
             -%}
 
           {%- when 'pickup_availability' -%}
-            {%- render 'product-pickup-availability',
-                variant: current_variant,
-                block: block,
-                section: section
-            -%}
+            {%- render 'product-pickup-availability', variant: current_variant, block: block, section: section -%}
 
           {%- when 'complementary' -%}
-            {%- render 'complementary-products',
-                block: block,
-                product: product,
-                section_id: section.id
-            -%}
+            {%- render 'complementary-products', block: block, product: product, section_id: section.id -%}
 
           {%- when 'description' -%}
             {%- if product.description != blank -%}
@@ -270,7 +268,6 @@
                 {{ block.settings.custom_liquid }}
               </div>
             {%- endif -%}
-
         {%- endcase -%}
       {%- endfor -%}
     </product-info>
@@ -316,16 +313,30 @@
        but that only swaps the visual order without swapping the column
        widths, so a "small media on the right" ended up rendered in the
        wide column. Reversing the columns is the correct fix.) */
-    .valor-mp--media-left.valor-mp--media-small  .valor-mp__inner { grid-template-columns: minmax(0, 0.35fr) minmax(0, 0.65fr); }
-    .valor-mp--media-left.valor-mp--media-medium .valor-mp__inner { grid-template-columns: minmax(0, 0.5fr)  minmax(0, 0.5fr);  }
-    .valor-mp--media-left.valor-mp--media-large  .valor-mp__inner { grid-template-columns: minmax(0, 0.65fr) minmax(0, 0.35fr); }
+    .valor-mp--media-left.valor-mp--media-small .valor-mp__inner {
+      grid-template-columns: minmax(0, 0.35fr) minmax(0, 0.65fr);
+    }
+    .valor-mp--media-left.valor-mp--media-medium .valor-mp__inner {
+      grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.5fr);
+    }
+    .valor-mp--media-left.valor-mp--media-large .valor-mp__inner {
+      grid-template-columns: minmax(0, 0.65fr) minmax(0, 0.35fr);
+    }
 
-    .valor-mp--media-right.valor-mp--media-small  .valor-mp__inner { grid-template-columns: minmax(0, 0.65fr) minmax(0, 0.35fr); }
-    .valor-mp--media-right.valor-mp--media-medium .valor-mp__inner { grid-template-columns: minmax(0, 0.5fr)  minmax(0, 0.5fr);  }
-    .valor-mp--media-right.valor-mp--media-large  .valor-mp__inner { grid-template-columns: minmax(0, 0.35fr) minmax(0, 0.65fr); }
+    .valor-mp--media-right.valor-mp--media-small .valor-mp__inner {
+      grid-template-columns: minmax(0, 0.65fr) minmax(0, 0.35fr);
+    }
+    .valor-mp--media-right.valor-mp--media-medium .valor-mp__inner {
+      grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.5fr);
+    }
+    .valor-mp--media-right.valor-mp--media-large .valor-mp__inner {
+      grid-template-columns: minmax(0, 0.35fr) minmax(0, 0.65fr);
+    }
 
     /* Right-side media: swap visual order without changing source order */
-    .valor-mp--media-right .valor-mp__media { order: 2; }
+    .valor-mp--media-right .valor-mp__media {
+      order: 2;
+    }
   }
 
   /* === Media column === */
@@ -410,8 +421,8 @@
           "type": "select",
           "id": "text_style",
           "options": [
-            { "value": "body",      "label": "Body" },
-            { "value": "subtitle",  "label": "Subtitle" },
+            { "value": "body", "label": "Body" },
+            { "value": "subtitle", "label": "Subtitle" },
             { "value": "uppercase", "label": "Uppercase" }
           ],
           "default": "uppercase",
@@ -439,8 +450,8 @@
           "type": "select",
           "id": "text_style",
           "options": [
-            { "value": "body",      "label": "Body" },
-            { "value": "subtitle",  "label": "Subtitle" },
+            { "value": "body", "label": "Body" },
+            { "value": "subtitle", "label": "Subtitle" },
             { "value": "uppercase", "label": "Uppercase" }
           ],
           "default": "body",
@@ -448,20 +459,25 @@
         }
       ]
     },
-    { "type": "title",    "name": "Title",    "limit": 1, "settings": [
-      {
-        "type": "select",
-        "id": "heading_size",
-        "label": "Heading size",
-        "options": [
-          { "value": "small", "label": "Small" },
-          { "value": "medium", "label": "Medium" },
-          { "value": "large", "label": "Large" }
-        ],
-        "default": "medium"
-      }
-    ] },
-    { "type": "price",    "name": "Price",    "limit": 1, "settings": [] },
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            { "value": "small", "label": "Small" },
+            { "value": "medium", "label": "Medium" },
+            { "value": "large", "label": "Large" }
+          ],
+          "default": "medium"
+        }
+      ]
+    },
+    { "type": "price", "name": "Price", "limit": 1, "settings": [] },
     {
       "type": "payment_terms",
       "name": "t:sections.main_product.blocks.payment_terms.name",
@@ -477,8 +493,8 @@
           "type": "select",
           "id": "text_style",
           "options": [
-            { "value": "body",      "label": "Body" },
-            { "value": "subtitle",  "label": "Subtitle" },
+            { "value": "body", "label": "Body" },
+            { "value": "subtitle", "label": "Subtitle" },
             { "value": "uppercase", "label": "Uppercase" }
           ],
           "default": "body",
@@ -518,7 +534,7 @@
           "type": "select",
           "id": "picker_style",
           "options": [
-            { "value": "pills",    "label": "Pills" },
+            { "value": "pills", "label": "Pills" },
             { "value": "dropdown", "label": "Dropdown" },
             { "value": "swatches", "label": "Swatches" }
           ],
@@ -661,11 +677,11 @@
           "type": "select",
           "id": "icon",
           "options": [
-            { "value": "none",     "label": "None" },
-            { "value": "ruler",    "label": "Ruler" },
-            { "value": "info",     "label": "Info" },
+            { "value": "none", "label": "None" },
+            { "value": "ruler", "label": "Ruler" },
+            { "value": "info", "label": "Info" },
             { "value": "question", "label": "Question mark" },
-            { "value": "shirt",    "label": "Shirt" }
+            { "value": "shirt", "label": "Shirt" }
           ],
           "default": "ruler",
           "label": "Icon"
@@ -722,9 +738,9 @@
       "type": "select",
       "id": "media_width",
       "options": [
-        { "value": "small",  "label": "Small" },
+        { "value": "small", "label": "Small" },
         { "value": "medium", "label": "Medium" },
-        { "value": "large",  "label": "Large" }
+        { "value": "large", "label": "Large" }
       ],
       "default": "large",
       "label": "Desktop media width",
@@ -734,7 +750,7 @@
       "type": "select",
       "id": "media_position",
       "options": [
-        { "value": "left",  "label": "Left" },
+        { "value": "left", "label": "Left" },
         { "value": "right", "label": "Right" }
       ],
       "default": "left",
@@ -745,9 +761,9 @@
       "type": "select",
       "id": "media_aspect_ratio",
       "options": [
-        { "value": "square",   "label": "Square (1:1)" },
+        { "value": "square", "label": "Square (1:1)" },
         { "value": "portrait", "label": "Portrait (4:5)" },
-        { "value": "adapt",    "label": "Adapt to image" }
+        { "value": "adapt", "label": "Adapt to image" }
       ],
       "default": "square",
       "label": "Media aspect ratio",
@@ -757,7 +773,7 @@
       "type": "select",
       "id": "media_fit",
       "options": [
-        { "value": "cover",   "label": "Cover (fill, may crop)" },
+        { "value": "cover", "label": "Cover (fill, may crop)" },
         { "value": "contain", "label": "Contain (show full image)" }
       ],
       "default": "cover",
@@ -769,7 +785,7 @@
       "id": "image_size_mobile",
       "options": [
         { "value": "default", "label": "Default" },
-        { "value": "full",    "label": "Full width" }
+        { "value": "full", "label": "Full width" }
       ],
       "default": "default",
       "label": "Mobile image size"
@@ -783,8 +799,8 @@
       "id": "enable_lightbox",
       "options": [
         { "value": "default", "label": "Use theme default" },
-        { "value": "on",      "label": "On" },
-        { "value": "off",     "label": "Off" }
+        { "value": "on", "label": "On" },
+        { "value": "off", "label": "Off" }
       ],
       "default": "default",
       "label": "Lightbox zoom",
@@ -795,8 +811,8 @@
       "id": "show_thumbnails",
       "options": [
         { "value": "default", "label": "Use theme default" },
-        { "value": "on",      "label": "On" },
-        { "value": "off",     "label": "Off" }
+        { "value": "on", "label": "On" },
+        { "value": "off", "label": "Off" }
       ],
       "default": "default",
       "label": "Show thumbnails"
@@ -806,8 +822,8 @@
       "id": "show_arrows",
       "options": [
         { "value": "default", "label": "Use theme default" },
-        { "value": "on",      "label": "On" },
-        { "value": "off",     "label": "Off" }
+        { "value": "on", "label": "On" },
+        { "value": "off", "label": "Off" }
       ],
       "default": "default",
       "label": "Show navigation arrows",
