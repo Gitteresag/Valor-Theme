@@ -1,0 +1,685 @@
+{%- liquid
+  assign content_position = section.settings.desktop_content_position
+  assign content_alignment = section.settings.desktop_content_alignment
+  assign mobile_alignment = section.settings.mobile_content_alignment
+  assign image_height = section.settings.image_height
+  assign desktop_image = section.settings.image_desktop
+  assign mobile_image = section.settings.image_mobile
+
+  assign hero_loading = 'lazy'
+  assign hero_fetchpriority = 'auto'
+  if section.location == 'template' and section.index == 1
+    assign hero_loading = 'eager'
+    assign hero_fetchpriority = 'high'
+  endif
+
+  # Transparent header trigger.
+  # The CSS uses :has() to check whether this section is the homepage's first
+  # section before activating — but we still gate on page_type and the merchant
+  # checkbox here so the trigger class never appears off the homepage. This
+  # keeps the DOM clean on collection/product/article pages even if a banner
+  # sits there with the checkbox accidentally on.
+  assign use_transparent_header_trigger = false
+  if request.page_type == 'index' and section.settings.enable_transparent_header
+    assign use_transparent_header_trigger = true
+  endif
+-%}
+<section
+  class="valor-hero valor-hero--{{ image_height }}{% if section.settings.show_text_below %} valor-hero--text-below-mobile{% endif %}{% if section.settings.full_width_desktop or use_transparent_header_trigger %} valor-hero--full-desktop{% endif %}{% if section.settings.full_width_mobile or use_transparent_header_trigger %} valor-hero--full-mobile{% endif %}{% if use_transparent_header_trigger %} valor-hero--transparent-header-trigger{% endif %}"
+  style="--valor-hero-overlay: {{ section.settings.image_overlay_opacity | times: 0.01 }};"
+  {% if use_transparent_header_trigger %}data-transparent-header-behavior="{{ section.settings.transparent_header_behavior | default: 'always' }}"{% endif %}
+>
+  {%- if use_transparent_header_trigger -%}
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var header = document.querySelector('.valor-section-header');
+
+        root.classList.add('valor-transparent-header-active');
+
+        if (!header) return;
+
+        header.classList.remove('valor-section-header--sticky', 'valor-section-header--transparent-solid');
+
+        {% if section.settings.transparent_header_behavior == 'none' %}
+          header.classList.remove('valor-section-header--transparent-pinned', 'valor-section-header--animate');
+          root.classList.add('valor-transparent-header-ready');
+        {% else %}
+          header.classList.add('valor-section-header--transparent-pinned');
+          requestAnimationFrame(function () {
+            header.classList.add('valor-section-header--animate');
+            root.classList.add('valor-transparent-header-ready');
+          });
+        {% endif %}
+      })();
+    </script>
+  {%- endif -%}
+  <div class="valor-hero__media">
+    {%- if desktop_image != blank -%}
+      <picture class="valor-hero__picture">
+        {%- if mobile_image != blank -%}
+          <source
+            media="(max-width: 749px)"
+            srcset="{{ mobile_image | image_url: width: 450 }} 450w, {{ mobile_image | image_url: width: 750 }} 750w, {{ mobile_image | image_url: width: 1100 }} 1100w"
+            sizes="100vw"
+            width="{{ mobile_image.width }}"
+            height="{{ mobile_image.height }}"
+          >
+        {%- endif -%}
+        <img
+          class="valor-hero__image"
+          srcset="{{ desktop_image | image_url: width: 750 }} 750w, {{ desktop_image | image_url: width: 1100 }} 1100w, {{ desktop_image | image_url: width: 1500 }} 1500w, {{ desktop_image | image_url: width: 1780 }} 1780w, {{ desktop_image | image_url: width: 2000 }} 2000w, {{ desktop_image | image_url: width: 3000 }} 3000w"
+          src="{{ desktop_image | image_url: width: 1500 }}"
+          sizes="100vw"
+          alt="{{ desktop_image.alt | escape }}"
+          width="{{ desktop_image.width }}"
+          height="{{ desktop_image.height }}"
+          loading="{{ hero_loading }}"
+          {%- if hero_fetchpriority == 'high' %} fetchpriority="high"{% endif -%}
+        >
+      </picture>
+    {%- elsif mobile_image != blank -%}
+      <div class="valor-hero__placeholder valor-hero__placeholder--desktop">
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'valor-hero__placeholder-svg' }}
+      </div>
+      <picture class="valor-hero__picture valor-hero__picture--mobile-only">
+        <img
+          class="valor-hero__image"
+          srcset="{{ mobile_image | image_url: width: 450 }} 450w, {{ mobile_image | image_url: width: 750 }} 750w, {{ mobile_image | image_url: width: 1100 }} 1100w"
+          src="{{ mobile_image | image_url: width: 750 }}"
+          sizes="100vw"
+          alt="{{ mobile_image.alt | escape }}"
+          width="{{ mobile_image.width }}"
+          height="{{ mobile_image.height }}"
+          loading="{{ hero_loading }}"
+          {%- if hero_fetchpriority == 'high' %} fetchpriority="high"{% endif -%}
+        >
+      </picture>
+    {%- else -%}
+      <div class="valor-hero__placeholder valor-hero__placeholder--desktop">
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'valor-hero__placeholder-svg' }}
+      </div>
+      <div class="valor-hero__placeholder valor-hero__placeholder--mobile">
+        {{ 'lifestyle-2' | placeholder_svg_tag: 'valor-hero__placeholder-svg' }}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.image_overlay_opacity > 0 -%}
+      <div class="valor-hero__overlay" aria-hidden="true"></div>
+    {%- endif -%}
+  </div>
+
+  <div class="valor-hero__content-wrapper valor-hero__content-wrapper--pos-{{ content_position }} valor-hero__content-wrapper--align-{{ content_alignment }} valor-hero__content-wrapper--mobile-{{ mobile_alignment }}">
+    <div class="valor-hero__content{% if section.settings.show_text_box %} valor-hero__content--box{% endif %}">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'heading' -%}
+            <h2 class="valor-hero__heading valor-hero__heading--{{ block.settings.heading_size }}" {{ block.shopify_attributes }}>
+              {{ block.settings.heading }}
+            </h2>
+          {%- when 'subheading' -%}
+            <div class="valor-hero__subheading rte" {{ block.shopify_attributes }}>
+              {{ block.settings.subheading }}
+            </div>
+          {%- when 'buttons' -%}
+            <div class="valor-hero__buttons" {{ block.shopify_attributes }}>
+              {%- if block.settings.button_label_1 != blank and block.settings.button_link_1 != blank -%}
+                <a
+                  href="{{ block.settings.button_link_1 }}"
+                  class="valor-button valor-button--{% if block.settings.button_style_secondary_1 %}secondary{% else %}primary{% endif %}"
+                >
+                  {{ block.settings.button_label_1 | escape }}
+                </a>
+              {%- endif -%}
+              {%- if block.settings.button_label_2 != blank and block.settings.button_link_2 != blank -%}
+                <a
+                  href="{{ block.settings.button_link_2 }}"
+                  class="valor-button valor-button--{% if block.settings.button_style_secondary_2 %}secondary{% else %}primary{% endif %}"
+                >
+                  {{ block.settings.button_label_2 | escape }}
+                </a>
+              {%- endif -%}
+            </div>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .valor-hero {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* Full-width banner — escape the theme-shell grid so the hero can span
+     the full viewport width. The shell wraps every section in a CSS grid
+     where children are constrained to the centre column
+     (.shopify-section > * { grid-column: 2 }). We promote the section to
+     span the full grid (grid-column: 1 / -1) for hero-style full bleed.
+     Desktop and mobile have independent toggles. */
+  @media (min-width: 750px) {
+    .shopify-section > .valor-hero--full-desktop {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 749px) {
+    .shopify-section > .valor-hero--full-mobile {
+      grid-column: 1 / -1;
+    }
+  }
+
+  /* Heights — desktop */
+  .valor-hero--small { min-height: 28rem; }
+  .valor-hero--medium { min-height: 38rem; }
+  .valor-hero--large { min-height: 48rem; }
+  .valor-hero--adapt { min-height: 0; }
+
+  @media (max-width: 749px) {
+    .valor-hero--small { min-height: 22rem; }
+    .valor-hero--medium { min-height: 28rem; }
+    .valor-hero--large { min-height: 36rem; }
+  }
+
+  /* Media layer — fills the section */
+  .valor-hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+  }
+  .valor-hero--adapt .valor-hero__media {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+  }
+
+  .valor-hero__picture,
+  .valor-hero__image,
+  .valor-hero__placeholder {
+    width: 100%;
+    height: 100%;
+  }
+  .valor-hero__picture,
+  .valor-hero__image {
+    display: block;
+  }
+  .valor-hero__image,
+  .valor-hero__placeholder {
+    object-fit: cover;
+    object-position: center;
+  }
+  .valor-hero--adapt .valor-hero__picture,
+  .valor-hero--adapt .valor-hero__image {
+    width: 100%;
+    height: auto;
+  }
+
+  .valor-hero__placeholder {
+    background-color: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-hero__placeholder-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Use a single <picture> when possible so the browser only
+     prioritizes the image candidate for the active viewport. */
+  .valor-hero__picture--mobile-only,
+  .valor-hero__placeholder--mobile {
+    display: none;
+  }
+  @media (max-width: 749px) {
+    .valor-hero__placeholder--desktop {
+      display: none;
+    }
+    .valor-hero__picture--mobile-only {
+      display: block;
+    }
+    .valor-hero__placeholder--mobile {
+      display: flex;
+    }
+  }
+
+  /* Overlay */
+  .valor-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background-color: #000;
+    opacity: var(--valor-hero-overlay, 0);
+    pointer-events: none;
+  }
+  .valor-hero--adapt .valor-hero__overlay {
+    z-index: 1;
+  }
+
+  /* Content wrapper — fills the section, centers the content area */
+  .valor-hero__content-wrapper {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    width: 100%;
+    min-height: inherit;
+    padding: clamp(2rem, 5vw, 5rem) clamp(1rem, 4vw, 3rem);
+  }
+  .valor-hero--adapt .valor-hero__content-wrapper {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Desktop content position (vertical alignment of content block within wrapper) */
+  .valor-hero__content-wrapper--pos-top-left,
+  .valor-hero__content-wrapper--pos-top-center,
+  .valor-hero__content-wrapper--pos-top-right { align-items: flex-start; }
+  .valor-hero__content-wrapper--pos-middle-left,
+  .valor-hero__content-wrapper--pos-middle-center,
+  .valor-hero__content-wrapper--pos-middle-right { align-items: center; }
+  .valor-hero__content-wrapper--pos-bottom-left,
+  .valor-hero__content-wrapper--pos-bottom-center,
+  .valor-hero__content-wrapper--pos-bottom-right { align-items: flex-end; }
+
+  /* Desktop content position (horizontal) */
+  .valor-hero__content-wrapper--pos-top-left,
+  .valor-hero__content-wrapper--pos-middle-left,
+  .valor-hero__content-wrapper--pos-bottom-left { justify-content: flex-start; }
+  .valor-hero__content-wrapper--pos-top-center,
+  .valor-hero__content-wrapper--pos-middle-center,
+  .valor-hero__content-wrapper--pos-bottom-center { justify-content: center; }
+  .valor-hero__content-wrapper--pos-top-right,
+  .valor-hero__content-wrapper--pos-middle-right,
+  .valor-hero__content-wrapper--pos-bottom-right { justify-content: flex-end; }
+
+  /* Content block */
+  .valor-hero__content {
+    max-width: 38rem;
+    color: var(--color-background);
+    /* On hero overlays, foreground/background flip — text is light on dark image */
+  }
+  .valor-hero__content-wrapper--align-left { text-align: left; }
+  .valor-hero__content-wrapper--align-center { text-align: center; }
+  .valor-hero__content-wrapper--align-right { text-align: right; }
+
+  .valor-hero__content--box {
+    background-color: color-mix(in srgb, var(--color-background) 92%, transparent);
+    color: var(--color-foreground);
+    padding: clamp(1.5rem, 3vw, 2.5rem);
+    border-radius: 0.25rem;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* Heading sizes */
+  .valor-hero__heading {
+    margin: 0 0 1rem;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-weight: var(--font-heading--weight);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+  .valor-hero__heading--h0 { font-size: calc(var(--font-heading-scale, 1) * clamp(2.5rem, 6vw, 5rem)); }
+  .valor-hero__heading--h1 { font-size: calc(var(--font-heading-scale, 1) * clamp(2rem, 5vw, 3.75rem)); }
+  .valor-hero__heading--h2 { font-size: calc(var(--font-heading-scale, 1) * clamp(1.625rem, 4vw, 2.75rem)); }
+
+  .valor-hero__subheading {
+    font-size: clamp(1rem, 1.5vw, 1.125rem);
+    line-height: 1.5;
+    margin: 0 0 1.75rem;
+    opacity: 0.95;
+  }
+
+  /* Buttons row */
+  .valor-hero__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .valor-hero__content-wrapper--align-center .valor-hero__buttons { justify-content: center; }
+  .valor-hero__content-wrapper--align-right .valor-hero__buttons { justify-content: flex-end; }
+
+
+  /* Hero buttons intentionally use the global .valor-button styles.
+     Keep color decisions in Theme settings > Colors > Buttons so the
+     same primary/outline button system works consistently in every section. */
+
+  /* Mobile content alignment override */
+  @media (max-width: 749px) {
+    .valor-hero__content-wrapper--mobile-left { text-align: left; }
+    .valor-hero__content-wrapper--mobile-left .valor-hero__buttons { justify-content: flex-start; }
+    .valor-hero__content-wrapper--mobile-center { text-align: center; }
+    .valor-hero__content-wrapper--mobile-center .valor-hero__buttons { justify-content: center; }
+
+    /* Show text below image option on mobile */
+    .valor-hero--text-below-mobile {
+      min-height: 0;
+    }
+    .valor-hero--text-below-mobile .valor-hero__media {
+      position: relative;
+      inset: auto;
+      aspect-ratio: 4 / 5;
+    }
+    .valor-hero--text-below-mobile .valor-hero__picture,
+    .valor-hero--text-below-mobile .valor-hero__image,
+    .valor-hero--text-below-mobile .valor-hero__placeholder {
+      height: 100%;
+    }
+    .valor-hero--text-below-mobile .valor-hero__overlay { display: none; }
+    .valor-hero--text-below-mobile .valor-hero__content-wrapper {
+      position: relative;
+      inset: auto;
+      padding: 1.5rem clamp(1rem, 4vw, 3rem) 2.5rem;
+    }
+    .valor-hero--text-below-mobile .valor-hero__content {
+      color: var(--color-foreground);
+      max-width: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+
+{
+  "name": "Image banner",
+  "tag": "section",
+  "class": "valor-section-image-banner",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "Image (desktop)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Image (mobile)",
+      "info": "Optional — falls back to desktop image if empty."
+    },
+    {
+      "type": "select",
+      "id": "image_height",
+      "label": "Banner height",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "Adapt to first image"
+        },
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "range",
+      "id": "image_overlay_opacity",
+      "label": "Image overlay opacity",
+      "min": 0,
+      "max": 80,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_desktop",
+      "label": "Full width on desktop",
+      "default": true,
+      "info": "Stretches the banner edge to edge on desktop. Recommended for hero banners. Transparent header always uses full width.",
+      "visible_if": "{{ section.settings.enable_transparent_header == false }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_mobile",
+      "label": "Full width on mobile",
+      "default": true,
+      "info": "Stretches the banner edge to edge on mobile. Transparent header always uses full width.",
+      "visible_if": "{{ section.settings.enable_transparent_header == false }}"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_transparent_header",
+      "label": "Use transparent header over this banner",
+      "info": "The header floats over the banner with white text. Only takes effect when this banner is the first section on the homepage. Falls back gracefully on older browsers.",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "transparent_header_behavior",
+      "label": "Transparent header behavior",
+      "info": "Overrides the normal sticky header setting for this homepage banner.",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "always",
+          "label": "Always pinned"
+        }
+      ],
+      "default": "always",
+      "visible_if": "{{ section.settings.enable_transparent_header }}"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_position",
+      "label": "Position",
+      "options": [
+        {
+          "value": "top-left",
+          "label": "Top left"
+        },
+        {
+          "value": "top-center",
+          "label": "Top center"
+        },
+        {
+          "value": "top-right",
+          "label": "Top right"
+        },
+        {
+          "value": "middle-left",
+          "label": "Middle left"
+        },
+        {
+          "value": "middle-center",
+          "label": "Middle center"
+        },
+        {
+          "value": "middle-right",
+          "label": "Middle right"
+        },
+        {
+          "value": "bottom-left",
+          "label": "Bottom left"
+        },
+        {
+          "value": "bottom-center",
+          "label": "Bottom center"
+        },
+        {
+          "value": "bottom-right",
+          "label": "Bottom right"
+        }
+      ],
+      "default": "middle-center"
+    },
+    {
+      "type": "select",
+      "id": "desktop_content_alignment",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_text_box",
+      "label": "Show content in a box",
+      "default": false,
+      "info": "Adds a translucent backdrop behind the heading and buttons."
+    },
+    {
+      "type": "header",
+      "content": "Mobile layout"
+    },
+    {
+      "type": "select",
+      "id": "mobile_content_alignment",
+      "label": "Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_text_below",
+      "label": "Show text below image on mobile",
+      "default": false
+    }
+  ],
+  "blocks": [
+    {
+      "type": "heading",
+      "name": "Heading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Image banner"
+        },
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            {
+              "value": "h0",
+              "label": "Extra large"
+            },
+            {
+              "value": "h1",
+              "label": "Large"
+            },
+            {
+              "value": "h2",
+              "label": "Medium"
+            }
+          ],
+          "default": "h1"
+        }
+      ]
+    },
+    {
+      "type": "subheading",
+      "name": "Subheading",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "subheading",
+          "label": "Subheading",
+          "default": "<p>Tell your brand's story through images.</p>"
+        }
+      ]
+    },
+    {
+      "type": "buttons",
+      "name": "Buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "button_label_1",
+          "label": "Button 1 label"
+        },
+        {
+          "type": "url",
+          "id": "button_link_1",
+          "label": "Button 1 link"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary_1",
+          "label": "Use outline style for button 1",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "button_label_2",
+          "label": "Button 2 label"
+        },
+        {
+          "type": "url",
+          "id": "button_link_2",
+          "label": "Button 2 link"
+        },
+        {
+          "type": "checkbox",
+          "id": "button_style_secondary_2",
+          "label": "Use outline style for button 2",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image banner",
+      "blocks": [
+        {
+          "type": "heading"
+        },
+        {
+          "type": "subheading"
+        },
+        {
+          "type": "buttons"
+        }
+      ]
+    }
+  ]
+}
+
+{% endschema %}

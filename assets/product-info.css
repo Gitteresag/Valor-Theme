@@ -1,0 +1,930 @@
+/* Product information component styles.
+
+   These rules govern how the inner blocks of a product page look —
+   price, SKU, inventory, variant picker, quantity, buy buttons, etc.
+   They are kept separate from sections/main-product.liquid's own
+   {% stylesheet %} block (which only handles section-level layout)
+   so that other product-rendering sections (featured-product, future
+   related-products, etc.) can adopt the same component styles.
+
+   v0.22.1 — class names are still .valor-mp__* to avoid breaking
+   anything during the asset extraction. They will be renamed to a
+   neutral prefix (e.g. .valor-pi__*) once featured-product begins
+   sharing these styles. */
+
+/* === Text block (vendor-style or subtitle) === */
+.valor-mp__text {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+.valor-mp__text--uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.valor-mp__text--subtitle {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-foreground);
+}
+
+/* === Title === */
+.valor-mp__title {
+  /* Font family, weight, style, and size now come from .valor-heading
+     and .valor-heading--{small|medium|large} classes (see critical.css)
+     — keeps the product page H1 visually consistent with featured-product
+     and other heading-bearing sections. We only set local layout here. */
+  margin: 0;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+/* === Price === */
+.valor-mp__price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.875rem;
+}
+.valor-mp__price-current {
+  font-size: 1.5rem;
+  font-weight: var(--font-body--weight-bold);
+}
+.valor-mp__price-current--sale { color: var(--color-foreground); }
+.valor-mp__price-compare {
+  font-size: 1.125rem;
+  color: color-mix(in srgb, var(--color-foreground) 55%, transparent);
+  text-decoration: line-through;
+}
+.valor-mp__price-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+  font-size: 0.75rem;
+  font-weight: var(--font-body--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: var(--style-border-radius-inputs, 4px);
+}
+.valor-mp__tax {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+}
+.valor-mp__unit-price {
+  margin: -0.75rem 0 0;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--color-foreground) 78%, transparent);
+}
+
+.valor-product-payment-terms {
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+
+.valor-product-payment-terms__form {
+  margin: 0;
+}
+
+/* === SKU === */
+.valor-mp__sku {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+}
+.valor-mp__sku--uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+.valor-mp__sku--subtitle {
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+/* === Inventory ===
+   A small coloured dot signals state at-a-glance. Colours intentionally
+   muted so they don't clash with merchant-chosen colour palettes. */
+.valor-mp__inventory {
+  margin: 0;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.valor-mp__inventory-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.valor-mp__inventory--in   .valor-mp__inventory-dot { background-color: #2e8540; }
+.valor-mp__inventory--low  .valor-mp__inventory-dot { background-color: #d49000; }
+.valor-mp__inventory--out  .valor-mp__inventory-dot { background-color: var(--valor-color-error); }
+
+/* === Vendor === */
+.valor-mp__vendor {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+.valor-mp__vendor a {
+  color: inherit;
+  text-decoration: none;
+}
+.valor-mp__vendor a:hover {
+  text-decoration: underline;
+}
+.valor-mp__vendor--uppercase {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.valor-mp__vendor--subtitle {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-foreground);
+}
+
+/* === Variant picker ===
+   Pills, swatches, dropdowns and minimal size rows share the same option
+   wrappers and a single JS handler that resolves option combinations to
+   variants. */
+.valor-mp__variants {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.valor-mp__option-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+.valor-mp__option-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
+}
+.valor-mp__option-selected {
+  color: var(--color-foreground);
+  font-weight: var(--font-body--weight-bold);
+}
+.valor-mp__option-label--size-text {
+  width: 100%;
+}
+.valor-mp__option-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.valor-mp__option-label-text {
+  min-width: 0;
+}
+.valor-mp__option-size-guide {
+  flex: 0 0 auto;
+}
+
+/* Pills */
+.valor-mp__option-values--pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.valor-mp__option-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.valor-mp__option-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  padding: 0.625rem 1rem;
+  border: 1.5px solid var(--valor-border-strong);
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.valor-mp__option-input:checked + .valor-mp__option-pill {
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+  border-color: var(--color-foreground);
+}
+.valor-mp__option-input:focus-visible + .valor-mp__option-pill {
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 3px;
+}
+/* Disabled (sold out) variants — JS toggles data-disabled per pill */
+.valor-mp__option-pill[data-disabled='true'] {
+  opacity: 0.65;
+  text-decoration: line-through;
+}
+
+/* Minimal size text buttons */
+.valor-mp__option-values--size-text {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 1.25rem;
+}
+.valor-mp__option-size-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.75rem;
+  padding: 0.375rem 0.125rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-foreground) 62%, transparent);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.2;
+  transition: color 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.valor-mp__option-input:checked + .valor-mp__option-size-text {
+  color: var(--color-foreground);
+  border-bottom-color: currentColor;
+}
+.valor-mp__option-input:focus-visible + .valor-mp__option-size-text {
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+.valor-mp__option-size-text[data-disabled='true'] {
+  opacity: 0.4;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+/* Swatches — only used when picker_style = "swatches" AND every value
+   in the option has either a native swatch (color/image) or a variant
+   image fallback. The Liquid template resolves the source per value
+   into either --valor-swatch-color or --valor-swatch-image, set on
+   the label itself; this CSS just renders whichever was provided.
+   Circle-only — no shape setting in this version, deliberately keeping
+   merchant-facing knobs minimal. */
+.valor-mp__option-values--swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+.valor-mp__option-swatch {
+  --valor-swatch-size: 36px;
+  position: relative;
+  display: inline-block;
+  width: var(--valor-swatch-size);
+  height: var(--valor-swatch-size);
+  border-radius: 50%;
+  border: 1.5px solid var(--valor-border-strong);
+  background-color: var(--valor-swatch-color, transparent);
+  background-image: var(--valor-swatch-image, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .valor-mp__option-swatch:hover {
+    border-color: color-mix(in srgb, var(--color-foreground) 75%, transparent);
+  }
+}
+/* Selected: heavier ring with a small inner gap so the swatch colour
+   stays readable against the focus ring. */
+.valor-mp__option-input:checked + .valor-mp__option-swatch {
+  border-color: var(--color-background);
+  box-shadow: 0 0 0 2px var(--color-foreground);
+}
+.valor-mp__option-input:focus-visible + .valor-mp__option-swatch {
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 3px;
+}
+/* Sold-out swatches get a diagonal slash through them. We can't use
+   the line-through trick from pills because there's no text — the
+   slash is rendered with a gradient on ::after. */
+.valor-mp__option-swatch[data-disabled='true'] {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.valor-mp__option-swatch[data-disabled='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 1px),
+    var(--color-foreground) calc(50% - 1px),
+    var(--color-foreground) calc(50% + 1px),
+    transparent calc(50% + 1px)
+  );
+  pointer-events: none;
+}
+
+/* Dropdown — uses CSS-painted chevron via background-image rather than
+   ::after, since native <select> won't accept overlay pseudo-elements
+   reliably across browsers (the browser-native arrow can collide with
+   ours). Same approach as featured-product. */
+.valor-mp__option-select {
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border: 1.5px solid var(--valor-border-strong);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font: inherit;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 2px),
+    calc(100% - 13px) calc(50% - 2px);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 2rem;
+}
+.valor-mp__option-select:focus {
+  outline: none;
+  border-color: var(--color-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .valor-mp__option-pill,
+  .valor-mp__option-size-text { transition: none; }
+}
+
+/* === Quantity selector === */
+.valor-mp__quantity-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.valor-mp__quantity-in-cart {
+  margin-left: 0.375rem;
+  font-weight: var(--font-body--weight);
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+}
+.valor-mp__quantity-wrapper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--valor-border-strong);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  overflow: hidden;
+}
+.valor-mp__quantity-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  background: transparent;
+  border: 0;
+  color: var(--color-foreground);
+  cursor: pointer;
+  font-size: 1.125rem;
+  line-height: 1;
+  font-family: inherit;
+}
+.valor-mp__quantity-btn:hover {
+  background-color: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+}
+.valor-mp__quantity-input {
+  width: 3.5rem;
+  text-align: center;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--valor-border-strong);
+  border-right: 1px solid var(--valor-border-strong);
+  color: var(--color-foreground);
+  font-size: 0.9375rem;
+  font-family: inherit;
+}
+.valor-mp__quantity-input::-webkit-outer-spin-button,
+.valor-mp__quantity-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.valor-mp__quantity-input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* === Buy buttons ===
+   Reuses the global .valor-button system. Add to cart and Shopify's
+   dynamic checkout buttons stack vertically with consistent height. */
+.valor-mp__buy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.valor-mp__form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+.valor-mp__add {
+  width: 100%;
+  min-height: 52px;
+  padding: 1rem 1.5rem;
+  font-size: 0.9375rem;
+}
+.valor-mp__add[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Force Shopify dynamic checkout (Shop Pay, Apple Pay, Google Pay) to
+   match Add to cart in size — Shopify defaults to a smaller pill. */
+.valor-mp__form .shopify-payment-button {
+  width: 100%;
+  margin-top: 0;
+}
+.valor-mp__form .shopify-payment-button__button {
+  width: 100% !important;
+  min-height: 52px !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: var(--style-border-radius-buttons, var(--style-border-radius-inputs, 4px)) !important;
+  font-size: 0.9375rem !important;
+  font-weight: var(--font-body--weight-bold) !important;
+  line-height: 1.2 !important;
+}
+.valor-mp__form .shopify-payment-button__more-options {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+/* Inline error shown by cart-drawer.js when /cart/add.js rejects a
+   request (out of stock, sold out, etc.). Hidden by the [hidden]
+   attribute until a message is set. Muted-red accent on the left
+   for at-a-glance recognition; sits directly under the buy buttons
+   so the message is in view when the customer dismisses the failed
+   action. */
+.valor-mp__add-error {
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-left: 3px solid var(--valor-color-error);
+  background-color: color-mix(in srgb, var(--valor-color-error) 8%, transparent);
+  color: var(--valor-color-error);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  border-radius: 0 var(--style-border-radius-inputs, 4px) var(--style-border-radius-inputs, 4px) 0;
+}
+
+/* === Description === */
+.valor-mp__description {
+  margin-top: 0.5rem;
+}
+
+/* === Share === */
+.valor-mp__share {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.valor-mp__share-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: 0;
+  color: var(--color-foreground);
+  font-family: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0.375rem 0.5rem;
+  margin-left: -0.5rem;
+  border-radius: var(--style-border-radius-inputs, 4px);
+}
+.valor-mp__share-btn:hover {
+  background-color: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+}
+.valor-mp__share-icon {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+}
+.valor-mp__share-message {
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+}
+
+/* === Rating ===
+   Two stacked rows of stars: bottom row is empty (muted outline),
+   top row is filled (foreground colour) clipped to a width set by
+   --valor-rating-percent. This handles fractional ratings (e.g. 4.3)
+   without rendering different SVGs per value, and degrades gracefully
+   on browsers that don't support custom properties (showing 5 muted
+   stars, which reads as "no review data" rather than as broken UI). */
+.valor-mp__rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+}
+.valor-mp__rating-stars {
+  position: relative;
+  display: inline-block;
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: 0.1em;
+}
+.valor-mp__rating-stars-empty {
+  color: color-mix(in srgb, var(--color-foreground) 25%, transparent);
+}
+.valor-mp__rating-stars-filled {
+  position: absolute;
+  inset: 0;
+  width: var(--valor-rating-percent, 0%);
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--color-foreground);
+}
+.valor-mp__rating-text {
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+}
+
+/* === Collapsible rows ===
+   Native <details>/<summary> for accordion behaviour without JS.
+   Several collapsible blocks stack with a shared border between them,
+   so we put a top border on each — the first one's border is its
+   visual "lid", the others continue the divider line. */
+.valor-mp__collapsible {
+  border-top: 1px solid var(--valor-border-strong);
+}
+.valor-mp__collapsible:last-of-type {
+  border-bottom: 1px solid var(--valor-border-strong);
+}
+.valor-mp__collapsible-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  cursor: pointer;
+  list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Hide the default browser disclosure triangle in WebKit + Firefox
+   so we can use our own chevron icon. */
+.valor-mp__collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+.valor-mp__collapsible-summary::marker {
+  content: '';
+}
+.valor-mp__collapsible-heading {
+  font-weight: var(--font-body--weight-bold);
+  font-size: 0.9375rem;
+}
+.valor-mp__collapsible-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+.valor-mp__collapsible[open] .valor-mp__collapsible-icon {
+  transform: rotate(180deg);
+}
+.valor-mp__collapsible-content {
+  padding: 0 0 1.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+.valor-mp__collapsible-content > *:first-child {
+  margin-top: 0;
+}
+.valor-mp__collapsible-content > *:last-child {
+  margin-bottom: 0;
+}
+.valor-mp__collapsible-content p,
+.valor-mp__collapsible-content ul,
+.valor-mp__collapsible-content ol {
+  margin: 0 0 0.75em;
+}
+.valor-mp__collapsible-content a {
+  color: var(--color-foreground);
+}
+
+/* Empty-state shown only in Theme Editor, when a collapsible row has
+   no content and no fallback page. Merchant sees the block exists
+   but knows it won't be visible to customers until filled in. Same
+   visual language as related-products' editor info card. */
+.valor-mp__collapsible-empty {
+  padding: 1rem 1.25rem;
+  border: 1px dashed color-mix(in srgb, var(--color-foreground) 20%, transparent);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  background-color: color-mix(in srgb, var(--color-foreground) 2%, transparent);
+}
+.valor-mp__collapsible-empty-heading {
+  margin: 0 0 0.25rem;
+  font-weight: var(--font-body--weight-bold);
+  font-size: 0.9375rem;
+  color: var(--color-foreground);
+}
+.valor-mp__collapsible-empty-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .valor-mp__collapsible-icon { transition: none; }
+}
+
+/* === Custom Liquid ===
+   A bare wrapper with no styling beyond a sensible margin so merchants'
+   own snippets don't collide with the next block visually. Anything
+   inside is fully merchant-controlled. */
+.valor-mp__custom-liquid {
+  /* Spacing handled by parent .valor-mp__info gap; this is just a
+     reset wrapper for shopify_attributes. */
+}
+
+/* === Pop-up trigger ===
+   Sized like a help link rather than a button — popups carry supporting
+   info (size guide, care instructions), not a primary action. The text
+   is underlined so it reads as interactive without competing visually
+   with Add to cart or other CTAs. */
+.valor-mp__popup-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 0;
+  padding: 0.375rem 0;
+  margin: 0;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.valor-mp__popup-trigger:hover {
+  text-decoration-thickness: 2px;
+}
+.valor-mp__popup-trigger:focus-visible {
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.valor-mp__popup--inline {
+  display: inline-flex;
+}
+.valor-mp__popup-trigger--inline {
+  padding: 0;
+  font-size: 0.8125rem;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--color-foreground) 82%, transparent);
+  text-underline-offset: 0.2em;
+}
+.valor-mp__popup-icon {
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+
+/* === Pop-up dialog ===
+   Native <dialog> renders to the browser's top layer (above all stacking
+   contexts), so we don't need z-index management. The dialog is invisible
+   by default; it's only shown when [open] is set, which showModal() does.
+
+   Centring approach: rather than rely on the browser's default
+   margin:auto centring of <dialog> (which is fragile when combined
+   with width: 100% + max-width — Chromium and Safari can render the
+   dialog flush to the top-left corner), we treat the <dialog> itself
+   as a full-viewport flex container and centre an inner card inside
+   it. This is the same pattern as snippets/lightbox.liquid uses, so
+   the two share a consistent, reliable approach. */
+.valor-mp__popup-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100dvw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-foreground);
+}
+@supports not (height: 100dvh) {
+  .valor-mp__popup-dialog {
+    width: 100vw;
+    height: 100vh;
+  }
+}
+.valor-mp__popup-dialog[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.valor-mp__popup-dialog::backdrop {
+  background-color: color-mix(in srgb, #000 50%, transparent);
+}
+/* The inner element is the visual "card" — width-constrained, with
+   the background, border-radius, and shadow that make it look like a
+   modal. The outer <dialog> stays transparent and full-screen so the
+   backdrop click area covers everything. */
+.valor-mp__popup-dialog-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100dvh - 2rem);
+  margin: 1rem;
+  background: var(--color-background);
+  border-radius: 8px;
+  box-shadow: 0 20px 60px color-mix(in srgb, #000 35%, transparent);
+  overflow: hidden;
+}
+@supports not (height: 100dvh) {
+  .valor-mp__popup-dialog-inner {
+    max-height: calc(100vh - 2rem);
+  }
+}
+.valor-mp__popup-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--valor-border-default);
+  flex-shrink: 0;
+}
+.valor-mp__popup-dialog-heading {
+  margin: 0;
+  font-family: var(--font-heading--family);
+  font-style: var(--font-heading--style);
+  font-size: 1.125rem;
+  font-weight: var(--font-heading--weight);
+  letter-spacing: 0;
+}
+.valor-mp__popup-close {
+  background: none;
+  border: 0;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  cursor: pointer;
+  color: var(--color-foreground);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.valor-mp__popup-close:hover {
+  background-color: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+}
+.valor-mp__popup-dialog-content {
+  padding: 1.25rem 1.5rem 1.5rem;
+  /* Vertical scroll for tall content. Horizontal scroll is here too,
+     but scoped per element below — wide tables get to overflow on
+     mobile (rare but important for size guides), images and other
+     content stay within bounds. */
+  overflow-x: auto;
+  overflow-y: auto;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+/* Images shouldn't trigger horizontal scroll — they should always
+   shrink to fit the modal width. Without this, a 1200px size-guide
+   diagram would force horizontal scrolling on every screen. */
+.valor-mp__popup-dialog-content img {
+  max-width: 100%;
+  height: auto;
+}
+.valor-mp__popup-dialog-content > *:first-child { margin-top: 0; }
+.valor-mp__popup-dialog-content > *:last-child { margin-bottom: 0; }
+.valor-mp__popup-dialog-content p,
+.valor-mp__popup-dialog-content ul,
+.valor-mp__popup-dialog-content ol {
+  margin: 0 0 0.75em;
+}
+.valor-mp__popup-dialog-content a {
+  color: var(--color-foreground);
+}
+
+/* Tables — common in size guides ("Bracelet size", "Length cm", "Width
+   cm") so we provide sensible default styling rather than relying on
+   merchants to write CSS in the page editor. */
+.valor-mp__popup-dialog-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 1em;
+  font-size: 0.9375rem;
+}
+.valor-mp__popup-dialog-content th,
+.valor-mp__popup-dialog-content td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+}
+.valor-mp__popup-dialog-content th {
+  font-weight: var(--font-body--weight-bold);
+  background-color: color-mix(in srgb, var(--color-foreground) 3%, transparent);
+}
+
+/* Mobile — nearly fullscreen modal with side margins so the customer
+   can still see they're in a layered context. */
+@media (max-width: 749px) {
+  .valor-mp__popup-dialog-inner {
+    margin: 1rem;
+    max-width: calc(100% - 2rem);
+  }
+  .valor-mp__popup-dialog-header {
+    padding: 1rem 1.125rem;
+  }
+  .valor-mp__popup-dialog-content {
+    padding: 1rem 1.125rem 1.25rem;
+  }
+  /* Wide size-guide tables can be wider than a phone screen. Letting
+     them grow to their natural width and scroll horizontally inside
+     the modal is far better than crushing every column to fit. */
+  .valor-mp__popup-dialog-content table {
+    width: max-content;
+    min-width: 100%;
+  }
+}
+
+/* Empty editor state — same visual language as collapsible-empty for
+   visual consistency in Theme Editor. */
+.valor-mp__popup-empty {
+  padding: 1rem 1.25rem;
+  border: 1px dashed color-mix(in srgb, var(--color-foreground) 20%, transparent);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  background-color: color-mix(in srgb, var(--color-foreground) 2%, transparent);
+}
+.valor-mp__popup-empty-heading {
+  margin: 0 0 0.25rem;
+  font-weight: var(--font-body--weight-bold);
+  font-size: 0.9375rem;
+  color: var(--color-foreground);
+}
+.valor-mp__popup-empty-text {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+}
+
+/* === Complementary products block ====================================
+   Wrapper around the complementary mini-cards inside main-product.
+   Hidden by default in live mode (revealed by JS once the
+   recommendations API responds with at least one product). The
+   block looks like a small upsell panel rather than a full grid. */
+.valor-mp__complementary {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--valor-border-strong);
+}
+.valor-mp__complementary-heading {
+  margin: 0 0 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: var(--font-body--weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-foreground);
+}
+.valor-mp__complementary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+/* Theme Editor helper — shown when no recommendations are configured.
+   The merchant sees this empty state and can click into Search &
+   Discovery to set complementary products up. Customers never see
+   this in live mode (the block stays hidden). */
+.valor-mp__complementary-editor {
+  padding: 0.875rem 1rem;
+  border: 1px dashed color-mix(in srgb, var(--color-foreground) 25%, transparent);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+.valor-mp__complementary-editor p {
+  margin: 0;
+}

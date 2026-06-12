@@ -1,0 +1,623 @@
+/* Valor Collection page styles
+   ------------------------------------------------------------------
+   Layout:
+     Mobile  : single column. Filter button + sort dropdown sit above
+               the grid. Facets panel slides in from the right as a
+               drawer when the filter button is tapped.
+     Desktop : two columns. Facets sidebar fixed-width on the left,
+               product grid takes the remaining space. Sort dropdown
+               sits above the grid in the toolbar row.
+
+   Loading state:
+     During AJAX fetch the wrapper gets .valor-collection--loading
+     which fades the grid + facets to give feedback. We deliberately
+     don't show a spinner because the fetches are short and a fade
+     is less jarring than a spinner that flashes for 200ms.
+*/
+
+.valor-collection {
+  /* Padding driven by section settings (--valor-section-padding-top/bottom),
+     set inline on the collection section wrapper element. The
+     fallbacks (20/48) match the schema defaults so that the section
+     still has comfortable spacing if the inline style is ever stripped. */
+  padding-top: var(--valor-section-padding-top, 20px);
+  padding-bottom: var(--valor-section-padding-bottom, 48px);
+}
+
+/* === Banner ====================================================== */
+.valor-collection__banner {
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border-radius: var(--style-border-radius-inputs, 4px);
+}
+.valor-collection__banner-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+.valor-collection__banner--height-small .valor-collection__banner-image  { aspect-ratio: 4 / 1; }
+.valor-collection__banner--height-medium .valor-collection__banner-image { aspect-ratio: 3 / 1; }
+.valor-collection__banner--height-large .valor-collection__banner-image  { aspect-ratio: 2 / 1; }
+
+/* === Header ====================================================== */
+.valor-collection__header {
+  margin-bottom: 1.5rem;
+}
+/* Alignment modifiers — let the merchant choose how the title and
+   description sit relative to the page width. Defaults to center to
+   match the original collection page look. */
+.valor-collection__header--left   { text-align: left; }
+.valor-collection__header--center { text-align: center; }
+.valor-collection__header--right  { text-align: right; }
+.valor-collection__title {
+  /* Font size and weight come from .valor-heading--{size} classes in
+     the critical stylesheet — keeps this title visually consistent
+     with rich-text, featured-collection, and other heading-bearing
+     sections. We only set local layout (margin) here, so changing the
+     global heading scale in theme settings reflows every page header
+     consistently. */
+  margin: 0 0 0.5rem;
+}
+.valor-collection__description {
+  max-width: 60ch;
+  margin: 0 auto;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  line-height: 1.6;
+}
+.valor-collection__description--left   { text-align: left; }
+.valor-collection__description--center { text-align: center; }
+.valor-collection__description--right  { text-align: right; }
+/* Body size modifiers — affects the description's base font-size;
+   rte child elements scale proportionally via em-based sizing. */
+.valor-collection__description--body-small  { font-size: var(--font-size-body-sm); }
+.valor-collection__description--body-medium { font-size: var(--font-size-body-md); }
+.valor-collection__description--body-large  { font-size: var(--font-size-body-lg); }
+
+/* === Toolbar (count + filter button + sort) ====================== */
+.valor-collection__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 0;
+  margin-bottom: 1.25rem;
+  border-top: 1px solid var(--valor-border-default);
+  border-bottom: 1px solid var(--valor-border-default);
+}
+.valor-collection__count {
+  font-size: var(--font-size-body-sm);
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+.valor-collection__filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.875rem;
+  background: var(--color-background);
+  border: 1px solid var(--valor-border-strong);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  color: var(--color-foreground);
+  font-size: var(--font-size-body-sm);
+  cursor: pointer;
+  font-family: inherit;
+}
+.valor-collection__filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  background: var(--color-foreground);
+  color: var(--color-background);
+  border-radius: 999px;
+  font-size: var(--font-size-body-2xs);
+  line-height: 1;
+}
+.valor-collection__sort-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--font-size-body-sm);
+}
+.valor-collection__sort-label {
+  font-size: var(--font-size-body-xs);
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  margin-bottom: 0.35rem;
+  display: block;
+}
+.valor-collection__sort {
+  padding: 0.5rem 1.75rem 0.5rem 0.75rem;
+  background: var(--color-background) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>") no-repeat right 0.5rem center;
+  border: 1px solid var(--valor-border-strong);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  color: var(--color-foreground);
+  font-size: var(--font-size-body-sm);
+  font-family: inherit;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Mobile toolbar layout:
+   - Product count centred on its own row
+   - Single "Filter and sort" button below it, full width, centred
+   - Desktop sort wrapper hidden — sort moves into the drawer
+   - Filter button hidden on desktop (sidebar is always visible) */
+@media (max-width: 749.98px) {
+  .valor-collection__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.625rem;
+  }
+  .valor-collection__count {
+    text-align: center;
+  }
+  .valor-collection__filter-btn {
+    justify-content: center;
+    width: 100%;
+  }
+  .valor-collection__sort-wrap--desktop {
+    display: none;
+  }
+}
+
+@media (min-width: 750px) {
+  .valor-collection__toolbar--mobile {
+    display: none;
+  }
+  .valor-collection__count {
+    margin-right: auto;
+  }
+  .valor-collection__filter-btn,
+  .valor-collection__sort-wrap--mobile {
+    display: none;
+  }
+}
+
+/* Mobile-only sort wrap inside the drawer: stack label above select,
+   takes full drawer width, separator below before the filter list.
+   Scoped to the mobile media query so the desktop rule above (which
+   sets display:none) takes precedence — without this scope, the
+   default-state .valor-collection__sort-wrap--mobile { display: block }
+   would override the desktop hide because of source order. */
+@media (max-width: 749.98px) {
+  .valor-collection__sort-wrap--mobile {
+    display: block;
+    padding-bottom: 0.875rem;
+    margin-bottom: 0.875rem;
+    border-bottom: 1px solid var(--valor-border-default);
+  }
+  .valor-collection__sort-wrap--mobile .valor-collection__sort {
+    width: 100%;
+  }
+}
+
+/* === Layout (sidebar + grid) ===================================== */
+.valor-collection__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+@media (min-width: 750px) {
+  /* Desktop now uses the horizontal filter bar above the grid; the
+     sidebar aside is mobile-drawer-only, so it stays out of the
+     desktop layout entirely. valor-collection__main expands to the
+     full content width. */
+  .valor-collection__layout {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .valor-collection__sidebar {
+    display: none;
+  }
+  .valor-collection__main {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* === Mobile drawer =============================================== */
+@media (max-width: 749.98px) {
+  /* Lock body scroll while the filter drawer is open. JS toggles the
+     class on body when the drawer opens / closes. Without this the
+     page scrolls behind the drawer on touch devices. */
+  body.valor-collection-drawer-open {
+    overflow: hidden;
+  }
+  .valor-collection__sidebar {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: min(85vw, 340px);
+    background: var(--color-background);
+    z-index: 60;
+    /* Push the drawer fully off-screen including the shadow gutter,
+       so a closed drawer can never bleed a shadow line into the
+       viewport's right edge. */
+    transform: translateX(calc(100% + 24px));
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    padding: 1.25rem;
+    box-shadow: none;
+  }
+  valor-collection[data-drawer-open] .valor-collection__sidebar {
+    transform: translateX(0);
+    box-shadow: -4px 0 16px color-mix(in srgb, #000 10%, transparent);
+  }
+  .valor-collection__overlay {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, #000 35%, transparent);
+    z-index: 59;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  valor-collection[data-drawer-open] .valor-collection__overlay {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Skip-transition state: applied during AJAX-triggered auto-close
+     so the user sees the new product grid immediately with no slide-
+     out, no fade-out overlay, and no flash of the just-rendered
+     drawer. JS sets this before innerHTML swap, then removes it after
+     two animation frames so the browser has applied the closed state
+     before transitions are re-enabled. */
+  valor-collection[data-drawer-skip-transition] .valor-collection__sidebar,
+  valor-collection[data-drawer-skip-transition] .valor-collection__overlay {
+    transition: none !important;
+  }
+  valor-collection[data-drawer-skip-transition] .valor-collection__sidebar {
+    transform: translateX(calc(100% + 24px)) !important;
+    box-shadow: none !important;
+  }
+  valor-collection[data-drawer-skip-transition] .valor-collection__overlay {
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+@media (min-width: 750px) {
+  .valor-collection__overlay {
+    display: none;
+  }
+}
+
+/* === Product grid ================================================ */
+.valor-collection__grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 750px) {
+  .valor-collection__grid {
+    gap: 1.5rem;
+  }
+}
+.valor-collection__grid--mobile-1 { grid-template-columns: 1fr; }
+.valor-collection__grid--mobile-2 { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 750px) {
+  .valor-collection__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .valor-collection__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .valor-collection__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .valor-collection__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
+}
+
+/* Grid-view overrides set by grid-view.js based on visitor's toggle
+   choice. Higher specificity (attribute + class) wins over the
+   --cols-N / --mobile-N rules above without !important. The
+   "default" value is intentionally absent — that case falls through
+   to the section's cols_desktop / cols_mobile setting. */
+@media (min-width: 750px) {
+  .valor-collection__grid[data-grid-view-desktop="compact"] {
+    grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
+    gap: 1rem;
+  }
+}
+@media (max-width: 749px) {
+  .valor-collection__grid[data-grid-view-mobile="single"] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === Grid-view toggle (two-button control next to sort) ============= */
+.valor-grid-view-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.valor-grid-view-toggle--desktop { display: none; }
+
+@media (min-width: 750px) {
+  .valor-grid-view-toggle--desktop { display: inline-flex; }
+  .valor-grid-view-toggle--mobile  { display: none; }
+}
+
+.valor-grid-view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-foreground) 55%, transparent);
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.valor-grid-view-toggle__btn:hover {
+  color: var(--color-foreground);
+  background-color: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+}
+
+.valor-grid-view-toggle__btn[aria-pressed="true"] {
+  color: var(--color-foreground);
+  background-color: color-mix(in srgb, var(--color-foreground) 10%, transparent);
+}
+
+/* === Empty state ================================================= */
+.valor-collection__empty {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+.valor-collection__empty-text {
+  font-size: var(--font-size-body-lg);
+  margin: 0 0 1.5rem;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+
+/* === Loading state =============================================== */
+.valor-collection--loading .valor-collection__main,
+.valor-collection--loading .valor-collection__sidebar {
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+/* === Pagination ================================================== */
+.valor-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2.5rem;
+  font-size: var(--font-size-body-sm);
+}
+.valor-pagination__list {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.valor-pagination__page,
+.valor-pagination__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border-radius: var(--style-border-radius-inputs, 4px);
+  color: var(--color-foreground);
+  text-decoration: none;
+  justify-content: center;
+}
+.valor-pagination__page--current {
+  background: var(--color-foreground);
+  color: var(--color-background);
+  font-weight: 500;
+}
+.valor-pagination__page--gap {
+  cursor: default;
+}
+@media (hover: hover) and (pointer: fine) {
+  a.valor-pagination__page:hover,
+  a.valor-pagination__link:hover {
+    background: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+  }
+}
+.valor-pagination__link--disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* === Facets ====================================================== */
+.valor-facets {
+  background: var(--color-background);
+}
+.valor-facets__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.875rem;
+  border-bottom: 1px solid var(--valor-border-default);
+  margin-bottom: 0.875rem;
+}
+.valor-facets__heading {
+  font-size: var(--font-size-body-base);
+  font-weight: 500;
+  margin: 0 auto 0 0;
+}
+.valor-facets__clear {
+  font-size: var(--font-size-body-xs);
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  text-decoration: underline;
+}
+.valor-facets__close {
+  background: none;
+  border: 0;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--color-foreground);
+  display: none;
+}
+@media (max-width: 749.98px) {
+  .valor-facets__close { display: inline-flex; }
+}
+
+/* Active filter pills */
+.valor-facets__active {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.valor-facets__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  background: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+  border-radius: 999px;
+  font-size: var(--font-size-body-xs);
+  color: var(--color-foreground);
+  text-decoration: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .valor-facets__pill:hover {
+    background: color-mix(in srgb, var(--color-foreground) 14%, transparent);
+  }
+}
+
+/* Filter groups (collapsible) */
+.valor-facets__groups {
+  display: flex;
+  flex-direction: column;
+}
+.valor-facets__group {
+  border-bottom: 1px solid var(--valor-border-strong);
+}
+.valor-facets__group:last-child {
+  border-bottom: 0;
+}
+.valor-facets__group-summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  cursor: pointer;
+  font-size: var(--font-size-body-md);
+  font-weight: 500;
+}
+.valor-facets__group-summary::-webkit-details-marker { display: none; }
+.valor-facets__group-icon {
+  transition: transform 0.2s ease;
+}
+.valor-facets__group[open] .valor-facets__group-icon {
+  transform: rotate(180deg);
+}
+
+.valor-facets__values {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.valor-facets__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: var(--font-size-body-sm);
+  line-height: 1.4;
+}
+.valor-facets__checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.valor-facets__check-box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid color-mix(in srgb, var(--color-foreground) 35%, transparent);
+  border-radius: 3px;
+  background: var(--color-background);
+  color: var(--color-background);
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.valor-facets__checkbox:checked + .valor-facets__check-box {
+  background: var(--color-foreground);
+  border-color: var(--color-foreground);
+}
+.valor-facets__checkbox:focus-visible + .valor-facets__check-box {
+  outline: 2px solid var(--color-foreground);
+  outline-offset: 2px;
+}
+.valor-facets__checkbox:disabled + .valor-facets__check-box {
+  opacity: 0.4;
+}
+.valor-facets__checkbox:disabled ~ .valor-facets__value-label {
+  opacity: 0.4;
+}
+.valor-facets__check-box svg {
+  opacity: 0;
+}
+.valor-facets__checkbox:checked + .valor-facets__check-box svg {
+  opacity: 1;
+}
+.valor-facets__value-count {
+  margin-left: auto;
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  font-size: var(--font-size-body-xs);
+}
+
+/* Price range */
+.valor-facets__price {
+  padding: 0.5rem 0 0.875rem;
+}
+.valor-facets__price-row {
+  display: flex;
+  gap: 0.6rem;
+}
+.valor-facets__price-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.valor-facets__price-label {
+  font-size: var(--font-size-body-2xs);
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+.valor-facets__price-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--valor-border-strong);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  padding: 0 0.5rem;
+}
+.valor-facets__price-currency {
+  font-size: var(--font-size-body-sm);
+  color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  margin-right: 0.25rem;
+}
+.valor-facets__price-input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 0.5rem 0;
+  font-size: var(--font-size-body-sm);
+  font-family: inherit;
+  color: var(--color-foreground);
+  width: 100%;
+  min-width: 0;
+}
+.valor-facets__price-input:focus {
+  outline: none;
+}
+.valor-facets__price-input-wrap:focus-within {
+  border-color: var(--color-foreground);
+}

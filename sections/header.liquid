@@ -1,0 +1,1909 @@
+<valor-sticky-header data-sticky-type="{{ section.settings.sticky_header_type | default: 'always' }}">
+<header
+  class="valor-header valor-header--logo-{{ section.settings.logo_position }}{% if settings.transparent_logo != blank %} valor-header--has-transparent-logo{% endif %}"
+  style="--header-logo-height: {{ settings.logo_height }}px; --header-logo-height-mobile: {{ settings.logo_height_mobile | default: 32 }}px;"
+>
+  <button
+    type="button"
+    class="valor-header__menu-toggle"
+    aria-label="{{ 'accessibility.open_menu' | t }}"
+    aria-controls="MobileDrawer"
+    aria-expanded="false"
+    data-drawer-toggle
+  >
+    <span class="valor-header__menu-toggle-icon valor-header__menu-toggle-icon--open" aria-hidden="true">
+      {{ 'icon-menu.svg' | inline_asset_content }}
+    </span>
+    <span class="valor-header__menu-toggle-icon valor-header__menu-toggle-icon--close" aria-hidden="true">
+      {{ 'icon-close.svg' | inline_asset_content }}
+    </span>
+  </button>
+
+  {%- liquid
+    assign logo_tag = 'div'
+    if request.page_type == 'index'
+      assign logo_tag = 'h1'
+    endif
+  -%}
+
+  <{{ logo_tag }} class="valor-header__title">
+    <a href="{{ routes.root_url }}" class="valor-header__title-link">
+      {%- if settings.logo != blank -%}
+        {%- comment -%}
+          Default logo wrapper. Always rendered when logo is set.
+          When a transparent_logo is also set AND transparent header is
+          active (CSS handles the activation via :has() on the body),
+          this default wrapper is hidden and the transparent one shown.
+          Scrolling restores the default. The toggle is purely CSS — no
+          JS, no flash on load.
+        {%- endcomment -%}
+        <span class="valor-header__logo-wrapper valor-header__logo-wrapper--default">
+          {{
+            settings.logo
+            | image_url: width: 600
+            | image_tag:
+              loading: 'eager',
+              fetchpriority: 'high',
+              width: settings.logo.width,
+              height: settings.logo.height,
+              class: 'valor-header__logo-image',
+              alt: shop.name
+          }}
+        </span>
+
+        {%- if settings.transparent_logo != blank -%}
+          <span class="valor-header__logo-wrapper valor-header__logo-wrapper--transparent">
+            {{
+              settings.transparent_logo
+              | image_url: width: 600
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                width: settings.transparent_logo.width,
+                height: settings.transparent_logo.height,
+                class: 'valor-header__logo-image',
+                alt: shop.name
+            }}
+          </span>
+        {%- endif -%}
+      {%- else -%}
+        <span class="valor-header__logo-text">{{ shop.name }}</span>
+      {%- endif -%}
+    </a>
+  </{{ logo_tag }}>
+
+  <nav class="valor-header__menu">
+    <ul class="valor-header__menu-list">
+      {% for link in section.settings.menu.links %}
+        <li class="valor-header__menu-item">
+          {%- if link.links.size > 0 -%}
+            <a href="{{ link.url }}" class="valor-header__menu-link valor-header__menu-link--has-submenu">
+              <span>{{ link.title }}</span>
+              <span class="valor-header__menu-chevron" aria-hidden="true">
+                {{ 'icon-chevron-down.svg' | inline_asset_content }}
+              </span>
+            </a>
+            <ul class="valor-header__submenu">
+              <li class="valor-header__submenu-view-all">
+                <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
+              </li>
+              {% for child in link.links %}
+                <li>
+                  <a href="{{ child.url }}">{{ child.title }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {%- else -%}
+            <a href="{{ link.url }}" class="valor-header__menu-link">{{ link.title }}</a>
+          {%- endif -%}
+        </li>
+      {% endfor %}
+    </ul>
+  </nav>
+
+  <div class="valor-header__icons">
+    {%- liquid
+      assign show_country_selector = false
+      assign show_language_selector = false
+      if section.settings.enable_country_selector and localization.available_countries.size > 1
+        assign show_country_selector = true
+      endif
+      if section.settings.enable_language_selector and localization.available_languages.size > 1
+        assign show_language_selector = true
+      endif
+    -%}
+
+    {%- if show_country_selector or show_language_selector -%}
+      <div class="valor-header__localization">
+        {%- if show_country_selector -%}
+          <valor-localization-form class="valor-localization">
+            {%- form 'localization', id: 'HeaderCountryForm', class: 'valor-localization__form' -%}
+              <h2 class="visually-hidden" id="HeaderCountryLabel">{{ 'localization.country_label' | t }}</h2>
+              {%- render 'country-localization', localPosition: 'HeaderCountry' -%}
+            {%- endform -%}
+          </valor-localization-form>
+        {%- endif -%}
+
+        {%- if show_language_selector -%}
+          <valor-localization-form class="valor-localization">
+            {%- form 'localization', id: 'HeaderLanguageForm', class: 'valor-localization__form' -%}
+              <h2 class="visually-hidden" id="HeaderLanguageLabel">{{ 'localization.language_label' | t }}</h2>
+              {%- render 'language-localization', localPosition: 'HeaderLanguage' -%}
+            {%- endform -%}
+          </valor-localization-form>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.enable_search -%}
+      {%- render 'header-search', input_id: 'ValorSearchInput' -%}
+    {%- endif -%}
+
+    {% if shop.customer_accounts_enabled %}
+      <shopify-account menu="{{ section.settings.customer_account_menu }}">
+        {%- if section.settings.enable_customer_avatar and customer and customer.has_avatar? -%}
+          {{ customer | avatar }}
+        {%- else -%}
+          {{ 'icon-account.svg' | inline_asset_content }}
+        {%- endif -%}
+      </shopify-account>
+    {% endif %}
+
+    <a href="{{ routes.cart_url }}" class="valor-header__cart">
+      {{ 'icon-cart.svg' | inline_asset_content }}
+      {%- if cart.item_count > 0 -%}
+        <span class="valor-cart-count" aria-hidden="true">
+          {%- if cart.item_count < 100 -%}{{ cart.item_count }}{%- endif -%}
+        </span>
+      {%- endif -%}
+      <span
+        class="visually-hidden"
+        data-cart-count-text
+        data-template="{{ 'cart.title' | t }} (%count%)"
+      >{{ 'cart.title' | t }} ({{ cart.item_count }})</span>
+    </a>
+  </div>
+</header>
+</valor-sticky-header>
+
+<div
+  id="MobileDrawer"
+  class="valor-mobile-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="MobileDrawerLabel"
+  hidden
+>
+  <h2 id="MobileDrawerLabel" class="visually-hidden">{{ 'accessibility.open_menu' | t }}</h2>
+
+  {%- comment -%}
+    Drawer's own header row. The drawer overlays the entire viewport
+    (top:0, full height), so it needs its own logo + close button rather
+    than relying on the page header underneath. Logo links to the
+    homepage so users can escape from a sub-page back to root.
+  {%- endcomment -%}
+  <div class="valor-mobile-drawer__header">
+    <a href="{{ routes.root_url }}" class="valor-mobile-drawer__logo">
+      {%- if settings.logo != blank -%}
+        {{
+          settings.logo
+          | image_url: width: 400
+          | image_tag:
+            loading: 'eager',
+            width: settings.logo.width,
+            height: settings.logo.height,
+            class: 'valor-mobile-drawer__logo-image',
+            alt: shop.name
+        }}
+      {%- else -%}
+        <span class="valor-mobile-drawer__logo-text">{{ shop.name }}</span>
+      {%- endif -%}
+    </a>
+    <button
+      type="button"
+      class="valor-mobile-drawer__close"
+      aria-label="{{ 'accessibility.close_menu' | t }}"
+      data-drawer-close
+    >
+      {{ 'icon-close.svg' | inline_asset_content }}
+    </button>
+  </div>
+
+  <div class="valor-mobile-drawer__inner">
+    <nav class="valor-mobile-drawer__nav">
+      {% for link in section.settings.menu.links %}
+        {%- if link.links.size > 0 -%}
+          <details class="valor-mobile-drawer__group">
+            <summary class="valor-mobile-drawer__summary">
+              <span>{{ link.title }}</span>
+              <span class="valor-mobile-drawer__chevron" aria-hidden="true">
+                {{ 'icon-chevron-down.svg' | inline_asset_content }}
+              </span>
+            </summary>
+            <div class="valor-mobile-drawer__sublist">
+              <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
+              {% for child in link.links %}
+                <a href="{{ child.url }}">{{ child.title }}</a>
+              {% endfor %}
+            </div>
+          </details>
+        {%- else -%}
+          <a href="{{ link.url }}">{{ link.title }}</a>
+        {%- endif -%}
+      {% endfor %}
+    </nav>
+
+    <div class="valor-mobile-drawer__footer">
+      {%- if show_country_selector or show_language_selector -%}
+        <div class="valor-mobile-drawer__localization">
+          {%- if show_country_selector -%}
+            <valor-localization-form class="valor-localization valor-localization--drawer">
+              {%- form 'localization', id: 'DrawerCountryForm', class: 'valor-localization__form' -%}
+                <h2 class="visually-hidden" id="DrawerCountryLabel">{{ 'localization.country_label' | t }}</h2>
+                {%- render 'country-localization', localPosition: 'DrawerCountry' -%}
+              {%- endform -%}
+            </valor-localization-form>
+          {%- endif -%}
+
+          {%- if show_language_selector -%}
+            <valor-localization-form class="valor-localization valor-localization--drawer">
+              {%- form 'localization', id: 'DrawerLanguageForm', class: 'valor-localization__form' -%}
+                <h2 class="visually-hidden" id="DrawerLanguageLabel">{{ 'localization.language_label' | t }}</h2>
+                {%- render 'language-localization', localPosition: 'DrawerLanguage' -%}
+              {%- endform -%}
+            </valor-localization-form>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {% if shop.customer_accounts_enabled %}
+        <a href="{{ routes.account_url }}" class="valor-mobile-drawer__account">
+          <span class="valor-mobile-drawer__account-icon">
+            {{ 'icon-account.svg' | inline_asset_content }}
+          </span>
+          <span>
+            {%- if customer -%}
+              {{ 'header.account' | t }}
+            {%- else -%}
+              {{ 'header.log_in' | t }}
+            {%- endif -%}
+          </span>
+        </a>
+      {% endif %}
+
+      {%- assign has_social = false -%}
+      {%- if settings.social_instagram_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_facebook_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_x_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_tiktok_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_pinterest_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_youtube_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_linkedin_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_threads_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_snapchat_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+
+      {%- if has_social -%}
+        <ul class="valor-mobile-drawer__social">
+          {%- if settings.social_instagram_url != blank -%}
+            <li><a href="{{ settings.social_instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="Instagram">{{ 'icon-instagram.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+          {%- if settings.social_facebook_url != blank -%}
+            <li><a href="{{ settings.social_facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="Facebook">{{ 'icon-facebook.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+          {%- if settings.social_x_url != blank -%}
+            <li><a href="{{ settings.social_x_url }}" target="_blank" rel="noopener noreferrer" aria-label="X">{{ 'icon-x.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+          {%- if settings.social_tiktok_url != blank -%}
+            <li><a href="{{ settings.social_tiktok_url }}" target="_blank" rel="noopener noreferrer" aria-label="TikTok">{{ 'icon-tiktok.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+          {%- if settings.social_pinterest_url != blank -%}
+            <li><a href="{{ settings.social_pinterest_url }}" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">{{ 'icon-pinterest.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+          {%- if settings.social_youtube_url != blank -%}
+            <li><a href="{{ settings.social_youtube_url }}" target="_blank" rel="noopener noreferrer" aria-label="YouTube">{{ 'icon-youtube.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+          {%- if settings.social_linkedin_url != blank -%}
+            <li><a href="{{ settings.social_linkedin_url }}" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">{{ 'icon-linkedin.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+          {%- if settings.social_threads_url != blank -%}
+            <li><a href="{{ settings.social_threads_url }}" target="_blank" rel="noopener noreferrer" aria-label="Threads">{{ 'icon-threads.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+          {%- if settings.social_snapchat_url != blank -%}
+            <li><a href="{{ settings.social_snapchat_url }}" target="_blank" rel="noopener noreferrer" aria-label="Snapchat">{{ 'icon-snapchat.svg' | inline_asset_content }}</a></li>
+          {%- endif -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{%- comment -%}
+  Backdrop behind the drawer. A button rather than a div so it's keyboard-
+  focusable and accessible — clicking anywhere on the dim/blur area closes
+  the drawer, just like the close button. Sits on z-index 190, between the
+  page/header/announcement controls and the drawer.
+{%- endcomment -%}
+<button
+  type="button"
+  class="valor-mobile-drawer-backdrop"
+  data-drawer-backdrop
+  hidden
+  aria-label="{{ 'accessibility.close_menu' | t }}"
+  tabindex="-1"
+></button>
+
+{% stylesheet %}
+  .valor-header,
+  .valor-header button,
+  .valor-header a,
+  .valor-mobile-drawer,
+  .valor-mobile-drawer button,
+  .valor-mobile-drawer a {
+    -webkit-tap-highlight-color: transparent;
+  }
+  .valor-header button:focus,
+  .valor-mobile-drawer button:focus {
+    outline: none;
+  }
+  .valor-header button:focus-visible,
+  .valor-mobile-drawer button:focus-visible {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  .valor-header {
+    min-height: 5rem;
+    padding-block: 0.75rem;
+    display: grid;
+    align-items: center;
+    column-gap: 1rem;
+    /* Default (center): menu on left, logo centered, icons right */
+    grid-template-areas: 'navigation heading icons';
+    grid-template-columns: 1fr auto 1fr;
+    border-bottom: 1px solid var(--valor-border-default);
+    /* Smooth colour transitions so transparent ↔ solid state changes
+       (top of banner, scrolled, drawer-open) blend instead of snapping. */
+    transition:
+      background-color 0.22s ease,
+      color 0.22s ease,
+      border-color 0.22s ease;
+  }
+  .valor-header a {
+    position: relative;
+    text-decoration: none;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-header svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* Cart icon + count bubble (Dawn-style pill on the icon corner) */
+  .valor-header__cart {
+    position: relative;
+  }
+  .valor-cart-count {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    min-width: 1.125rem;
+    height: 1.125rem;
+    padding: 0 0.3rem;
+    border-radius: 999px;
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+    font-size: 0.6875rem;
+    font-weight: var(--font-body--weight-bold);
+    line-height: 1.125rem;
+    text-align: center;
+    pointer-events: none;
+  }
+  /* Title wrapper (<h1> on homepage, <div> elsewhere) */
+  .valor-header__title {
+    grid-area: heading;
+    justify-self: center;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    min-width: 0;
+    line-height: 0;
+  }
+  .valor-header__title-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+  /* Logo wrapper isolates line-height: 0 for image logos only */
+  .valor-header__logo-wrapper {
+    display: inline-block;
+    line-height: 0;
+  }
+  /* Transparent logo is hidden by default; the transparent-header CSS
+     swaps it in only when the conditions for transparency are met. */
+  .valor-header__logo-wrapper--transparent {
+    display: none;
+  }
+  .valor-header__logo-image {
+    display: block;
+    width: auto;
+    max-height: var(--header-logo-height, 2.5rem);
+  }
+  @media (max-width: 989px) {
+    .valor-header__logo-image {
+      max-height: var(--header-logo-height-mobile, 2rem);
+    }
+  }
+  /* Text logo: explicit size so it stays identical on every page
+     regardless of the parent <h1> (homepage) vs <div> (other pages).
+     Uses the heading font because it represents the brand identity. */
+  .valor-header__logo-text {
+    display: block;
+    line-height: 1;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-weight: var(--font-heading--weight-bold);
+    font-size: calc(var(--font-heading-scale, 1) * 1.5rem);
+    letter-spacing: 0.02em;
+  }
+  @media (min-width: 750px) {
+    .valor-header__logo-text {
+      font-size: calc(var(--font-heading-scale, 1) * 1.75rem);
+    }
+  }
+  .valor-header .valor-header__menu {
+    grid-area: navigation;
+    display: flex;
+    align-items: center;
+    justify-self: start;
+    min-width: 0;
+  }
+  .valor-header .valor-header__icons {
+    grid-area: icons;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-self: end;
+  }
+  .valor-header .valor-header__icons > a,
+  .valor-header .valor-header__icons > shopify-account,
+  .valor-header .valor-header__icons > .valor-header__search-toggle {
+    flex: 0 0 2.75rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Desktop menu: list reset */
+  .valor-header__menu-list {
+    display: flex;
+    gap: 1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .valor-header__menu-item {
+    position: relative;
+  }
+  .valor-header__menu-link {
+    display: flex;
+    align-items: center;
+  }
+  .valor-header__menu-link--has-submenu {
+    gap: 0.25rem;
+  }
+  .valor-header__menu-chevron {
+    display: flex;
+    align-items: center;
+    transition: transform 200ms ease;
+  }
+  .valor-header__menu-chevron svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  .valor-header__menu-item:hover .valor-header__menu-chevron,
+  .valor-header__menu-item:focus-within .valor-header__menu-chevron {
+    transform: rotate(180deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .valor-header__menu-chevron {
+      transition: none;
+    }
+  }
+
+  /* Desktop submenu: hidden by default, shown on hover/focus.
+     Padding-top creates visual gap WITHOUT breaking hover (a margin/top offset
+     would create dead space where the submenu disappears as the cursor crosses it). */
+  .valor-header__submenu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    list-style: none;
+    padding: 0.75rem 0 0.5rem;
+    margin: 0;
+    min-width: 12rem;
+    background-color: transparent;
+    color: var(--color-foreground);
+    display: none;
+    z-index: 10;
+  }
+  .valor-header__submenu::before {
+    content: '';
+    position: absolute;
+    top: 0.75rem;
+    left: 0;
+    right: 0;
+    bottom: 0.5rem;
+    background-color: var(--color-background);
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+    z-index: -1;
+  }
+  .valor-header__submenu li {
+    display: block;
+    position: relative;
+  }
+  .valor-header__submenu a {
+    display: block;
+    padding: 0.5rem 1rem;
+    white-space: nowrap;
+    justify-content: flex-start;
+  }
+  .valor-header__submenu-view-all a {
+    font-weight: var(--font-body--weight-bold);
+  }
+  .valor-header__submenu-view-all {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-foreground) 8%, transparent);
+    margin-bottom: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  .valor-header__menu-item:hover .valor-header__submenu,
+  .valor-header__menu-item:focus-within .valor-header__submenu {
+    display: block;
+  }
+
+  /* Hamburger button: hidden on desktop, shown on mobile.
+     Contains both hamburger and close icons; CSS swaps them based on aria-expanded */
+  .valor-header__menu-toggle {
+    grid-area: left-icons;
+    display: none;
+    position: relative;
+    width: 2.75rem;
+    height: 2.75rem;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-foreground);
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-header__menu-toggle-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    inset: 0;
+  }
+  .valor-header__menu-toggle-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .valor-header__menu-toggle .valor-header__menu-toggle-icon--close {
+    display: none;
+  }
+  .valor-header__menu-toggle[aria-expanded='true'] .valor-header__menu-toggle-icon--open {
+    display: none;
+  }
+  .valor-header__menu-toggle[aria-expanded='true'] .valor-header__menu-toggle-icon--close {
+    display: flex;
+  }
+
+  /* Logo position: left (Dawn-style) - desktop only */
+  @media (min-width: 990px) {
+    .valor-header--logo-left {
+      grid-template-areas: 'heading navigation icons';
+      grid-template-columns: auto auto 1fr;
+      column-gap: 2rem;
+    }
+    .valor-header--logo-left .valor-header__title {
+      justify-self: start;
+    }
+    .valor-header--logo-left .valor-header__menu {
+      justify-self: start;
+    }
+    .valor-header--logo-left .valor-header__icons {
+      justify-self: end;
+    }
+  }
+
+  @media (max-width: 989px) {
+    .valor-header {
+      grid-template-areas: 'left-icons heading icons';
+      grid-template-columns: 1fr auto 1fr;
+      column-gap: 0.5rem;
+    }
+    .valor-header__menu-toggle {
+      display: flex;
+      justify-self: start;
+      align-self: center;
+    }
+    .valor-header .valor-header__menu {
+      display: none;
+    }
+    .valor-header__title {
+      justify-self: center;
+      text-align: center;
+    }
+    .valor-header .valor-header__icons {
+      justify-self: end;
+      gap: 0.25rem;
+    }
+    /* Hide account icon on mobile — it's accessible from the drawer footer (Dawn pattern) */
+    .valor-header .valor-header__icons > shopify-account {
+      display: none;
+    }
+  }
+
+  /* Mobile drawer: a full-height overlay panel that slides in from the
+     left and covers the entire viewport (including the page header and
+     announcement bar). It has its own header row inside — logo on the
+     left, close button on the right — so the user sees one continuous
+     panel rather than the page header + a separate slide-in below it.
+     This matches the ICIW pattern and avoids the "two-piece" look the
+     old below-header drawer produced when transparent header was active. */
+  .valor-mobile-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    /* Side panel, not full-width. min() keeps it usable on tablets while
+       still capping at a comfortable phone width. */
+    width: min(90vw, 420px);
+    height: 100vh;
+    height: 100dvh;
+    /* Above the page header, announcement bar and any carousel controls. */
+    z-index: 1000;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 0.24s cubic-bezier(0.22, 0.61, 0.36, 1),
+      visibility 0s linear 0.24s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .valor-mobile-drawer[hidden] {
+    /* keep transform/visibility for animation; [hidden] removed by JS on open */
+    display: flex;
+  }
+  .valor-mobile-drawer[data-open] {
+    transform: translateX(0);
+    visibility: visible;
+    transition-delay: 0s, 0s;
+  }
+  /* When drawer is open, prevent the page beneath from scrolling */
+  body.valor-drawer-open {
+    overflow: hidden;
+    touch-action: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .valor-mobile-drawer {
+      transition: none;
+    }
+  }
+
+  /* Drawer's own header row — same vertical rhythm as the page header. */
+  .valor-mobile-drawer__header {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    align-items: center;
+    flex-shrink: 0;
+    min-height: 4.5rem;
+    padding: 0 clamp(1rem, 4vw, 1.5rem);
+    border-bottom: 1px solid var(--valor-border-default);
+  }
+  .valor-mobile-drawer__header::before {
+    content: '';
+    display: block;
+  }
+  .valor-mobile-drawer__logo {
+    grid-column: 2;
+    justify-self: center;
+    color: inherit;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    line-height: 0;
+  }
+  .valor-mobile-drawer__logo-image {
+    display: block;
+    width: auto;
+    max-height: var(--header-logo-height-mobile, 2rem);
+  }
+  .valor-mobile-drawer__logo-text {
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-weight: var(--font-heading--weight-bold);
+    font-size: 1.25rem;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .valor-mobile-drawer__close {
+    grid-column: 3;
+    justify-self: end;
+    position: relative;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-right: -0.5rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 50%;
+    transition: background-color 0.15s ease;
+  }
+  .valor-mobile-drawer__close:hover {
+    background-color: color-mix(in srgb, var(--color-foreground) 8%, transparent);
+  }
+  .valor-mobile-drawer__close svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* Backdrop behind the drawer — dims and blurs the page underneath so
+     the drawer panel reads as the focused surface. The element exists
+     in the DOM permanently (just hidden) so its transition can be driven
+     entirely by attribute toggles, with no extra JS for animation. */
+  .valor-mobile-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 990;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.16);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    /* Same timing curve as the drawer panel so the two motions feel like
+       one. Visibility is delayed on close so clicks register through the
+       last frame of the fade-out. */
+    transition:
+      opacity 0.24s ease,
+      visibility 0s linear 0.24s;
+  }
+  .valor-mobile-drawer-backdrop[data-open] {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s, 0s;
+  }
+  .valor-mobile-drawer-backdrop[hidden] {
+    /* Keep in DOM for transition; [hidden] is removed by JS on open */
+    display: block;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .valor-mobile-drawer-backdrop {
+      transition: none;
+    }
+  }
+  .valor-mobile-drawer__inner {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+  .valor-mobile-drawer__nav {
+    display: flex;
+    flex-direction: column;
+  }
+  .valor-mobile-drawer__nav > a {
+    color: inherit;
+    text-decoration: none;
+    padding: 1rem 0;
+    font-size: 1.125rem;
+    border-bottom: 1px solid var(--valor-border-strong);
+  }
+
+  /* Drawer submenu via <details>/<summary> */
+  .valor-mobile-drawer__group {
+    border: 0;
+    border-bottom: 1px solid var(--valor-border-strong);
+  }
+  .valor-mobile-drawer__summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    font-size: 1.125rem;
+    cursor: pointer;
+    list-style: none;
+  }
+  .valor-mobile-drawer__summary::-webkit-details-marker {
+    display: none;
+  }
+  .valor-mobile-drawer__chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease;
+  }
+  .valor-mobile-drawer__chevron svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .valor-mobile-drawer__group[open] .valor-mobile-drawer__chevron {
+    transform: rotate(180deg);
+  }
+  .valor-mobile-drawer__sublist {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 0.5rem;
+  }
+  .valor-mobile-drawer__sublist a {
+    color: inherit;
+    text-decoration: none;
+    padding: 0.75rem 0 0.75rem 1rem;
+    font-size: 1rem;
+  }
+
+  /* Drawer footer: account link + social icons */
+  .valor-mobile-drawer__footer {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding-top: 1.5rem;
+  }
+  .valor-mobile-drawer__account {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+    padding: 0.75rem 0;
+    font-size: 1.125rem;
+  }
+  .valor-mobile-drawer__account-icon {
+    flex: 0 0 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-mobile-drawer__account-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .valor-mobile-drawer__social {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    list-style: none;
+    padding: 1rem 0 0;
+    margin: 0;
+  }
+  .valor-mobile-drawer__social li {
+    display: flex;
+  }
+  .valor-mobile-drawer__social a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-foreground);
+    padding: 0.5rem;
+  }
+  .valor-mobile-drawer__social svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    fill: currentColor;
+    display: block;
+  }
+
+  /* ===== Utilities ===== */
+  .visually-hidden {
+    position: absolute !important;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0 0 0 0);
+    word-wrap: normal !important;
+  }
+  .hidden {
+    display: none !important;
+  }
+
+  /* ===== Localization (country + language selectors) ===== */
+  .valor-header__localization {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .valor-localization {
+    position: relative;
+    display: block;
+  }
+  .valor-localization__form {
+    margin: 0;
+  }
+  .valor-localization__disclosure {
+    position: relative;
+  }
+  .valor-localization__select {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: transparent;
+    border: 0;
+    padding: 0.25rem 0;
+    margin: 0;
+    color: var(--color-foreground);
+    font: inherit;
+    font-size: 0.875rem;
+    line-height: 1.2;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .valor-localization__select:focus {
+    outline: none;
+  }
+  .valor-localization__select:focus-visible {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+  .valor-localization__chevron {
+    display: inline-flex;
+    align-items: center;
+    transition: transform 200ms ease;
+  }
+  .valor-localization__chevron svg {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+  .valor-localization__select[aria-expanded='true'] .valor-localization__chevron {
+    transform: rotate(180deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .valor-localization__chevron {
+      transition: none;
+    }
+  }
+
+  .valor-localization__panel {
+    position: absolute;
+    top: calc(100% + 0.75rem);
+    right: 0;
+    z-index: 20;
+    min-width: 14rem;
+    max-width: 90vw;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    border: 1px solid var(--valor-border-strong);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-foreground) 8%, transparent);
+  }
+  /* Modifier: dropdown opens to the right (used in footer where selector sits on the left). */
+  .valor-localization--align-left .valor-localization__panel {
+    right: auto;
+    left: 0;
+  }
+  /* Modifier: dropdown opens upwards (used in footer where space below is limited). */
+  .valor-localization--align-up .valor-localization__panel {
+    top: auto;
+    bottom: calc(100% + 0.75rem);
+  }
+  .valor-localization__panel[hidden] {
+    display: none;
+  }
+  /* Mobile: when localization sits in the footer (uses both align-left + align-up modifiers),
+     show the panel as a full-width bottom-anchored sheet so long country/language names fit
+     and the panel doesn't push the page horizontally. */
+  @media (max-width: 749px) {
+    .valor-localization--align-left.valor-localization--align-up .valor-localization__panel {
+      position: fixed;
+      left: 1rem;
+      right: 1rem;
+      bottom: 1rem;
+      top: auto;
+      max-width: none;
+      width: auto;
+      max-height: 70vh;
+      overflow-y: auto;
+      border-radius: 0.5rem;
+      box-shadow: 0 8px 32px color-mix(in srgb, var(--color-foreground) 18%, transparent);
+    }
+  }
+
+  .valor-localization__filter {
+    position: relative;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--valor-border-default);
+  }
+  .valor-localization__filter-input {
+    width: 100%;
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    background: transparent;
+    color: var(--color-foreground);
+    border: 1px solid var(--valor-border-strong);
+    border-radius: var(--style-border-radius-inputs);
+    font: inherit;
+    font-size: 0.875rem;
+  }
+  .valor-localization__filter-input:focus {
+    outline: none;
+    border-color: var(--color-foreground);
+  }
+  .valor-localization__filter-reset {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 0;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-localization__filter-reset svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .valor-localization__list-wrapper {
+    max-height: 24rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .valor-localization__list {
+    list-style: none;
+    margin: 0;
+    padding: 0.5rem 0;
+  }
+  .valor-localization__list--popular {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-foreground) 10%, transparent);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.75rem;
+  }
+  .valor-localization__item {
+    display: block;
+  }
+  .valor-localization__link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--color-foreground);
+    text-decoration: none;
+    font-size: 0.875rem;
+    line-height: 1.3;
+  }
+  .valor-localization__link:hover,
+  .valor-localization__link:focus-visible {
+    background-color: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    outline: none;
+  }
+  .valor-localization__link[aria-current='true'] {
+    font-weight: var(--font-body--weight-bold);
+  }
+  .valor-localization__check {
+    flex: 0 0 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-localization__check svg {
+    width: 1rem;
+    height: 1rem;
+  }
+  .valor-localization__check--hidden {
+    visibility: hidden;
+  }
+  .valor-localization__country-name {
+    flex: 1 1 auto;
+  }
+  .valor-localization__currency {
+    flex: 0 0 auto;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+    font-size: 0.8125rem;
+  }
+
+  /* Mobile drawer variant: panel inline (not absolute) */
+  .valor-localization--drawer {
+    width: 100%;
+  }
+  .valor-localization--drawer .valor-localization__select {
+    width: 100%;
+    justify-content: space-between;
+    padding: 0.875rem 0;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--valor-border-strong);
+  }
+  .valor-localization--drawer .valor-localization__panel {
+    position: static;
+    box-shadow: none;
+    border: 0;
+    border-bottom: 1px solid var(--valor-border-strong);
+    min-width: 0;
+    max-width: 100%;
+  }
+  .valor-localization--drawer .valor-localization__list-wrapper {
+    max-height: 16rem;
+  }
+
+  .valor-mobile-drawer__localization {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 1rem;
+  }
+
+  /* ===== Header search button ===== */
+  .valor-header__search-toggle {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    color: var(--color-foreground);
+  }
+  .valor-header__search-toggle:focus {
+    outline: none;
+  }
+  .valor-header__search-toggle:focus-visible {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  /* ===== Search modal (native <dialog>) ===== */
+  .valor-search-modal {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+    background: transparent;
+    color: var(--color-foreground);
+  }
+  .valor-search-modal::backdrop {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+  .valor-search-modal__inner {
+    position: relative;
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    padding: 1.5rem clamp(1rem, 4vw, 3rem);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    border-bottom: 1px solid var(--valor-border-default);
+  }
+  .valor-search-modal__form {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+  .valor-search-modal__field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
+  .valor-search-modal__search-icon {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+    pointer-events: none;
+  }
+  .valor-search-modal__search-icon svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .valor-search-modal__input {
+    width: 100%;
+    padding: 0.875rem 2.5rem 0.875rem 2.5rem;
+    background: transparent;
+    color: var(--color-foreground);
+    border: 0;
+    border-bottom: 1px solid var(--valor-border-strong);
+    font: inherit;
+    font-size: 1.125rem;
+    border-radius: 0;
+  }
+  .valor-search-modal__input::-webkit-search-cancel-button,
+  .valor-search-modal__input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .valor-search-modal__input:focus {
+    outline: none;
+    border-bottom-color: var(--color-foreground);
+  }
+  .valor-search-modal__reset {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 0;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--color-foreground);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-search-modal__reset svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  .valor-search-modal__form:has(input[name='q']:not(:placeholder-shown)) .valor-search-modal__reset {
+    display: flex;
+  }
+  .valor-search-modal__close {
+    background: transparent;
+    border: 0;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--color-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+  }
+  .valor-search-modal__close:focus {
+    outline: none;
+  }
+  .valor-search-modal__close:focus-visible {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+  .valor-search-modal__close svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  /* Hide desktop localization on mobile (drawer takes over) */
+  @media (max-width: 989px) {
+    .valor-header__localization {
+      display: none;
+    }
+  }
+
+  /* ===== Sticky header (Dawn-style) =====
+     Sticky class is applied to Shopify's section-wrapper (.valor-section-header)
+     because that element is a child of <body>, giving sticky enough room to work.
+     Also acts as the positioned ancestor for the absolutely-positioned drawer. */
+  .valor-section-header {
+    position: relative;
+    /* Raised above other sections (which can create their own stacking
+       contexts via transforms, sticky positioning, or video embeds) so the
+       absolutely-positioned mobile drawer (z-index: 100) always overlays
+       page content correctly. */
+    z-index: 60;
+  }
+  .valor-section-header.valor-section-header--sticky {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    background-color: var(--color-background);
+  }
+  .valor-section-header.valor-section-header--animate {
+    transition:
+      background-color 0.22s ease,
+      color 0.22s ease,
+      border-color 0.22s ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .valor-section-header.valor-section-header--animate {
+      transition: none;
+    }
+  }
+
+  /* ===== Customer avatar inside <shopify-account> ===== */
+  .valor-header__icons shopify-account img {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Transparent header — activates only when an image-banner with the
+     "Use transparent header over this banner" setting is the FIRST section
+     on the homepage. The :has() selector enforces the "first section"
+     requirement at the CSS level, so moving the banner down or removing it
+     reverts the header automatically with no JS or template changes.
+
+     Older browsers without :has() simply skip these rules and see a normal
+     opaque header. The image-banner's overlay still keeps text legible —
+     no broken state, just no transparency effect.
+
+     The header is positioned absolute so it floats over the banner while
+     the banner takes its natural height. Announcement-bar height is read
+     from a CSS variable that the announcement-bar section sets via JS. */
+  @supports selector(body:has(*)) {
+    /* Prepaint the homepage header in transparent mode before the first
+       image-banner script has had time to add the runtime classes. This
+       prevents the solid white header flash on pages using the transparent
+       homepage hero. The class is limited to index pages and is superseded
+       by the real runtime classes once the hero renders. */
+    html.valor-page-index:not(.valor-transparent-header-ready) .valor-section-header {
+      position: fixed;
+      top: var(--valor-announcement-height, 0px);
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 120;
+      color: #fff;
+      background-color: transparent;
+      background-image: linear-gradient(
+        to bottom,
+        var(--color-background) 50%,
+        rgba(0, 0, 0, 0) 50%
+      );
+      background-size: 100% 200%;
+      background-position: 0 100%;
+      border-bottom: 0;
+    }
+    html.valor-page-index:not(.valor-transparent-header-ready) .valor-section-header > valor-sticky-header::before {
+      opacity: 1;
+    }
+    html.valor-page-index:not(.valor-transparent-header-ready) .valor-section-header .valor-header {
+      background: transparent;
+      color: inherit;
+      border-bottom: 0;
+    }
+
+    /* Transparent header trigger.
+       The first homepage image banner is the only section that may activate
+       this state. The full-width Shopify section wrapper owns the visual
+       background so there is only one surface to animate. */
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header {
+      position: absolute;
+      top: var(--valor-announcement-height, 0px);
+      left: 0;
+      right: 0;
+      z-index: 60;
+      color: #fff;
+      background: transparent;
+      border-bottom: 0;
+    }
+
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header > valor-sticky-header {
+      display: block;
+      position: relative;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    /* Soft full-bleed top shadow for image readability. It lives behind the
+       header content and fades out when the pinned header becomes solid. */
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header > valor-sticky-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 100vw;
+      height: clamp(7rem, 18vw, 11rem);
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 1;
+      background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.34) 0%,
+        rgba(0, 0, 0, 0.24) 32%,
+        rgba(0, 0, 0, 0.12) 62%,
+        rgba(0, 0, 0, 0.04) 82%,
+        rgba(0, 0, 0, 0) 100%
+      );
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header {
+      position: relative;
+      z-index: 1;
+      background: transparent;
+      color: inherit;
+      border-bottom-color: transparent;
+    }
+
+    /* Inherit the wrapper colour so links, buttons and SVG icons change in
+       one pass with the header instead of each element animating separately. */
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header a,
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header button,
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header svg {
+      color: inherit;
+    }
+
+    /* ICIW-style pinned transparent header.
+       Do not switch between absolute and fixed while scrolling. In pinned
+       mode the header is fixed from the beginning and one full-width wrapper
+       background slides from transparent to solid via background-position. */
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned {
+      position: fixed;
+      top: var(--valor-announcement-height, 0px);
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 120;
+      color: #fff;
+      background-color: transparent;
+      background-image: linear-gradient(
+        to bottom,
+        var(--color-background) 50%,
+        rgba(0, 0, 0, 0) 50%
+      );
+      background-size: 100% 200%;
+      background-position: 0 100%;
+      border-bottom: 0;
+      transition:
+        top 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        background-position 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: top, background-position, color;
+    }
+
+    /* Solid-state divider. Use a pseudo-element instead of border so the
+       transparent top state remains completely clean and no layout height
+       changes occur when the header becomes solid. */
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1px;
+      z-index: 2;
+      pointer-events: none;
+      background: color-mix(in srgb, var(--color-foreground) 10%, transparent);
+      opacity: 0;
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid::after {
+      opacity: 1;
+    }
+
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned .valor-header {
+      background: transparent;
+      color: inherit;
+      border-bottom: 0;
+    }
+
+    html:not(.valor-transparent-header-ready) body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned,
+    html:not(.valor-transparent-header-ready) body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned::after,
+    html:not(.valor-transparent-header-ready) body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header > valor-sticky-header::before {
+      transition: none;
+    }
+
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid {
+      top: 0;
+      color: var(--color-foreground);
+      background-position: 0 0;
+    }
+    body.valor-drawer-open .valor-section-header,
+    body:has(.valor-mobile-drawer[data-open]) .valor-section-header {
+      z-index: 2000;
+    }
+
+
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid > valor-sticky-header::before {
+      opacity: 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned {
+        transition: none;
+      }
+      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header > valor-sticky-header::before {
+        transition: none;
+      }
+    }
+
+    /* Logo swap — only applies when --has-transparent-logo modifier is
+       on <header>, which is set in Liquid only if settings.transparent_logo
+       is non-blank. Top/transparent state: show transparent logo. */
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header--has-transparent-logo .valor-header__logo-wrapper--default {
+      display: none;
+    }
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header--has-transparent-logo .valor-header__logo-wrapper--transparent {
+      display: inline-block;
+    }
+
+    /* Solid pinned state: restore normal logo. */
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid .valor-header--has-transparent-logo .valor-header__logo-wrapper--default {
+      display: inline-block;
+    }
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid .valor-header--has-transparent-logo .valor-header__logo-wrapper--transparent {
+      display: none;
+    }
+
+    /* The mobile drawer is a full-height overlay, so no drawer-open header
+       overrides are needed here. */
+  }
+{% endstylesheet %}
+
+<script src="{{ 'localization-form.js' | asset_url }}" defer></script>
+
+<script>
+  /* Sticky header controller.
+     Valor intentionally supports only two header behaviours:
+     - none
+     - always
+
+     The old hide/reveal behaviour is not used anymore. If an
+     older saved theme setting still contains another value, it is treated as
+     "always" so old installs cannot re-enable that loop.
+
+     Transparent header is controlled by the first homepage image-banner:
+     - none: transparent at the top, then scrolls away
+     - always: fixed transparent at the top, then uses an ICIW-style
+       background-position slide to become a solid pinned header as soon as
+       scrolling starts.
+
+     Initialisation waits until the document is ready. This is important
+     because the header renders before the template sections; detecting the
+     transparent hero too early would miss it and incorrectly pin the header
+     as a solid header on page load. */
+  if (!customElements.get('valor-sticky-header')) {
+    customElements.define(
+      'valor-sticky-header',
+      class ValorStickyHeader extends HTMLElement {
+        connectedCallback() {
+          this.sectionEl = this.closest('.valor-section-header');
+          if (!this.sectionEl) return;
+
+          this.onScroll = this.onScroll.bind(this);
+          this.init = this.init.bind(this);
+
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', this.init, { once: true });
+          } else {
+            this.init();
+          }
+        }
+
+        disconnectedCallback() {
+          document.removeEventListener('DOMContentLoaded', this.init);
+          window.removeEventListener('scroll', this.onScroll);
+        }
+
+        init() {
+          if (this.initialized) return;
+          this.initialized = true;
+
+          this.type = this.getAttribute('data-sticky-type') || 'always';
+          if (this.type !== 'none' && this.type !== 'always') {
+            this.type = 'always';
+          }
+
+          this.transparentHero = document.querySelector(
+            '#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger'
+          );
+          this.hasTransparentHeader = !!this.transparentHero;
+
+          if (this.hasTransparentHeader) {
+            this.transparentBehavior = this.transparentHero.getAttribute('data-transparent-header-behavior') || 'always';
+            if (this.transparentBehavior !== 'none' && this.transparentBehavior !== 'always') {
+              this.transparentBehavior = 'always';
+            }
+
+            if (this.transparentBehavior === 'none') {
+              this.clearStickyState();
+              return;
+            }
+
+            this.transparentPinned = true;
+            this.transparentSolid = false;
+            this.transparentPinStart = 2;
+            this.transparentPinEnd = 0;
+            this.setTransparentPinnedState();
+            window.addEventListener('scroll', this.onScroll, { passive: true });
+            this.onScroll();
+            return;
+          }
+
+          if (this.type === 'none') {
+            this.clearStickyState();
+            return;
+          }
+
+          this.setStickyState();
+        }
+
+        clearStickyState() {
+          this.sectionEl.classList.remove(
+            'valor-section-header--sticky',
+            'valor-section-header--animate',
+            'valor-section-header--transparent-pinned',
+            'valor-section-header--transparent-solid'
+          );
+        }
+
+        setStickyState() {
+          this.sectionEl.classList.add('valor-section-header--sticky', 'valor-section-header--animate');
+        }
+
+        setTransparentPinnedState() {
+          this.sectionEl.classList.remove('valor-section-header--sticky');
+          this.sectionEl.classList.add('valor-section-header--transparent-pinned', 'valor-section-header--animate');
+        }
+
+        onScroll() {
+          if (!this.sectionEl || !this.transparentPinned) return;
+          if (this.scrollTicking) return;
+
+          this.scrollTicking = true;
+          window.requestAnimationFrame(() => {
+            this.scrollTicking = false;
+
+            var scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+            if (!this.transparentSolid && scrollTop > this.transparentPinStart) {
+              this.transparentSolid = true;
+              this.sectionEl.classList.add('valor-section-header--transparent-solid');
+            } else if (this.transparentSolid && scrollTop <= this.transparentPinEnd) {
+              this.transparentSolid = false;
+              this.sectionEl.classList.remove('valor-section-header--transparent-solid');
+            }
+          });
+        }
+      }
+    );
+  }
+</script>
+
+<script>
+  (function () {
+    var drawer = document.getElementById('MobileDrawer');
+    var activeToggle = document.querySelector('[data-drawer-toggle]');
+    var backdrop = document.querySelector('.valor-mobile-drawer-backdrop[data-drawer-backdrop]');
+    var searchModal = document.getElementById('ValorSearchModal');
+
+    function getToggle() {
+      activeToggle = document.querySelector('[data-drawer-toggle]') || activeToggle;
+      return activeToggle;
+    }
+
+    function openDrawer() {
+      var toggle = getToggle();
+      if (!drawer || !toggle) return;
+      // Take the drawer (and its backdrop) out of [hidden] in the same
+      // frame we set data-open. Because the drawer is a full-height
+      // overlay (top: 0) covering the whole page, no header measurement
+      // or coordination is needed — it just slides in over everything,
+      // with the backdrop fading in at the same rhythm.
+      drawer.removeAttribute('hidden');
+      if (backdrop) backdrop.removeAttribute('hidden');
+      document.body.classList.add('valor-drawer-open');
+
+      requestAnimationFrame(function () {
+        drawer.setAttribute('data-open', '');
+        if (backdrop) backdrop.setAttribute('data-open', '');
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.setAttribute('aria-label', '{{ "accessibility.close_menu" | t }}');
+      });
+    }
+
+    function closeDrawer() {
+      var toggle = getToggle();
+      if (!drawer || !toggle) return;
+      drawer.removeAttribute('data-open');
+      if (backdrop) backdrop.removeAttribute('data-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', '{{ "accessibility.open_menu" | t }}');
+      document.body.classList.remove('valor-drawer-open');
+      // Re-hide after the transition for screen-reader cleanliness
+      setTimeout(function () {
+        if (!drawer.hasAttribute('data-open')) drawer.setAttribute('hidden', '');
+        if (backdrop && !backdrop.hasAttribute('data-open')) {
+          backdrop.setAttribute('hidden', '');
+        }
+      }, 250);
+    }
+
+    // Drawer controls. Use one delegated capturing listener instead of
+    // relying only on the initial button references: the Shopify Theme
+    // Editor can re-render header markup, and solid transparent-header
+    // state can otherwise leave the old listener attached to a stale node.
+    if (drawer) {
+      document.addEventListener('click', function (event) {
+        var toggleTarget = event.target.closest('[data-drawer-toggle]');
+        var closeTarget = event.target.closest('[data-drawer-close]');
+
+        if (toggleTarget) {
+          event.preventDefault();
+          activeToggle = toggleTarget;
+          if (drawer.hasAttribute('data-open')) {
+            closeDrawer();
+          } else {
+            openDrawer();
+          }
+          return;
+        }
+
+        if (closeTarget) {
+          event.preventDefault();
+          closeDrawer();
+          var toggle = getToggle();
+          if (toggle) toggle.focus();
+        }
+      }, true);
+
+      // Click outside (backdrop) also closes the drawer.
+      if (backdrop) {
+        backdrop.addEventListener('click', function () {
+          closeDrawer();
+          var toggle = getToggle();
+          if (toggle) toggle.focus();
+        });
+      }
+
+      // Close on Escape.
+      document.addEventListener('keyup', function (event) {
+        if (event.code === 'Escape' && drawer.hasAttribute('data-open')) {
+          closeDrawer();
+          var toggle = getToggle();
+          if (toggle) toggle.focus();
+        }
+      });
+    }
+
+    // Search modal open/close
+    if (searchModal) {
+      var searchInput = searchModal.querySelector('input[name="q"]');
+      var resetButton = searchModal.querySelector('.valor-search-modal__reset');
+      var predictiveSearchEl = searchModal.querySelector('valor-predictive-search');
+
+      document.querySelectorAll('[data-search-modal-open]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          // If the drawer is open, close it first to avoid stacking modals
+          if (drawer && drawer.hasAttribute('data-open')) closeDrawer();
+          searchModal.showModal();
+          if (searchInput) {
+            setTimeout(function () { searchInput.focus(); }, 0);
+          }
+        });
+      });
+      searchModal.querySelectorAll('[data-search-modal-close]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          searchModal.close();
+        });
+      });
+      searchModal.addEventListener('click', function (event) {
+        if (event.target === searchModal) {
+          searchModal.close();
+        }
+      });
+      // When the modal closes, also close the predictive search dropdown
+      searchModal.addEventListener('close', function () {
+        if (predictiveSearchEl && typeof predictiveSearchEl.close === 'function') {
+          predictiveSearchEl.close();
+        }
+      });
+      // Only handle reset manually when predictive search is NOT in charge.
+      // Predictive search hooks the form's native 'reset' event itself.
+      if (resetButton && searchInput && !predictiveSearchEl) {
+        resetButton.addEventListener('click', function () {
+          searchInput.value = '';
+          searchInput.focus();
+        });
+      }
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "t:general.header",
+  "class": "valor-section-header",
+  "settings": [
+    {
+      "type": "select",
+      "id": "logo_position",
+      "label": "Logo position on desktop",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "t:labels.menu"
+    },
+    {
+      "type": "link_list",
+      "id": "customer_account_menu",
+      "label": "t:labels.customer_account_menu",
+      "default": "customer-account-main-menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_customer_avatar",
+      "label": "t:labels.enable_customer_avatar",
+      "info": "t:labels.enable_customer_avatar_info",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:labels.sticky_header"
+    },
+    {
+      "type": "select",
+      "id": "sticky_header_type",
+      "label": "t:labels.sticky_header_type",
+      "info": "Applies to the normal header. If a homepage banner uses transparent header, the banner's own Transparent header behavior overrides this setting.",
+      "options": [
+        { "value": "none", "label": "t:labels.sticky_none" },
+        { "value": "always", "label": "t:labels.sticky_always" }
+      ],
+      "default": "always"
+    },
+    {
+      "type": "header",
+      "content": "t:labels.localization_header"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_country_selector",
+      "label": "t:labels.enable_country_selector",
+      "info": "t:labels.enable_country_selector_info",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_language_selector",
+      "label": "t:labels.enable_language_selector",
+      "info": "t:labels.enable_language_selector_info",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "t:labels.search_header"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_search",
+      "label": "t:labels.enable_search",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

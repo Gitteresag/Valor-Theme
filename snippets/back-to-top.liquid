@@ -1,0 +1,20 @@
+{%- comment -%}
+  Renders a global back-to-top button.
+  Visibility & behavior controlled by Theme settings → Buttons → Back to top.
+{%- endcomment -%}
+
+{%- if settings.enable_back_to_top -%}
+  <button
+    is="valor-back-to-top"
+    type="button"
+    class="valor-back-to-top valor-back-to-top--desktop-{{ settings.back_to_top_position_desktop }} valor-back-to-top--mobile-{{ settings.back_to_top_position_mobile }}"
+    aria-label="{{ 'accessibility.back_to_top' | t | default: 'Back to top' }}"
+    hidden
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <line x1="12" y1="19" x2="12" y2="5"></line>
+      <polyline points="5 12 12 5 19 12"></polyline>
+    </svg>
+    <span class="valor-back-to-top__label">{{ 'accessibility.back_to_top_short' | t | default: 'Top' }}</span>
+  </button>
+{%- endif -%}

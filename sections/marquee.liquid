@@ -1,0 +1,247 @@
+{%- liquid
+  assign speed = section.settings.scroll_speed
+  assign font_size = section.settings.font_size
+  assign separator = section.settings.separator
+-%}
+
+<section
+  class="valor-marquee valor-marquee--size-{{ font_size }}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px; --valor-marquee-duration: {{ speed }}s;"
+>
+  <div class="valor-marquee__viewport" aria-label="{{ 'sections.marquee.aria_label' | t | default: 'Announcement' }}">
+    {%- comment -%} Render the track twice for seamless loop {%- endcomment -%}
+    {%- for i in (1..2) -%}
+      <ul class="valor-marquee__track" {% if i == 2 %}aria-hidden="true"{% endif %}>
+        {%- for block in section.blocks -%}
+          <li class="valor-marquee__item" {% if i == 1 %}{{ block.shopify_attributes }}{% endif %}>
+            {%- if block.settings.icon != 'none' and block.settings.icon != blank -%}
+              <span class="valor-marquee__icon" aria-hidden="true">
+                {%- render 'icon-library', icon: block.settings.icon, size: 22 -%}
+              </span>
+            {%- endif -%}
+            {%- if block.settings.link != blank -%}
+              <a href="{{ block.settings.link }}" class="valor-marquee__link">{{ block.settings.text | escape }}</a>
+            {%- else -%}
+              <span class="valor-marquee__text">{{ block.settings.text | escape }}</span>
+            {%- endif -%}
+          </li>
+          {%- unless forloop.last and i == 2 -%}
+            <li class="valor-marquee__sep" aria-hidden="true">{{ separator }}</li>
+          {%- endunless -%}
+        {%- endfor -%}
+      </ul>
+    {%- endfor -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .valor-marquee {
+    padding-top: var(--valor-section-padding-top, 24px);
+    padding-bottom: var(--valor-section-padding-bottom, 24px);
+    background-color: var(--color-foreground);
+    color: var(--color-background);
+    overflow: hidden;
+  }
+
+  .valor-marquee__viewport {
+    display: flex;
+    gap: 2.5rem;
+    width: 100%;
+    overflow: hidden;
+    /* Mask edges for smooth fade-in/fade-out */
+    -webkit-mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
+  }
+
+  .valor-marquee__track {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    flex: 0 0 auto;
+    animation: valor-marquee-scroll var(--valor-marquee-duration, 30s) linear infinite;
+  }
+
+  @keyframes valor-marquee-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-100% - 2.5rem)); }
+  }
+
+  .valor-marquee:hover .valor-marquee__track {
+    animation-play-state: paused;
+  }
+
+  .valor-marquee__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  .valor-marquee__sep {
+    opacity: 0.5;
+    font-weight: 300;
+  }
+
+  .valor-marquee__link {
+    color: inherit;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+  }
+  .valor-marquee__link:hover { opacity: 0.75; }
+
+  .valor-marquee__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+  }
+  .valor-marquee__icon svg { width: 100%; height: 100%; display: block; }
+
+  /* Sizes */
+  .valor-marquee--size-small { font-size: 0.8125rem; }
+  .valor-marquee--size-medium { font-size: 0.9375rem; }
+  .valor-marquee--size-large { font-size: 1.125rem; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .valor-marquee__track { animation: none; }
+    .valor-marquee__viewport { overflow-x: auto; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Marquee",
+  "tag": "section",
+  "class": "valor-section-marquee",
+  "settings": [
+    {
+      "type": "select",
+      "id": "font_size",
+      "label": "Text size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "text",
+      "id": "separator",
+      "label": "Separator between items",
+      "default": "—"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scroll duration",
+      "min": 10,
+      "max": 90,
+      "step": 5,
+      "unit": "s",
+      "default": 30,
+      "info": "Higher = slower. Pauses on hover."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Free shipping on orders over €50"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "truck", "label": "Truck" },
+            { "value": "package", "label": "Package" },
+            { "value": "globe", "label": "Globe" },
+            { "value": "airplane", "label": "Airplane" },
+            { "value": "home", "label": "Home" },
+            { "value": "lock", "label": "Lock" },
+            { "value": "shield-check", "label": "Shield (check)" },
+            { "value": "check-circle", "label": "Check circle" },
+            { "value": "award", "label": "Award" },
+            { "value": "star", "label": "Star" },
+            { "value": "sparkles", "label": "Sparkles" },
+            { "value": "credit-card", "label": "Credit card" },
+            { "value": "cash", "label": "Cash" },
+            { "value": "tag", "label": "Tag" },
+            { "value": "receipt", "label": "Receipt" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "chat", "label": "Chat" },
+            { "value": "phone", "label": "Phone" },
+            { "value": "question-circle", "label": "Question" },
+            { "value": "information-circle", "label": "Information" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "recycle", "label": "Recycle" },
+            { "value": "fire", "label": "Fire" },
+            { "value": "medal", "label": "Medal" },
+            { "value": "ruler", "label": "Ruler" },
+            { "value": "scale", "label": "Scale" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "clock", "label": "Clock" },
+            { "value": "lightning", "label": "Lightning" },
+            { "value": "target", "label": "Target" }
+          ],
+          "default": "none"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Optional link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Marquee",
+      "blocks": [
+        { "type": "item", "settings": { "icon": "truck", "text": "Free shipping over €50" } },
+        { "type": "item", "settings": { "icon": "lock", "text": "Secure checkout" } },
+        { "type": "item", "settings": { "icon": "package", "text": "30-day returns" } },
+        { "type": "item", "settings": { "icon": "globe", "text": "Worldwide delivery" } },
+        { "type": "item", "settings": { "icon": "sparkles", "text": "Premium quality" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

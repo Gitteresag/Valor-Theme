@@ -1,0 +1,86 @@
+{
+  "sections": {
+    "image_banner": {
+      "type": "image-banner",
+      "blocks": {
+        "heading": {
+          "type": "heading",
+          "settings": {
+            "heading": "Browse our latest products",
+            "heading_size": "h1"
+          }
+        },
+        "subheading": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "<p>Discover the new collection.</p>"
+          }
+        },
+        "buttons": {
+          "type": "buttons",
+          "settings": {
+            "button_label_1": "Shop all",
+            "button_link_1": "shopify://collections/all",
+            "button_style_secondary_1": false,
+            "button_label_2": "",
+            "button_link_2": "",
+            "button_style_secondary_2": true
+          }
+        }
+      },
+      "block_order": ["heading", "subheading", "buttons"],
+      "settings": {
+        "image_height": "medium",
+        "image_overlay_opacity": 30,
+        "desktop_content_position": "middle-center",
+        "desktop_content_alignment": "center",
+        "show_text_box": false,
+        "mobile_content_alignment": "center",
+        "show_text_below": false,
+        "enable_transparent_header": true,
+        "transparent_header_behavior": "always"
+      }
+    },
+    "featured_collection": {
+      "type": "featured-collection",
+      "settings": {
+        "title": "Featured products",
+        "heading_size": "medium",
+        "collection": "all",
+        "products_to_show": 8,
+        "show_view_all": true,
+        "view_all_style": "secondary",
+        "full_width": false,
+        "image_ratio": "portrait",
+        "show_secondary_image": true,
+        "show_vendor": false,
+        "columns_desktop": 4,
+        "columns_mobile": "2",
+        "swipe_on_mobile": false,
+        "padding_top": 56,
+        "padding_bottom": 56
+      }
+    },
+    "collection_list": {
+      "type": "collection-list",
+      "blocks": {
+        "collection_1": { "type": "collection", "settings": {} },
+        "collection_2": { "type": "collection", "settings": {} },
+        "collection_3": { "type": "collection", "settings": {} }
+      },
+      "block_order": ["collection_1", "collection_2", "collection_3"],
+      "settings": {
+        "title": "Shop by category",
+        "heading_size": "medium",
+        "show_view_all": false,
+        "image_ratio": "portrait",
+        "columns_desktop": 3,
+        "columns_mobile": "2",
+        "swipe_on_mobile": false,
+        "padding_top": 56,
+        "padding_bottom": 56
+      }
+    }
+  },
+  "order": ["image_banner", "featured_collection", "collection_list"]
+}

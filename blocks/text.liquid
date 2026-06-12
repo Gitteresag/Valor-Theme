@@ -1,0 +1,62 @@
+{% doc %}
+  Renders a text block.
+
+  @example
+  {% content_for 'block', type: 'text', id: 'text' %}
+{% enddoc %}
+
+<div
+  class="valor-text {{ block.settings.text_style }}"
+  style="--text-align: {{ block.settings.alignment }}"
+  {{ block.shopify_attributes }}
+>
+  {{ block.settings.text }}
+</div>
+
+{% stylesheet %}
+  .valor-text {
+    text-align: var(--text-align);
+  }
+  .valor-text--title {
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: 2rem;
+    font-weight: var(--font-heading--weight);
+    letter-spacing: 0;
+  }
+  .valor-text--subtitle {
+    font-size: 1.5rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:general.text",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "t:labels.text",
+      "default": "Text"
+    },
+    {
+      "type": "select",
+      "id": "text_style",
+      "label": "t:labels.text_style",
+      "options": [
+        { "value": "valor-text--title", "label": "t:options.text_style.title" },
+        { "value": "valor-text--subtitle", "label": "t:options.text_style.subtitle" },
+        { "value": "valor-text--normal", "label": "t:options.text_style.normal" }
+      ],
+      "default": "valor-text--title"
+    },
+    {
+      "type": "text_alignment",
+      "id": "alignment",
+      "label": "t:labels.alignment",
+      "default": "left"
+    }
+  ],
+  "presets": [{ "name": "t:general.text" }]
+}
+{% endschema %}

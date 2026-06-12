@@ -1,0 +1,302 @@
+{%- liquid
+  assign columns_desktop = section.settings.columns_desktop
+  assign content_alignment = section.settings.heading_alignment
+-%}
+
+<section
+  class="valor-logo-list valor-logo-list--align-{{ content_alignment }}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-logo-list__inner">
+    {%- if section.settings.caption != blank or section.settings.heading != blank -%}
+      <header class="valor-logo-list__header">
+        {%- if section.settings.caption != blank -%}
+          <div class="valor-logo-list__caption">{{ section.settings.caption | escape }}</div>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="valor-logo-list__heading valor-heading valor-heading--{{ section.settings.heading_size }}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div
+        class="valor-logo-list__grid valor-logo-list__grid--cols-{{ columns_desktop }}{% if section.settings.grayscale %} valor-logo-list__grid--grayscale{% endif %}"
+      >
+        {%- for block in section.blocks -%}
+          {%- assign logo_loading = 'lazy' -%}
+          {%- assign logo_fetchpriority = 'auto' -%}
+          {%- if section.location == 'template' and section.index == 1 and forloop.first -%}
+            {%- assign logo_loading = 'eager' -%}
+            {%- assign logo_fetchpriority = 'high' -%}
+          {%- endif -%}
+          {%- assign logo_tag = 'div' -%}
+          {%- if block.settings.link != blank -%}
+            {%- assign logo_tag = 'a' -%}
+          {%- endif -%}
+          <{{ logo_tag }}
+            class="valor-logo-list__item{% if block.settings.image == blank %} valor-logo-list__item--placeholder{% endif %}"
+            {% if block.settings.link != blank %}href="{{ block.settings.link }}"{% endif %}
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.image != blank -%}
+              {%- assign img = block.settings.image -%}
+              <img
+                class="valor-logo-list__image"
+                src="{{ img | image_url: width: 240 }}"
+                srcset="{{ img | image_url: width: 120 }} 120w, {{ img | image_url: width: 240 }} 240w, {{ img | image_url: width: 480 }} 480w"
+                sizes="(min-width: 750px) 200px, 140px"
+                alt="{{ img.alt | default: 'Logo' | escape }}"
+                width="{{ img.width }}"
+                height="{{ img.height }}"
+                loading="{{ logo_loading }}"
+                fetchpriority="{{ logo_fetchpriority }}"
+                style="--valor-logo-max-height: {{ section.settings.logo_max_height }}px;"
+              >
+            {%- else -%}
+              <div class="valor-logo-list__placeholder" style="--valor-logo-max-height: {{ section.settings.logo_max_height }}px;" aria-hidden="true">
+                {{ 'logo' | placeholder_svg_tag: 'valor-logo-list__placeholder-svg' }}
+              </div>
+            {%- endif -%}
+          </{{ logo_tag }}>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .valor-logo-list {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+  .valor-logo-list__inner {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+  }
+
+  /* Header */
+  .valor-logo-list__header {
+    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .valor-logo-list--align-left .valor-logo-list__header { text-align: left; align-items: flex-start; }
+  .valor-logo-list--align-center .valor-logo-list__header { text-align: center; align-items: center; }
+  .valor-logo-list--align-right .valor-logo-list__header { text-align: right; align-items: flex-end; }
+
+  .valor-logo-list__caption {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  }
+
+  /* Grid */
+  .valor-logo-list__grid {
+    display: grid;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-items: center;
+    justify-items: center;
+  }
+  .valor-logo-list__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .valor-logo-list__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .valor-logo-list__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .valor-logo-list__grid--cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+  @media (max-width: 989px) {
+    .valor-logo-list__grid--cols-5,
+    .valor-logo-list__grid--cols-6 { grid-template-columns: repeat(4, 1fr); }
+  }
+
+  @media (max-width: 749px) {
+    .valor-logo-list__grid { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+    .valor-logo-list__grid--cols-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* Items */
+  .valor-logo-list__item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 200px;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.15s ease;
+  }
+  a.valor-logo-list__item:hover { opacity: 0.7; }
+
+  .valor-logo-list__image {
+    max-width: 100%;
+    max-height: var(--valor-logo-max-height, 60px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Placeholder shown when no image is uploaded yet */
+  .valor-logo-list__placeholder {
+    width: 100%;
+    max-width: 160px;
+    height: var(--valor-logo-max-height, 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+  }
+  .valor-logo-list__placeholder-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  /* Grayscale (recolor logos to neutral, premium look) */
+  .valor-logo-list__grid--grayscale .valor-logo-list__image {
+    filter: grayscale(100%);
+    opacity: 0.7;
+    transition: filter 0.2s ease, opacity 0.2s ease;
+  }
+  .valor-logo-list__grid--grayscale .valor-logo-list__item:hover .valor-logo-list__image {
+    filter: grayscale(0%);
+    opacity: 1;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Logo list",
+  "tag": "section",
+  "class": "valor-section-logo-list",
+  "settings": [
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Caption"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "As featured in"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "small"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Logos per row (desktop)",
+      "min": 3,
+      "max": 6,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "logo_max_height",
+      "label": "Logo max height",
+      "min": 32,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "checkbox",
+      "id": "grayscale",
+      "label": "Use grayscale style",
+      "default": true,
+      "info": "Logos appear in grayscale and color on hover. Premium look for press/feature lists."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Logo",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Logo image",
+          "info": "PNG or SVG with transparent background recommended."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Optional link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Logo list",
+      "blocks": [
+        { "type": "logo" },
+        { "type": "logo" },
+        { "type": "logo" },
+        { "type": "logo" },
+        { "type": "logo" }
+      ]
+    }
+  ]
+}
+{% endschema %}

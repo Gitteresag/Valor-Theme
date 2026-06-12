@@ -1,0 +1,46 @@
+{%- comment -%}
+  Renders inventory status for the currently selected variant — coloured
+  dot + status label. Three states: in stock, low stock, out of stock.
+
+  Only rendered when the variant has Shopify-tracked inventory and the
+  policy is "deny" (i.e. real stock counts that matter to the customer).
+  Variants without tracking, or with the "continue" policy, never render.
+
+  Accepts:
+    variant   {Variant}  required
+    block     {Block}    required — for settings.inventory_threshold,
+                                    settings.show_inventory_quantity,
+                                    shopify_attributes
+{%- endcomment -%}
+
+{%- liquid
+  assign show_inv = false
+  if variant.inventory_management == 'shopify' and variant.inventory_policy == 'deny'
+    assign show_inv = true
+  endif
+-%}
+{%- if show_inv -%}
+  {%- if variant.inventory_quantity <= 0 -%}
+    {%- assign inv_class = 'valor-mp__inventory--out' -%}
+    {%- assign inv_text = 'product.out_of_stock' | t -%}
+  {%- elsif variant.inventory_quantity <= block.settings.inventory_threshold -%}
+    {%- assign inv_class = 'valor-mp__inventory--low' -%}
+    {%- if block.settings.show_inventory_quantity -%}
+      {%- assign inv_text = 'product.low_stock_count' | t: count: variant.inventory_quantity -%}
+    {%- else -%}
+      {%- assign inv_text = 'product.low_stock' | t -%}
+    {%- endif -%}
+  {%- else -%}
+    {%- assign inv_class = 'valor-mp__inventory--in' -%}
+    {%- assign inv_text = 'product.in_stock' | t -%}
+  {%- endif -%}
+  <p
+    class="valor-mp__inventory {{ inv_class }}"
+    data-threshold="{{ block.settings.inventory_threshold }}"
+    data-show-qty="{{ block.settings.show_inventory_quantity }}"
+    {{ block.shopify_attributes }}
+  >
+    <span class="valor-mp__inventory-dot" aria-hidden="true"></span>
+    {{ inv_text }}
+  </p>
+{%- endif -%}

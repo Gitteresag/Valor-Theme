@@ -1,0 +1,620 @@
+{%- comment -%}
+  Search results page section.
+
+  Pattern follows Dawn's main-search.liquid but with Valor naming
+  conventions and reusing the existing collection page primitives
+  (facets snippet, product-card snippet, pagination snippet).
+
+  Layout:
+    Header
+      → H1 ("Search" or "Search results"), search input form,
+        result count or no-results message.
+    Toolbar (only if a search was performed AND there are results)
+      → result count, mobile "Filter and sort" button, desktop sort.
+    Layout (only if search was performed)
+      → Optional facets sidebar (uses Shopify Search & Discovery filters).
+      → Results grid using product-card / article / page renderers.
+    Pagination
+      → Valor's BEM-styled pagination snippet.
+
+  Result kinds:
+    Shopify search returns mixed object types — products, articles,
+    and pages — and Dawn renders them with separate card components
+    in the same grid. We do the same: products use product-card so
+    they look identical to the collection grid; articles and pages
+    use lightweight inline cards so a search hit on a Page/Blog post
+    is still clickable and visually distinct from a product image.
+
+  Filters:
+    Uses Shopify's storefront filter API (search.filters), populated
+    by the Search & Discovery app. Only meaningful if the merchant
+    has filters enabled for the search context. We let the same
+    facets snippet handle UI just like the collection page does.
+{%- endcomment -%}
+
+{{ 'product-card.css' | asset_url | stylesheet_tag }}
+{{ 'collection.css'   | asset_url | stylesheet_tag }}
+{{ 'facets-bar.css'   | asset_url | stylesheet_tag }}
+{{ 'search.css'       | asset_url | stylesheet_tag }}
+{%- comment -%}
+  Predictive search assets are loaded once by layout/theme.liquid.
+  This section only renders the search-page predictive-search markup.
+{%- endcomment -%}
+<script src="{{ 'collection.js' | asset_url }}" defer></script>
+<script src="{{ 'grid-view.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign cols_desktop   = section.settings.columns_desktop | default: 4
+  assign cols_mobile    = section.settings.columns_mobile  | default: 2
+  assign per_page       = section.settings.products_per_page | default: 24
+  assign image_ratio    = section.settings.image_ratio | default: 'square'
+  assign show_secondary = section.settings.show_secondary_image
+  assign show_vendor    = section.settings.show_vendor
+  assign enable_filtering = section.settings.enable_filtering
+  assign enable_sorting   = section.settings.enable_sorting
+  assign heading_size   = section.settings.heading_size | default: 'large'
+  assign heading_align  = section.settings.heading_alignment | default: 'center'
+  assign sort_by        = search.sort_by | default: search.default_sort_by
+  assign terms          = search.terms | escape
+  assign terms_url      = search.terms | url_encode
+  assign search_clear_url = routes.search_url
+  if terms_url != blank
+    assign search_clear_url = search_clear_url | append: '?q=' | append: terms_url | append: '&options%5Bprefix%5D=last'
+  endif
+
+  assign active_filter_count = 0
+  if search.performed and search.filters != empty
+    for filter in search.filters
+      assign active_filter_count = active_filter_count | plus: filter.active_values.size
+      if filter.type == 'price_range'
+        if filter.min_value.value != null or filter.max_value.value != null
+          assign active_filter_count = active_filter_count | plus: 1
+        endif
+      endif
+    endfor
+  endif
+
+  assign has_results = false
+  if search.performed and search.results_count > 0
+    assign has_results = true
+  endif
+
+  assign has_filters = false
+  if has_results and enable_filtering and search.filters != empty
+    assign has_filters = true
+  endif
+
+  assign has_sorting = false
+  if has_results and enable_sorting and search.sort_options.size > 1
+    assign has_sorting = true
+  endif
+
+  assign has_drawer_controls = false
+  if has_filters or has_sorting
+    assign has_drawer_controls = true
+  endif
+
+  assign empty_collection = section.settings.empty_state_collection | default: collections.all
+
+  assign show_empty_state_grid = false
+  if has_results == false and active_filter_count == 0
+    assign show_empty_state_grid = true
+  endif
+-%}
+
+<valor-collection
+  class="valor-search valor-section"
+  data-collection-section-id="{{ section.id }}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <header class="valor-search__header valor-search__header--{{ heading_align }}">
+    <h1 class="valor-search__title valor-heading valor-heading--{{ heading_size }}">
+      {%- if search.performed -%}
+        {{- 'templates.search.title' | t -}}
+      {%- else -%}
+        {{- 'general.search.search' | t -}}
+      {%- endif -%}
+    </h1>
+
+    {%- comment -%}
+      Search input.
+
+      When predictive search is enabled in theme settings, we wrap
+      the form in a <valor-predictive-search> custom element that
+      listens for input on the search field and renders live
+      suggestions into [data-predictive-search]. Same component as
+      the header search modal — see snippets/header-search.liquid.
+
+      The reset link (× icon) navigates back to the clean search
+      URL — this clears both the input and the results in one
+      action, which matches user expectations better than a
+      plain form reset (Dawn-style) that would only clear the
+      field while leaving stale results on screen. CSS hides the
+      link when the input is empty (sibling selector against
+      :placeholder-shown), so it only appears when there is
+      something to reset.
+    {%- endcomment -%}
+    {%- assign predictive_enabled = settings.enable_predictive_search -%}
+
+    {%- if predictive_enabled -%}
+      <valor-predictive-search
+        class="valor-psearch valor-search__predictive"
+        data-loading-text="{{ 'accessibility.loading' | t }}"
+      >
+    {%- endif -%}
+
+    <form
+      action="{{ routes.search_url }}"
+      method="get"
+      role="search"
+      class="valor-search__form"
+    >
+      <input type="hidden" name="options[prefix]" value="last">
+      <div class="valor-search__field">
+        <label for="SearchInput" class="visually-hidden">
+          {{ 'general.search.search' | t }}
+        </label>
+        <input
+          type="search"
+          name="q"
+          id="SearchInput"
+          class="valor-search__input"
+          value="{{ terms }}"
+          placeholder="{{ 'search.placeholder' | t }}"
+          {% if predictive_enabled %}
+            role="combobox"
+            aria-expanded="false"
+            aria-owns="predictive-search-results"
+            aria-controls="predictive-search-results"
+            aria-haspopup="listbox"
+            aria-autocomplete="list"
+          {% endif %}
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="{{ 'search.placeholder' | t }}"
+        >
+        {%- if predictive_enabled -%}
+          <span class="predictive-search-status visually-hidden" role="status" aria-hidden="true"></span>
+        {%- endif -%}
+        <a
+          href="{{ routes.search_url }}"
+          class="valor-search__reset"
+          aria-label="{{ 'general.search.reset' | t }}"
+        >
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </a>
+        <button
+          type="submit"
+          class="valor-search__submit"
+          aria-label="{{ 'search.submit' | t }}"
+        >
+          <svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+      </div>
+
+      {%- if predictive_enabled -%}
+        {%- comment -%}
+          Predictive results panel. The <valor-predictive-search>
+          element fetches /search/suggest.json on input and replaces
+          this panel's contents with the response. data-live-region
+          updates announce result counts to screen readers.
+        {%- endcomment -%}
+        <div class="valor-psearch__panel" data-predictive-search aria-live="polite">
+          <div class="valor-psearch__loading" aria-hidden="true">
+            <span class="valor-psearch__spinner"></span>
+          </div>
+        </div>
+        <span class="visually-hidden" data-predictive-search-status role="status" aria-live="polite"></span>
+      {%- endif -%}
+    </form>
+
+    {%- if predictive_enabled -%}
+      </valor-predictive-search>
+    {%- endif -%}
+
+    {%- if search.performed and has_results == false -%}
+      {%- if active_filter_count > 0 -%}
+        <p class="valor-search__status" role="status">
+          {{ 'templates.search.no_results_filtered_html' | t: link: search_clear_url }}
+        </p>
+      {%- else -%}
+        <p class="valor-search__status" role="status">
+          {{ 'general.search.no_results_html' | t: terms: terms }}
+        </p>
+      {%- endif -%}
+    {%- endif -%}
+
+    {%- comment -%}
+      List heading shown above the empty-state product grid. Visible
+      only when there are no search results AND no filters narrowing
+      a search down to zero. The label reflects context:
+      — Pre-search (/search with no query): shopkeeper's chosen
+        collection title, or the default "Browse our products".
+      — Searched but zero hits: chosen collection title, or the
+        default "You may also like".
+    {%- endcomment -%}
+    {%- if show_empty_state_grid and empty_collection.products.size > 0 -%}
+      <h2 class="valor-search__list-heading valor-heading valor-heading--medium">
+        {%- if section.settings.empty_state_collection != blank -%}
+          {{- empty_collection.title -}}
+        {%- elsif search.performed -%}
+          {{- 'templates.search.suggestions_heading' | t -}}
+        {%- else -%}
+          {{- 'templates.search.empty_state_heading' | t -}}
+        {%- endif -%}
+      </h2>
+    {%- endif -%}
+  </header>
+
+  {%- comment -%}
+    Three rendering branches based on visitor state:
+
+    A) Searched with results — full search experience with sidebar
+       filters, sort, toolbar and paginated results.
+    B) Searched, zero hits — a passive "you may also like" grid
+       drawn from empty_state_collection, capped at per_page items
+       (no pagination, no filters). Skipped entirely when active
+       filters are what zeroed the result set; in that case the
+       header's "clear filters" status message handles the UX.
+    C) Pre-search (/search with no query) — a paginated showcase
+       of empty_state_collection so the visitor can browse a full
+       set of products, not just the first per_page items.
+
+    Each branch owns its own paginate where applicable so the URL
+    `?page=N` parameter applies to the right product source.
+  {%- endcomment -%}
+  {%- if search.performed and has_results -%}
+
+    {%- paginate search.results by per_page -%}
+      <div class="valor-search__toolbar valor-collection__toolbar--mobile">
+        <span class="valor-search__count" role="status">
+          {%- if search.results_count == 1 -%}
+            {{ 'general.search.results_with_count.one' | t: count: search.results_count }}
+          {%- else -%}
+            {{ 'general.search.results_with_count.other' | t: count: search.results_count }}
+          {%- endif -%}
+        </span>
+
+        {%- if has_drawer_controls -%}
+          <button
+            type="button"
+            class="valor-collection__filter-btn"
+            data-facets-open
+            aria-label="{{ 'collection.filters.filter_and_sort' | t }}"
+          >
+            <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+            <span>{{ 'collection.filters.filter_and_sort' | t }}</span>
+            {%- if active_filter_count > 0 -%}
+              <span class="valor-collection__filter-count">{{ active_filter_count }}</span>
+            {%- endif -%}
+          </button>
+        {%- endif -%}
+
+        {%- render 'grid-view-toggle', viewport: 'mobile' -%}
+      </div>
+
+      {%- if has_filters or has_sorting -%}
+        {%- render 'facets-bar',
+            results: search,
+            paginate: paginate,
+            enable_filtering: enable_filtering,
+            show_sort: true,
+            has_sorting: has_sorting,
+            results_count: search.results_count
+        -%}
+      {%- endif -%}
+
+      <div class="valor-collection__layout{% unless has_filters %} valor-collection__layout--no-sidebar{% endunless %}">
+        <div class="valor-collection__overlay" data-facets-close aria-hidden="true"></div>
+
+        <aside class="valor-collection__sidebar">
+          {%- if has_sorting -%}
+            <div class="valor-collection__sort-wrap valor-collection__sort-wrap--mobile">
+              <label class="valor-collection__sort-label">{{ 'collection.sort_by' | t }}</label>
+              <select
+                class="valor-collection__sort"
+                data-collection-sort
+                aria-label="{{ 'collection.sort_by' | t }}"
+              >
+                {%- for option in search.sort_options -%}
+                  <option value="{{ option.value }}" {% if option.value == sort_by %}selected{% endif %}>
+                    {{ option.name }}
+                  </option>
+                {%- endfor -%}
+              </select>
+            </div>
+          {%- endif -%}
+
+          {%- if has_filters -%}
+            {%- render 'facets', results: search, paginate: paginate -%}
+          {%- endif -%}
+        </aside>
+
+        <div class="valor-collection__main">
+          <ul
+            class="valor-collection__grid valor-collection__grid--cols-{{ cols_desktop }} valor-collection__grid--mobile-{{ cols_mobile }} valor-search__grid"
+            role="list"
+          >
+            {%- for item in search.results -%}
+              <li class="valor-search__grid-item">
+                {%- case item.object_type -%}
+                  {%- when 'product' -%}
+                    {%- render 'product-card',
+                        product: item,
+                        image_ratio: image_ratio,
+                        show_secondary_image: show_secondary,
+                        show_vendor: show_vendor,
+                        show_price: true
+                    -%}
+                  {%- when 'article' -%}
+                    <a href="{{ item.url }}" class="valor-search__resource">
+                      {%- if item.image -%}
+                        <div class="valor-search__resource-media">
+                          <img
+                            src="{{ item.image | image_url: width: 600 }}"
+                            srcset="
+                              {{ item.image | image_url: width: 300 }} 300w,
+                              {{ item.image | image_url: width: 600 }} 600w,
+                              {{ item.image | image_url: width: 900 }} 900w
+                            "
+                            sizes="(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw"
+                            alt="{{ item.image.alt | default: item.title | escape }}"
+                            loading="lazy"
+                            width="{{ item.image.width }}"
+                            height="{{ item.image.height }}"
+                          >
+                        </div>
+                      {%- endif -%}
+                      <div class="valor-search__resource-body">
+                        <span class="valor-search__resource-badge">{{ 'blog.article' | t | default: 'Article' }}</span>
+                        <h2 class="valor-search__resource-title">{{ item.title | escape }}</h2>
+                        {%- if item.excerpt_or_content != blank -%}
+                          <p class="valor-search__resource-excerpt">
+                            {{ item.excerpt_or_content | strip_html | truncatewords: 20 }}
+                          </p>
+                        {%- endif -%}
+                      </div>
+                    </a>
+                  {%- when 'page' -%}
+                    <a href="{{ item.url }}" class="valor-search__resource valor-search__resource--text">
+                      <div class="valor-search__resource-body">
+                        <span class="valor-search__resource-badge">{{ 'templates.search.page' | t | default: 'Page' }}</span>
+                        <h2 class="valor-search__resource-title">{{ item.title | escape }}</h2>
+                        {%- if item.content != blank -%}
+                          <p class="valor-search__resource-excerpt">
+                            {{ item.content | strip_html | truncatewords: 24 }}
+                          </p>
+                        {%- endif -%}
+                      </div>
+                    </a>
+                {%- endcase -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+
+          {%- render 'pagination', paginate: paginate -%}
+        </div>
+      </div>
+    {%- endpaginate -%}
+
+  {%- elsif search.performed -%}
+
+    {%- if empty_collection.products.size > 0 and active_filter_count == 0 -%}
+      <div class="valor-search__empty-toolbar">
+        {%- render 'grid-view-toggle', viewport: 'desktop' -%}
+        {%- render 'grid-view-toggle', viewport: 'mobile' -%}
+      </div>
+
+      <div class="valor-collection__layout valor-collection__layout--no-sidebar valor-search__layout--empty-state">
+        <div class="valor-collection__main">
+          <ul
+            class="valor-collection__grid valor-collection__grid--cols-{{ cols_desktop }} valor-collection__grid--mobile-{{ cols_mobile }} valor-search__grid"
+            role="list"
+          >
+            {%- for product in empty_collection.products limit: per_page -%}
+              <li class="valor-search__grid-item">
+                {%- render 'product-card',
+                    product: product,
+                    image_ratio: image_ratio,
+                    show_secondary_image: show_secondary,
+                    show_vendor: show_vendor,
+                    show_price: true
+                -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      </div>
+    {%- endif -%}
+
+  {%- else -%}
+
+    {%- if empty_collection.products.size > 0 -%}
+      {%- paginate empty_collection.products by per_page -%}
+        <div class="valor-search__empty-toolbar">
+          {%- render 'grid-view-toggle', viewport: 'desktop' -%}
+          {%- render 'grid-view-toggle', viewport: 'mobile' -%}
+        </div>
+
+        <div class="valor-collection__layout valor-collection__layout--no-sidebar valor-search__layout--empty-state">
+          <div class="valor-collection__main">
+            <ul
+              class="valor-collection__grid valor-collection__grid--cols-{{ cols_desktop }} valor-collection__grid--mobile-{{ cols_mobile }} valor-search__grid"
+              role="list"
+            >
+              {%- for product in empty_collection.products -%}
+                <li class="valor-search__grid-item">
+                  {%- render 'product-card',
+                      product: product,
+                      image_ratio: image_ratio,
+                      show_secondary_image: show_secondary,
+                      show_vendor: show_vendor,
+                      show_price: true
+                  -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            {%- render 'pagination', paginate: paginate -%}
+          </div>
+        </div>
+      {%- endpaginate -%}
+    {%- endif -%}
+
+  {%- endif -%}
+</valor-collection>
+
+{% schema %}
+{
+  "name": "Search results",
+  "tag": "section",
+  "class": "valor-section-wrapper valor-section-wrapper--search",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Title size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Empty state"
+    },
+    {
+      "type": "collection",
+      "id": "empty_state_collection",
+      "label": "Empty state collection",
+      "info": "Products shown when the visitor lands on the search page with no query, or when a search returns zero results. Leave empty to show all products."
+    },
+    {
+      "type": "header",
+      "content": "Filtering and sorting"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "Enable filtering",
+      "info": "Configure filters in the [Search & Discovery app](/admin/apps/search-and-discovery/configuration/filters).",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "Enable sorting",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Product cards"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "adapt",     "label": "Adapt to image" },
+        { "value": "portrait",  "label": "Portrait (3:4)" },
+        { "value": "square",    "label": "Square (1:1)" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "label": "Show second image on hover",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        { "value": "1", "label": "1 column" },
+        { "value": "2", "label": "2 columns" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Results per page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    }
+  ]
+}
+{% endschema %}

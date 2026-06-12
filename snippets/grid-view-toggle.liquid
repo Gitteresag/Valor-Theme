@@ -1,0 +1,70 @@
+{%- comment -%}
+  Renders the two-button grid-view toggle.
+
+  Parameters:
+    viewport — "desktop" or "mobile". Controls which CSS-only
+               media-query rule the click ultimately affects and
+               which storage key the JS reads/writes.
+
+  The buttons start out without an active aria-pressed value; the
+  JS in grid-view.js sets aria-pressed="true" on the matching button
+  after reading the stored preference, so the markup is correct as
+  soon as JS runs. Without JS both buttons appear unpressed, which
+  is acceptable — the grid still uses its default layout.
+{%- endcomment -%}
+
+{%- assign vp = viewport | default: 'desktop' -%}
+
+<div class="valor-grid-view-toggle valor-grid-view-toggle--{{ vp }}" role="group" aria-label="{{ 'collection.grid_view.label' | t }}">
+  <button
+    type="button"
+    class="valor-grid-view-toggle__btn"
+    data-grid-view-toggle="default"
+    data-grid-view-viewport="{{ vp }}"
+    aria-label="{{ 'collection.grid_view.default' | t }}"
+    aria-pressed="false"
+  >
+    {%- if vp == 'mobile' -%}
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="2" y="2" width="5" height="12" rx="0.5"></rect>
+        <rect x="9" y="2" width="5" height="12" rx="0.5"></rect>
+      </svg>
+    {%- else -%}
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="2" y="2" width="5" height="5" rx="0.5"></rect>
+        <rect x="9" y="2" width="5" height="5" rx="0.5"></rect>
+        <rect x="2" y="9" width="5" height="5" rx="0.5"></rect>
+        <rect x="9" y="9" width="5" height="5" rx="0.5"></rect>
+      </svg>
+    {%- endif -%}
+  </button>
+
+  <button
+    type="button"
+    class="valor-grid-view-toggle__btn"
+    data-grid-view-toggle="{% if vp == 'mobile' %}single{% else %}compact{% endif %}"
+    data-grid-view-viewport="{{ vp }}"
+    aria-label="{% if vp == 'mobile' %}{{ 'collection.grid_view.single' | t }}{% else %}{{ 'collection.grid_view.compact' | t }}{% endif %}"
+    aria-pressed="false"
+  >
+    {%- if vp == 'mobile' -%}
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="2" y="2" width="12" height="3" rx="0.5"></rect>
+        <rect x="2" y="6.5" width="12" height="3" rx="0.5"></rect>
+        <rect x="2" y="11" width="12" height="3" rx="0.5"></rect>
+      </svg>
+    {%- else -%}
+      <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <rect x="1.5" y="1.5" width="3" height="3" rx="0.5"></rect>
+        <rect x="6.5" y="1.5" width="3" height="3" rx="0.5"></rect>
+        <rect x="11.5" y="1.5" width="3" height="3" rx="0.5"></rect>
+        <rect x="1.5" y="6.5" width="3" height="3" rx="0.5"></rect>
+        <rect x="6.5" y="6.5" width="3" height="3" rx="0.5"></rect>
+        <rect x="11.5" y="6.5" width="3" height="3" rx="0.5"></rect>
+        <rect x="1.5" y="11.5" width="3" height="3" rx="0.5"></rect>
+        <rect x="6.5" y="11.5" width="3" height="3" rx="0.5"></rect>
+        <rect x="11.5" y="11.5" width="3" height="3" rx="0.5"></rect>
+      </svg>
+    {%- endif -%}
+  </button>
+</div>

@@ -1,0 +1,44 @@
+{%- comment -%}
+  Renders the language picker for the localization form
+
+  Accepts:
+    - localPosition: pass in the position in which the form is coming up to create specific IDs
+{%- endcomment -%}
+
+<div class="valor-localization__disclosure">
+  <button
+    type="button"
+    class="valor-localization__select"
+    aria-expanded="false"
+    aria-controls="{{ localPosition }}-list"
+    aria-describedby="{{ localPosition }}Label"
+  >
+    <span>{{ localization.language.endonym_name | capitalize }}</span>
+    <span class="valor-localization__chevron" aria-hidden="true">
+      {{ 'icon-chevron-down.svg' | inline_asset_content }}
+    </span>
+  </button>
+
+  <div class="valor-localization__panel valor-localization__panel--language" hidden>
+    <ul id="{{ localPosition }}-list" class="valor-localization__list">
+      {%- for language in localization.available_languages -%}
+        <li class="valor-localization__item">
+          <a
+            class="valor-localization__link"
+            href="#"
+            hreflang="{{ language.iso_code }}"
+            lang="{{ language.iso_code }}"
+            {% if language.iso_code == localization.language.iso_code %}aria-current="true"{% endif %}
+            data-value="{{ language.iso_code }}"
+          >
+            <span class="valor-localization__check{% if language.iso_code != localization.language.iso_code %} valor-localization__check--hidden{% endif %}" aria-hidden="true">
+              {{- 'icon-check.svg' | inline_asset_content -}}
+            </span>
+            <span>{{- language.endonym_name | capitalize -}}</span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+<input type="hidden" name="locale_code" value="{{ localization.language.iso_code }}">

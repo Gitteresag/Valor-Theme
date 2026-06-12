@@ -1,0 +1,547 @@
+{%- liquid
+  assign columns_desktop = section.settings.columns_desktop
+  assign columns_mobile = section.settings.columns_mobile
+-%}
+<section
+  class="valor-collection-list{% if section.settings.swipe_on_mobile %} valor-collection-list--mobile-full-bleed{% endif %}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px; --valor-grid-gap: {{ section.settings.column_gap }}px; --valor-grid-gap-mobile: {{ section.settings.column_gap_mobile }}px; --valor-mobile-card-width: {{ section.settings.mobile_card_width }}%;"
+>
+  <div class="valor-collection-list__inner">
+    {%- if section.settings.title != blank -%}
+      <header class="valor-collection-list__header valor-collection-list__header--align-{{ section.settings.heading_alignment }}">
+        <h2 class="valor-collection-list__title valor-heading valor-heading--{{ section.settings.heading_size }}">
+          {{ section.settings.title }}
+        </h2>
+        {%- if section.settings.show_view_all -%}
+          <a
+            href="{{ routes.collections_url }}"
+            class="valor-collection-list__view-all valor-collection-list__view-all--desktop"
+          >
+            {{ 'sections.collection_list.view_all' | t | default: 'View all collections' }}
+            <span aria-hidden="true">→</span>
+          </a>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    <div
+      class="valor-collection-list__grid valor-collection-list__grid--cols-{{ columns_desktop }} valor-collection-list__grid--mobile-{{ columns_mobile }}{% if section.settings.swipe_on_mobile %} valor-collection-list__grid--swipe-mobile{% endif %}"
+    >
+      {%- for block in section.blocks -%}
+        {%- assign collection = block.settings.collection -%}
+        {%- assign card_loading = 'lazy' -%}
+        {%- assign card_fetchpriority = 'auto' -%}
+        {%- if section.location == 'template' and section.index == 1 and forloop.first -%}
+          {%- assign card_loading = 'eager' -%}
+          {%- assign card_fetchpriority = 'high' -%}
+        {%- endif -%}
+        <a
+          href="{{ collection.url | default: '#' }}"
+          class="valor-collection-card valor-collection-card--ratio-{{ section.settings.image_ratio }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="valor-collection-card__media">
+            {%- if collection.image != blank -%}
+              <img
+                class="valor-collection-card__image"
+                srcset="{{ collection.image | image_url: width: 400 }} 400w, {{ collection.image | image_url: width: 600 }} 600w, {{ collection.image | image_url: width: 800 }} 800w, {{ collection.image | image_url: width: 1100 }} 1100w"
+                src="{{ collection.image | image_url: width: 600 }}"
+                sizes="(min-width: 990px) 33vw, 50vw"
+                alt="{{ collection.image.alt | escape }}"
+                width="{{ collection.image.width }}"
+                height="{{ collection.image.height }}"
+                loading="{{ card_loading }}"
+                fetchpriority="{{ card_fetchpriority }}"
+              >
+            {%- elsif collection.products.first.featured_media != blank -%}
+              {%- assign first_image = collection.products.first.featured_media -%}
+              <img
+                class="valor-collection-card__image"
+                srcset="{{ first_image | image_url: width: 400 }} 400w, {{ first_image | image_url: width: 600 }} 600w, {{ first_image | image_url: width: 800 }} 800w"
+                src="{{ first_image | image_url: width: 600 }}"
+                sizes="(min-width: 990px) 33vw, 50vw"
+                alt="{{ first_image.alt | escape }}"
+                width="{{ first_image.width }}"
+                height="{{ first_image.height }}"
+                loading="{{ card_loading }}"
+                fetchpriority="{{ card_fetchpriority }}"
+              >
+            {%- else -%}
+              <div class="valor-collection-card__placeholder">
+                {{ 'collection-1' | placeholder_svg_tag: 'valor-collection-card__placeholder-svg' }}
+              </div>
+            {%- endif -%}
+            <div class="valor-collection-card__overlay" aria-hidden="true"></div>
+          </div>
+
+          <div class="valor-collection-card__info">
+            <h3 class="valor-collection-card__title">
+              {{- collection.title | default: 'Collection title' -}}
+            </h3>
+            {%- if collection != blank -%}
+              <span class="valor-collection-card__cta" aria-hidden="true">
+                {{ 'sections.collection_list.shop_now' | t | default: 'Shop now' }} →
+              </span>
+            {%- endif -%}
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.show_view_all -%}
+      <div class="valor-collection-list__view-all-mobile">
+        <a href="{{ routes.collections_url }}" class="valor-button valor-button--{{ section.settings.view_all_style }}">
+          {{ 'sections.collection_list.view_all' | t | default: 'View all collections' }}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .valor-collection-list {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+  .valor-collection-list__inner {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+  }
+
+  /* Header row */
+  .valor-collection-list__header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+  }
+  /* Centered heading: stack title and View all link vertically, centered.
+     The mobile View all button (at the bottom of the section) is unaffected. */
+  .valor-collection-list__header--align-center {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  /* Right alignment: stack vertically, end-aligned. */
+  .valor-collection-list__header--align-right {
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    gap: 0.75rem;
+  }
+  .valor-collection-list__view-all {
+    color: var(--color-foreground);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+    transition: opacity 0.15s ease;
+  }
+  .valor-collection-list__view-all:hover {
+    opacity: 0.7;
+  }
+  @media (max-width: 749px) {
+    .valor-collection-list__view-all--desktop {
+      display: none;
+    }
+  }
+
+  /* Grid */
+  .valor-collection-list__grid {
+    display: grid;
+    gap: var(--valor-grid-gap, 16px);
+  }
+  .valor-collection-list__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .valor-collection-list__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .valor-collection-list__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .valor-collection-list__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
+
+  @media (max-width: 989px) {
+    .valor-collection-list__grid--cols-4,
+    .valor-collection-list__grid--cols-5 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 749px) {
+    /* When swipe-on-mobile is enabled, escape the theme's centered content
+       column so the carousel can run edge-to-edge on the left. The header,
+       grid and view-all stay inside the section, but the section itself
+       spans the full viewport — the swipe grid then resets its own left
+       padding to 0 to start at the very edge. */
+    .shopify-section > .valor-collection-list--mobile-full-bleed {
+      grid-column: 1 / -1;
+    }
+    /* On mobile, the gap can be tighter than desktop. Falls back to the
+       desktop value, then to 16px, if the mobile setting is unset. */
+    .valor-collection-list__grid {
+      gap: var(--valor-grid-gap-mobile, var(--valor-grid-gap, 16px));
+    }
+    .valor-collection-list__grid--mobile-1 {
+      grid-template-columns: 1fr;
+    }
+    .valor-collection-list__grid--mobile-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    /* Swipe-on-mobile: horizontal scroll. Asymmetric padding makes the
+       first card start flush with the viewport's left edge while keeping
+       a comfortable gutter on the right so the last card never sticks
+       to the screen edge. scroll-padding aligns snap points to match. */
+    .valor-collection-list__grid--swipe-mobile {
+      grid-template-columns: none;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: var(--valor-grid-gap-mobile, var(--valor-grid-gap, 16px));
+      margin-left: calc(-1 * clamp(1rem, 4vw, 3rem));
+      margin-right: calc(-1 * clamp(1rem, 4vw, 3rem));
+      padding-left: 0;
+      padding-right: clamp(1rem, 4vw, 3rem);
+      scroll-padding-left: 0;
+      scroll-padding-right: clamp(1rem, 4vw, 3rem);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .valor-collection-list__grid--swipe-mobile::-webkit-scrollbar {
+      display: none;
+    }
+    /* Card width is merchant-controlled; lower values show more of the
+       next card as a swipe affordance, higher values feel more immersive. */
+    .valor-collection-list__grid--swipe-mobile > * {
+      flex: 0 0 var(--valor-mobile-card-width, 65%);
+      scroll-snap-align: start;
+    }
+    /* Collection cards in the swipe carousel feel more like standalone
+       "tiles" than items in a layout grid, so centering the overlay text
+       reads more cleanly. Scoped to swipe-mobile only — the regular grid
+       keeps the default bottom-left overlay alignment. align-items
+       centers the info column horizontally inside the absolute-positioned
+       overlay; text-align centers the lines themselves. */
+    .valor-collection-list__grid--swipe-mobile .valor-collection-card__info {
+      align-items: center;
+      text-align: center;
+    }
+    .valor-collection-list__grid--swipe-mobile .valor-collection-card__title,
+    .valor-collection-list__grid--swipe-mobile .valor-collection-card__cta {
+      text-align: center;
+    }
+  }
+
+  /* Mobile view-all */
+  .valor-collection-list__view-all-mobile {
+    display: none;
+    text-align: center;
+    margin-top: 2rem;
+  }
+  @media (max-width: 749px) {
+    .valor-collection-list__view-all-mobile {
+      display: block;
+    }
+  }
+
+  /* Collection card */
+  .valor-collection-card {
+    position: relative;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    overflow: hidden;
+  }
+  .valor-collection-card__media {
+    position: relative;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--color-foreground) 4%, transparent);
+  }
+  .valor-collection-card--ratio-square .valor-collection-card__media { aspect-ratio: 1 / 1; }
+  .valor-collection-card--ratio-portrait .valor-collection-card__media { aspect-ratio: 4 / 5; }
+  .valor-collection-card--ratio-landscape .valor-collection-card__media { aspect-ratio: 16 / 9; }
+
+  .valor-collection-card__image,
+  .valor-collection-card__placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .valor-collection-card__placeholder-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .valor-collection-card:hover .valor-collection-card__image {
+    transform: scale(1.04);
+  }
+
+  .valor-collection-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .valor-collection-card__info {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+  .valor-collection-card__title {
+    margin: 0;
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-size: calc(var(--font-heading-scale, 1) * clamp(1.125rem, 1.75vw, 1.5rem));
+    font-weight: var(--font-heading--weight);
+    letter-spacing: 0;
+    line-height: 1.2;
+  }
+  .valor-collection-card__cta {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    transition: gap 0.2s ease;
+  }
+  .valor-collection-card:hover .valor-collection-card__cta {
+    text-decoration: underline;
+  }
+{% endstylesheet %}
+
+{% schema %}
+
+{
+  "name": "Collection list",
+  "tag": "section",
+  "class": "valor-section-collection-list",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Heading",
+      "default": "Collections"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show \"View all collections\" link",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "view_all_style",
+      "label": "\"View all\" button style (mobile)",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Solid"
+        },
+        {
+          "value": "secondary",
+          "label": "Outline"
+        }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "header",
+      "content": "Cards"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape"
+        }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "label": "Enable swipe on mobile",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_width",
+      "label": "Mobile swipe card width",
+      "info": "Controls the card width when swipe on mobile is enabled.",
+      "min": 50,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 65
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between cards",
+      "info": "Spacing between collections in the grid. Set to 0 for an edge-to-edge look.",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between cards on mobile",
+      "info": "Spacing between collections on mobile. Also applies to swipe-on-mobile layout.",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection list",
+      "blocks": [
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        },
+        {
+          "type": "collection"
+        }
+      ]
+    }
+  ]
+}
+
+{% endschema %}

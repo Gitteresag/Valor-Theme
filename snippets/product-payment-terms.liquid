@@ -1,0 +1,32 @@
+{%- comment -%}
+  Renders Shop Pay Installments payment terms inside a valid product form.
+
+  Accepts:
+    product       {Product} required when form is not passed
+    variant       {Variant} required
+    form          {Form} optional, existing product form object
+    form_id       {String} optional, used for standalone product form
+    block         {Block} optional
+    class_name    {String} optional
+{%- endcomment -%}
+
+{%- assign payment_terms_class = class_name | default: 'valor-product-payment-terms' -%}
+{%- assign payment_terms_form_id = form_id | default: 'product-payment-terms' -%}
+
+{%- if variant != blank -%}
+  <div class="{{ payment_terms_class }}" {% if block %}{{ block.shopify_attributes }}{% endif %}>
+    {%- if form -%}
+      {{ form | payment_terms }}
+    {%- elsif product != blank -%}
+      {%- form 'product', product, id: payment_terms_form_id, class: 'valor-product-payment-terms__form', novalidate: 'novalidate' -%}
+        <input
+          type="hidden"
+          name="id"
+          value="{{ variant.id }}"
+          data-payment-terms-variant-id-input
+        >
+        {{ form | payment_terms }}
+      {%- endform -%}
+    {%- endif -%}
+  </div>
+{%- endif -%}

@@ -1,0 +1,423 @@
+{%- liquid
+  assign columns_desktop = section.settings.columns_desktop
+  assign columns_mobile = section.settings.columns_mobile
+  assign column_alignment = section.settings.column_alignment
+-%}
+
+<section
+  class="valor-icon-columns"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-icon-columns__inner">
+    {%- if section.settings.title != blank -%}
+      <header class="valor-icon-columns__header valor-icon-columns__header--align-{{ section.settings.heading_alignment }}">
+        <h2 class="valor-icon-columns__title valor-heading valor-heading--{{ section.settings.heading_size }}">
+          {{ section.settings.title }}
+        </h2>
+      </header>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div
+        class="valor-icon-columns__grid valor-icon-columns__grid--cols-{{ columns_desktop }} valor-icon-columns__grid--mobile-{{ columns_mobile }} valor-icon-columns__grid--align-{{ column_alignment }}{% if section.settings.swipe_on_mobile %} valor-icon-columns__grid--swipe-mobile{% endif %}"
+      >
+        {%- for block in section.blocks -%}
+          {%- assign icon_loading = 'lazy' -%}
+          {%- assign icon_fetchpriority = 'auto' -%}
+          {%- if section.location == 'template' and section.index == 1 and forloop.first -%}
+            {%- assign icon_loading = 'eager' -%}
+            {%- assign icon_fetchpriority = 'high' -%}
+          {%- endif -%}
+          <div class="valor-icon-column" {{ block.shopify_attributes }}>
+            {%- if block.settings.icon != 'none' and block.settings.icon != blank -%}
+              <div class="valor-icon-column__icon" aria-hidden="true" style="--valor-icon-size: {{ section.settings.icon_size }}px;">
+                {%- render 'icon-library', icon: block.settings.icon, size: section.settings.icon_size -%}
+              </div>
+            {%- elsif block.settings.image != blank -%}
+              <div class="valor-icon-column__image">
+                {%- assign img = block.settings.image -%}
+                <img
+                  src="{{ img | image_url: width: 200 }}"
+                  srcset="{{ img | image_url: width: 100 }} 100w, {{ img | image_url: width: 200 }} 200w, {{ img | image_url: width: 400 }} 400w"
+                  sizes="100px"
+                  alt="{{ img.alt | escape }}"
+                  width="{{ img.width }}"
+                  height="{{ img.height }}"
+                  loading="{{ icon_loading }}"
+                  fetchpriority="{{ icon_fetchpriority }}"
+                >
+              </div>
+            {%- elsif block.settings.icon_svg != blank -%}
+              <div class="valor-icon-column__icon" aria-hidden="true">
+                {{ block.settings.icon_svg }}
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.title != blank -%}
+              <h3 class="valor-icon-column__title">{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.text != blank -%}
+              <div class="valor-icon-column__text rte">{{ block.settings.text }}</div>
+            {%- endif -%}
+            {%- if block.settings.link_label != blank and block.settings.link != blank -%}
+              <a href="{{ block.settings.link }}" class="valor-icon-column__link">
+                {{ block.settings.link_label | escape }} <span aria-hidden="true">→</span>
+              </a>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .valor-icon-columns {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+  .valor-icon-columns__inner {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+  }
+
+  .valor-icon-columns__header {
+    margin-bottom: 2.5rem;
+    /* Default alignment was center; now controlled by --align-* modifier.
+       Falls back to center if neither modifier is present (legacy safety). */
+    text-align: center;
+  }
+  .valor-icon-columns__header--align-left { text-align: left; }
+  .valor-icon-columns__header--align-center { text-align: center; }
+  .valor-icon-columns__header--align-right { text-align: right; }
+
+  .valor-icon-columns__grid {
+    display: grid;
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+  }
+  .valor-icon-columns__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .valor-icon-columns__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .valor-icon-columns__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .valor-icon-columns__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .valor-icon-columns__grid--cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+  @media (max-width: 989px) {
+    .valor-icon-columns__grid--cols-4,
+    .valor-icon-columns__grid--cols-5,
+    .valor-icon-columns__grid--cols-6 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 749px) {
+    .valor-icon-columns__grid--mobile-1 { grid-template-columns: 1fr; }
+    .valor-icon-columns__grid--mobile-2 { grid-template-columns: repeat(2, 1fr); }
+
+    .valor-icon-columns__grid--swipe-mobile {
+      grid-template-columns: none;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 1rem;
+      margin: 0 calc(-1 * clamp(1rem, 4vw, 3rem));
+      padding: 0 clamp(1rem, 4vw, 3rem);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .valor-icon-columns__grid--swipe-mobile::-webkit-scrollbar { display: none; }
+    .valor-icon-columns__grid--swipe-mobile > * {
+      flex: 0 0 70%;
+      scroll-snap-align: start;
+    }
+  }
+
+  /* Column item */
+  .valor-icon-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+  .valor-icon-columns__grid--align-center .valor-icon-column {
+    align-items: center;
+    text-align: center;
+  }
+  .valor-icon-columns__grid--align-left .valor-icon-column {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .valor-icon-column__image {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 0.25rem;
+  }
+  .valor-icon-column__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+  .valor-icon-column__icon {
+    width: var(--valor-icon-size, 48px);
+    height: var(--valor-icon-size, 48px);
+    color: var(--color-foreground);
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-icon-column__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .valor-icon-column__title {
+    margin: 0;
+    font-size: calc(var(--font-heading-scale, 1) * 1rem);
+    font-family: var(--font-heading--family);
+    font-style: var(--font-heading--style);
+    font-weight: var(--font-heading--weight);
+    line-height: 1.3;
+  }
+  .valor-icon-column__text {
+    font-size: 0.9375rem;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  }
+  .valor-icon-column__text > *:first-child { margin-top: 0; }
+  .valor-icon-column__text > *:last-child { margin-bottom: 0; }
+
+  .valor-icon-column__link {
+    color: var(--color-foreground);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+    align-self: flex-start;
+    transition: opacity 0.15s ease;
+  }
+  .valor-icon-column__link:hover { opacity: 0.7; }
+  .valor-icon-columns__grid--align-center .valor-icon-column__link {
+    align-self: center;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Icon columns",
+  "tag": "section",
+  "class": "valor-section-icon-columns",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size",
+      "min": 24,
+      "max": 96,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "column_alignment",
+      "label": "Column alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Mobile layout"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        { "value": "1", "label": "1 column" },
+        { "value": "2", "label": "2 columns" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "label": "Enable swipe on mobile",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Column",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "truck", "label": "Truck" },
+            { "value": "package", "label": "Package" },
+            { "value": "globe", "label": "Globe" },
+            { "value": "airplane", "label": "Airplane" },
+            { "value": "home", "label": "Home" },
+            { "value": "lock", "label": "Lock" },
+            { "value": "shield-check", "label": "Shield (check)" },
+            { "value": "check-circle", "label": "Check circle" },
+            { "value": "award", "label": "Award" },
+            { "value": "star", "label": "Star" },
+            { "value": "sparkles", "label": "Sparkles" },
+            { "value": "credit-card", "label": "Credit card" },
+            { "value": "cash", "label": "Cash" },
+            { "value": "tag", "label": "Tag" },
+            { "value": "receipt", "label": "Receipt" },
+            { "value": "heart", "label": "Heart" },
+            { "value": "chat", "label": "Chat" },
+            { "value": "phone", "label": "Phone" },
+            { "value": "question-circle", "label": "Question" },
+            { "value": "information-circle", "label": "Information" },
+            { "value": "leaf", "label": "Leaf" },
+            { "value": "recycle", "label": "Recycle" },
+            { "value": "fire", "label": "Fire" },
+            { "value": "medal", "label": "Medal" },
+            { "value": "ruler", "label": "Ruler" },
+            { "value": "scale", "label": "Scale" },
+            { "value": "gift", "label": "Gift" },
+            { "value": "clock", "label": "Clock" },
+            { "value": "lightning", "label": "Lightning" },
+            { "value": "target", "label": "Target" }
+          ],
+          "default": "truck"
+        },
+        {
+          "type": "header",
+          "content": "Or use a custom image / SVG"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Custom image",
+          "info": "Used only when no built-in icon is selected."
+        },
+        {
+          "type": "html",
+          "id": "icon_svg",
+          "label": "Custom SVG (advanced)",
+          "info": "Paste raw <svg>…</svg>. Used only if no icon and no image."
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "inline_richtext",
+          "id": "title",
+          "label": "Title",
+          "default": "Column title"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Pair this column with an icon to highlight a feature.</p>"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link label"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Icon columns",
+      "blocks": [
+        { "type": "column", "settings": { "icon": "truck", "title": "Free shipping", "text": "<p>On orders over €50.</p>" } },
+        { "type": "column", "settings": { "icon": "lock", "title": "Secure payment", "text": "<p>Encrypted checkout.</p>" } },
+        { "type": "column", "settings": { "icon": "package", "title": "Easy returns", "text": "<p>30-day return policy.</p>" } },
+        { "type": "column", "settings": { "icon": "chat", "title": "Friendly support", "text": "<p>We're here to help.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

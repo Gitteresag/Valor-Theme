@@ -1,0 +1,338 @@
+{%- liquid
+  assign columns_desktop = section.settings.columns_desktop
+  assign content_alignment = section.settings.content_alignment
+-%}
+
+<section
+  class="valor-testimonials valor-testimonials--align-{{ content_alignment }}{% if section.settings.swipe_on_mobile %} valor-testimonials--mobile-full-bleed{% endif %}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-testimonials__inner">
+    {%- if section.settings.caption != blank or section.settings.heading != blank -%}
+      <header class="valor-testimonials__header">
+        {%- if section.settings.caption != blank -%}
+          <div class="valor-testimonials__caption">{{ section.settings.caption | escape }}</div>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="valor-testimonials__heading valor-heading valor-heading--{{ section.settings.heading_size }}">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div
+        class="valor-testimonials__grid valor-testimonials__grid--cols-{{ columns_desktop }}{% if section.settings.swipe_on_mobile %} valor-testimonials__grid--swipe-mobile{% endif %}"
+      >
+        {%- for block in section.blocks -%}
+          <figure class="valor-testimonial" {{ block.shopify_attributes }}>
+            {%- if section.settings.show_stars and block.settings.rating > 0 -%}
+              <div class="valor-testimonial__stars" aria-label="{{ block.settings.rating }} out of 5 stars">
+                {%- for i in (1..5) -%}
+                  <span class="valor-testimonial__star{% if i > block.settings.rating %} valor-testimonial__star--empty{% endif %}" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+                  </span>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+
+            <blockquote class="valor-testimonial__quote">
+              {{ block.settings.quote }}
+            </blockquote>
+
+            {%- if block.settings.author != blank or block.settings.role != blank -%}
+              <figcaption class="valor-testimonial__attribution">
+                {%- if block.settings.author != blank -%}
+                  <span class="valor-testimonial__author">{{ block.settings.author | escape }}</span>
+                {%- endif -%}
+                {%- if block.settings.role != blank -%}
+                  <span class="valor-testimonial__role">{{ block.settings.role | escape }}</span>
+                {%- endif -%}
+              </figcaption>
+            {%- endif -%}
+          </figure>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .valor-testimonials {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+  .valor-testimonials__inner {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+  }
+
+  /* Header */
+  .valor-testimonials__header {
+    margin-bottom: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .valor-testimonials--align-left .valor-testimonials__header { text-align: left; align-items: flex-start; }
+  .valor-testimonials--align-center .valor-testimonials__header { text-align: center; align-items: center; }
+
+  .valor-testimonials__caption {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  }
+
+  /* Grid */
+  .valor-testimonials__grid {
+    display: grid;
+    gap: clamp(1rem, 2.5vw, 2rem);
+  }
+  .valor-testimonials__grid--cols-1 { grid-template-columns: 1fr; }
+  .valor-testimonials__grid--cols-1 .valor-testimonial { max-width: 42rem; margin: 0 auto; }
+  .valor-testimonials__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .valor-testimonials__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .valor-testimonials__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+  @media (max-width: 989px) {
+    .valor-testimonials__grid--cols-3,
+    .valor-testimonials__grid--cols-4 { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 749px) {
+    /* When swipe-on-mobile is enabled, escape the theme's centred content
+       column so the carousel can run edge-to-edge on the left. The header
+       and grid stay inside the section, but the section itself spans the
+       full viewport — the swipe grid then resets its own left padding to
+       0 to start at the very edge. Same pattern as collection-list and
+       featured-collection. */
+    .shopify-section > .valor-testimonials--mobile-full-bleed {
+      grid-column: 1 / -1;
+    }
+
+    .valor-testimonials__grid:not(.valor-testimonials__grid--swipe-mobile) {
+      grid-template-columns: 1fr;
+    }
+    /* Asymmetric padding: first card starts flush with the viewport's
+       left edge while a comfortable gutter on the right keeps the last
+       card off the screen edge. scroll-padding mirrors this so snap
+       points line up with the visible padding. */
+    .valor-testimonials__grid--swipe-mobile {
+      grid-template-columns: none;
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      gap: 0.875rem;
+      margin-left: calc(-1 * clamp(1rem, 4vw, 3rem));
+      margin-right: calc(-1 * clamp(1rem, 4vw, 3rem));
+      padding-left: 0;
+      padding-right: clamp(1rem, 4vw, 3rem);
+      scroll-padding-left: 0;
+      scroll-padding-right: clamp(1rem, 4vw, 3rem);
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .valor-testimonials__grid--swipe-mobile::-webkit-scrollbar { display: none; }
+    .valor-testimonials__grid--swipe-mobile > * {
+      flex: 0 0 80%;
+      scroll-snap-align: start;
+    }
+  }
+
+  /* Card */
+  .valor-testimonial {
+    background-color: color-mix(in srgb, var(--color-foreground) 4%, transparent);
+    border-radius: var(--style-border-radius-inputs, 6px);
+    padding: clamp(1.25rem, 3vw, 1.75rem);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .valor-testimonials--align-center .valor-testimonial {
+    text-align: center;
+    align-items: center;
+  }
+
+  /* Stars */
+  .valor-testimonial__stars {
+    display: inline-flex;
+    gap: 0.125rem;
+    color: #f5b942;
+  }
+  .valor-testimonial__star {
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+  }
+  .valor-testimonial__star svg { width: 100%; height: 100%; display: block; }
+  .valor-testimonial__star--empty { color: color-mix(in srgb, var(--color-foreground) 18%, transparent); }
+
+  .valor-testimonial__quote {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  }
+
+  .valor-testimonial__attribution {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    margin-top: auto;
+  }
+  .valor-testimonial__author {
+    font-size: 0.875rem;
+    font-weight: var(--font-body--weight-bold);
+    color: var(--color-foreground);
+  }
+  .valor-testimonial__role {
+    font-size: 0.8125rem;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "tag": "section",
+  "class": "valor-section-testimonials",
+  "settings": [
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Caption"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "default": "What our customers say"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "Content alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_stars",
+      "label": "Show star ratings",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "label": "Enable swipe on mobile",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "quote",
+          "label": "Quote",
+          "default": "<p>Add a customer review here. Share what people love about your product or service.</p>"
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Author",
+          "default": "Customer name"
+        },
+        {
+          "type": "text",
+          "id": "role",
+          "label": "Role / location",
+          "default": "Verified buyer"
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Star rating",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "default": 5,
+          "info": "Set to 0 to hide stars on this card."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        { "type": "testimonial" },
+        { "type": "testimonial" },
+        { "type": "testimonial" }
+      ]
+    }
+  ]
+}
+{% endschema %}

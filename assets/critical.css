@@ -1,0 +1,404 @@
+/** Critical CSS for the theme. This file is included on every page. */
+/* Valor v0.15.1 — typography scale (phase 1 fix) */
+
+/* Reset styles inspired by https://www.joshwcomeau.com/css/custom-css-reset/ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+/* Set the root font-size from the body-scale setting. Because rem values
+   resolve relative to <html>, anchoring the scale here makes every rem
+   measurement in the theme scale together — fonts, paddings, line-heights,
+   the lot. Without this, only the body element's own 1rem font-size would
+   scale, and every section that hard-codes its font-size in rem would stay
+   at a fixed pixel value. */
+html {
+  font-size: calc(var(--font-body-scale, 1) * 100%);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  min-height: 100svh;
+  overscroll-behavior-y: none;
+  /* Prevents horizontal page-shift when sections use negative-margin
+     "full bleed" techniques (e.g. swipe-on-mobile carousels in
+     featured-collection, related-products, testimonials, collection-list,
+     icon-columns). Without this, sub-pixel rounding at the viewport edge
+     can leak the negative margin past the viewport on narrow screens,
+     dragging the whole page slightly left. `clip` is preferred over
+     `hidden` because it doesn't create a new block-formatting context
+     and therefore doesn't interfere with sticky positioning. The
+     fallback to `hidden` covers older browsers that don't support
+     `clip` yet (pre-2022 Safari/Firefox). */
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+main {
+  flex: 1 0 auto;
+  min-height: var(--valor-main-locked-height, 0px);
+}
+
+html:has(dialog[scroll-lock][open], details[scroll-lock][open]) {
+  overflow: hidden;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  border-radius: var(--style-border-radius-inputs);
+}
+
+select {
+  background-color: var(--color-background);
+  color: currentcolor;
+}
+
+dialog {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  overflow-wrap: break-word;
+}
+
+p:empty {
+  display: none;
+}
+
+:is(p, h1, h2, h3, h4, h5, h6):first-child,
+:empty:first-child + :where(p, h1, h2, h3, h4, h5, h6) {
+  margin-block-start: 0;
+}
+
+:is(p, h1, h2, h3, h4, h5, h6):last-child,
+:where(p, h1, h2, h3, h4, h5, h6) + :has(+ :empty:last-child) {
+  margin-block-end: 0;
+}
+
+/** Theme styles below */
+body {
+  font-family: var(--font-body--family);
+  font-style: var(--font-body--style);
+  font-weight: var(--font-body--weight);
+  font-size: 1rem;
+  line-height: 1.5;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/** Section layout utilities */
+
+/**
+ * Setup a grid that enables both full-width and constrained layouts
+ * depending on the class of the child elements.
+ *
+ * By default, a minimum content margin is set on the left and right
+ * sides of the section and the content is centered in the viewport to
+ * not exceed the maximum page width.
+ *
+ * When a child element is given the `full-width` class, it will span
+ * the entire viewport.
+ */
+.shopify-section {
+  --content-width: min(
+    calc(var(--page-width) - var(--page-margin) * 2),
+    calc(100% - var(--page-margin) * 2)
+  );
+  --content-margin: minmax(var(--page-margin), 1fr);
+  --content-grid: var(--content-margin) var(--content-width) var(--content-margin);
+
+  /* This is required to make <img> elements work as background images */
+  position: relative;
+  grid-template-columns: var(--content-grid);
+  display: grid;
+  width: 100%;
+}
+
+/* Child elements, by default, are constrained to the central column of the grid. */
+.shopify-section > * {
+  grid-column: 2;
+}
+
+/* Child elements that use the full-width utility class span the entire viewport. */
+.shopify-section > .full-width {
+  grid-column: 1 / -1;
+}
+
+/* Skip to content link - accessible for keyboard users */
+.skip-to-content-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  border: 2px solid var(--color-foreground);
+  text-decoration: none;
+  transform: translateY(-100%);
+}
+
+.skip-to-content-link:focus {
+  transform: translateY(0);
+}
+
+/* Reusable button styles — used by every .valor-button in the theme. */
+.valor-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 1.75rem;
+  font-size: 0.9375rem;
+  font-weight: var(--font-body--weight-bold);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  border-radius: var(--style-border-radius-buttons, var(--style-border-radius-inputs, 4px));
+  border: var(--style-button-border-width, 1.5px) solid transparent;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  line-height: 1.2;
+}
+/* Buttons inside .rte content (Page, Policy, Article body) need to
+   override two global .rte a rules:
+     1. text-decoration: underline  → visible underline through the button
+     2. color: inherit              → blanks out the button's own color.
+   Re-assert each variant's color so buttons keep the global button look
+   regardless of which content wrapper they live in. */
+.rte a.valor-button {
+  text-decoration: none;
+}
+.rte a.valor-button--primary {
+  color: var(--color-button-text, var(--color-background));
+}
+.rte a.valor-button--secondary {
+  color: var(--color-button-outline-text, var(--color-button-outline-border, var(--color-foreground)));
+}
+.rte a.valor-button--primary:hover {
+  color: var(--color-button-hover-text, var(--color-background));
+}
+.rte a.valor-button--secondary:hover {
+  color: var(--color-button-outline-hover-text, var(--color-button-hover-text, var(--color-background)));
+}
+.valor-button--primary {
+  background-color: var(--color-button-bg, var(--color-foreground));
+  color: var(--color-button-text, var(--color-background));
+  border-color: var(--color-button-border, var(--color-foreground));
+}
+.valor-button--primary:hover {
+  opacity: var(--button-hover-opacity, 0.85);
+  background-color: var(--color-button-hover-bg, var(--color-button-bg, var(--color-foreground)));
+  color: var(--color-button-hover-text, var(--color-button-text, var(--color-background)));
+  border-color: var(--color-button-hover-border, var(--color-button-border, var(--color-foreground)));
+}
+.valor-button--secondary {
+  background-color: transparent;
+  color: var(--color-button-outline-text, var(--color-button-outline-border, var(--color-foreground)));
+  border-color: var(--color-button-outline-border, var(--color-foreground));
+}
+.valor-button--secondary:hover {
+  background-color: var(--color-button-outline-hover-bg, var(--color-foreground));
+  color: var(--color-button-outline-hover-text, var(--color-background));
+  border-color: var(--color-button-outline-hover-border, var(--color-button-outline-hover-bg, var(--color-foreground)));
+}
+
+/* Rich-text content (.rte)
+   Used for any merchant-authored long-form content: page bodies, blog
+   articles, product descriptions, collection descriptions, FAQ answers.
+
+   Uses the classic "margin-bottom on every block element" pattern rather
+   than the modern owl-selector (* + *) approach. The classic pattern is
+   more predictable for prose and gives a more natural reading rhythm. */
+.rte {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.rte::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+
+.rte > :first-child {
+  margin-top: 0;
+}
+.rte > :last-child {
+  margin-bottom: 0;
+}
+
+.rte p {
+  margin: 0 0 1em;
+  /* Better line-break placement for prose. Scoped to .rte so small UI
+     text elsewhere isn't affected. */
+  text-wrap: pretty;
+}
+
+.rte h1,
+.rte h2,
+.rte h3,
+.rte h4,
+.rte h5,
+.rte h6 {
+  font-family: var(--font-heading--family);
+  font-style: var(--font-heading--style);
+  font-weight: var(--font-heading--weight);
+  line-height: 1.25;
+  letter-spacing: 0;
+  /* Top margin separates heading from previous content (new section feel),
+     bottom margin keeps heading close to its own paragraph (proximity). */
+  margin: 1.6em 0 0.75em;
+}
+.rte h1 { font-size: calc(var(--font-heading-scale, 1) * clamp(1.75rem, 3.5vw, 2.25rem)); }
+.rte h2 { font-size: calc(var(--font-heading-scale, 1) * clamp(1.5rem, 3vw, 1.875rem)); }
+.rte h3 { font-size: calc(var(--font-heading-scale, 1) * clamp(1.25rem, 2.5vw, 1.5rem)); }
+.rte h4 { font-size: calc(var(--font-heading-scale, 1) * 1.125rem); }
+.rte h5 { font-size: calc(var(--font-heading-scale, 1) * 1rem); }
+.rte h6 {
+  font-size: calc(var(--font-heading-scale, 1) * 0.9375rem);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.rte a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.rte a:hover {
+  text-decoration: none;
+}
+
+.rte strong { font-weight: var(--font-body--weight-bold); }
+.rte em { font-style: italic; }
+
+.rte ul,
+.rte ol {
+  margin: 0 0 1em;
+  padding-left: 1.5em;
+}
+.rte ul { list-style: disc; }
+.rte ol { list-style: decimal; }
+.rte li {
+  margin: 0.25em 0;
+}
+.rte li > ul,
+.rte li > ol {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+
+.rte blockquote {
+  margin: 1.5em 0;
+  padding: 0.5rem 0 0.5rem 1.25rem;
+  border-left: 3px solid color-mix(in srgb, var(--color-foreground) 20%, transparent);
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  font-style: italic;
+}
+
+.rte hr {
+  border: 0;
+  border-top: 1px solid var(--valor-border-default);
+  margin: 2.5em 0;
+}
+
+.rte img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5em 0;
+}
+
+.rte code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  padding: 0.125em 0.375em;
+  background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+  border-radius: 3px;
+}
+.rte pre {
+  margin: 0 0 1em;
+  padding: 1rem;
+  background: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+  border-radius: 4px;
+  overflow-x: auto;
+}
+.rte pre code {
+  padding: 0;
+  background: transparent;
+}
+
+.rte table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+.rte th,
+.rte td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--valor-border-default);
+  text-align: left;
+}
+.rte th {
+  font-weight: var(--font-body--weight-bold);
+}
+
+/* Centralised heading utility classes — used across all sections so the
+   typography scale stays consistent. Lives in critical.css (rather than
+   inline css-variables) because sections render their own <style> blocks
+   inside <body>, which would otherwise override these by source order.
+   Critical.css is loaded in <head>, so any same-specificity rule here
+   loses to a later one in a section — we don't want that for sizing.
+
+   The modifier names intentionally decouple visual size from HTML
+   semantics: a section's <h2> may visually be heading-md, while a
+   hero's <h1> may be heading-display. Visual hierarchy and DOM
+   hierarchy are separate concerns. */
+.valor-heading {
+  margin: 0;
+  font-family: var(--font-heading--family);
+  font-style: var(--font-heading--style);
+  /* Use the picker's own weight rather than the font-modify'd bold
+     variant. Lets merchants pick a Regular heading font and have it
+     stay regular — matching how Dawn handles --font-heading-weight
+     and avoiding a permanently-heavy heading look. The bold variant
+     is still loaded for use inside <strong> within headings. */
+  font-weight: var(--font-heading--weight);
+  line-height: 1.15;
+  /* Neutral tracking: -0.02em combined with a heavy weight made
+     headings feel cramped on the search/collection toolbars. 0
+     is closer to Dawn's slightly-positive default and reads
+     comfortably across the small/medium/large size tokens. */
+  letter-spacing: 0;
+}
+/* Size modifiers — all sections use the same small/medium/large values,
+   so a "Small" heading is visually identical across the theme regardless
+   of section. Maps onto the md/lg/xl tokens of the centralised scale.
+   If a section ever needs a larger editorial heading (hero-style on a
+   rich-text or image-with-text block, for example), add an "Extra large"
+   or "Display" option to that section's schema rather than reusing the
+   existing small/medium/large names with different sizes. */
+.valor-heading--small  { font-size: var(--font-size-heading-md); }
+.valor-heading--medium { font-size: var(--font-size-heading-lg); }
+.valor-heading--large  { font-size: var(--font-size-heading-xl); }

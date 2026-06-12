@@ -1,0 +1,406 @@
+{%- comment -%}
+  Blog index section.
+
+  Renders the blog page that lists every article in a blog. Two layouts:
+    grid    — uniform cards in a responsive grid (1col mobile, 2col tablet, 3col desktop)
+    list    — full-width single-column layout, ideal for editorial-feel blogs
+              with longer excerpts.
+
+  Card styling lives in the embedded {% stylesheet %} so the section is
+  self-contained. Heading sizing/alignment uses the same tokens as Page,
+  Collection, and Search for visual consistency across the theme.
+
+  Heading: blog.title from the Shopify admin (Online Store → Blog posts).
+  Articles per page is configurable.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/blog
+{%- endcomment -%}
+
+{{ 'page-layout.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign heading_size  = section.settings.heading_size  | default: 'large'
+  assign heading_align = section.settings.heading_alignment | default: 'left'
+  assign layout        = section.settings.layout        | default: 'grid'
+  assign per_page      = section.settings.posts_per_page | default: 9
+  assign show_image    = section.settings.show_image
+  assign image_ratio   = section.settings.image_ratio   | default: 'landscape'
+  assign show_date     = section.settings.show_date
+  assign show_author   = section.settings.show_author
+  assign show_excerpt  = section.settings.show_excerpt
+-%}
+
+<div
+  class="valor-blog valor-blog--{{ layout }}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-blog__inner">
+    <header class="valor-blog__header valor-blog__header--{{ heading_align }}">
+      <h1 class="valor-blog__title valor-heading valor-heading--{{ heading_size }}">{{ blog.title | escape }}</h1>
+    </header>
+
+    {%- paginate blog.articles by per_page -%}
+      {%- if blog.articles_count > 0 -%}
+        <ul class="valor-blog__list valor-blog__list--{{ layout }}" role="list">
+          {%- for article in blog.articles -%}
+            {%- assign article_image_loading = 'lazy' -%}
+            {%- assign article_image_fetchpriority = 'auto' -%}
+            {%- if section.location == 'template' and section.index == 1 and forloop.first -%}
+              {%- assign article_image_loading = 'eager' -%}
+              {%- assign article_image_fetchpriority = 'high' -%}
+            {%- endif -%}
+            <li class="valor-blog__item">
+              <article class="valor-blog-card">
+                {%- if show_image -%}
+                  <a href="{{ article.url }}" class="valor-blog-card__media valor-blog-card__media--{{ image_ratio }}" aria-hidden="true" tabindex="-1">
+                    {%- if article.image -%}
+                      {%- assign card_alt = article.image.alt | default: article.title | escape -%}
+                      {{ article.image | image_url: width: 1100 | image_tag:
+                        loading: article_image_loading,
+                        fetchpriority: article_image_fetchpriority,
+                        widths: '350,500,750,1100',
+                        sizes: '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw',
+                        width: article.image.width,
+                        height: article.image.height,
+                        alt: card_alt,
+                        class: 'valor-blog-card__image'
+                      }}
+                    {%- else -%}
+                      <div class="valor-blog-card__placeholder">
+                        {{ 'image' | placeholder_svg_tag: 'valor-blog-card__placeholder-svg' }}
+                      </div>
+                    {%- endif -%}
+                  </a>
+                {%- endif -%}
+
+                <div class="valor-blog-card__body">
+                  {%- if show_date or show_author -%}
+                    <p class="valor-blog-card__meta">
+                      {%- if show_date -%}
+                        <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+                          {{ article.published_at | date: format: 'date' }}
+                        </time>
+                      {%- endif -%}
+                      {%- if show_date and show_author and article.author != blank %} · {% endif -%}
+                      {%- if show_author and article.author != blank -%}
+                        <span class="valor-blog-card__author">{{ article.author | escape }}</span>
+                      {%- endif -%}
+                    </p>
+                  {%- endif -%}
+
+                  <h2 class="valor-blog-card__title valor-heading valor-heading--small">
+                    <a href="{{ article.url }}" class="valor-blog-card__link">{{ article.title | escape }}</a>
+                  </h2>
+
+                  {%- if show_excerpt and article.excerpt_or_content != blank -%}
+                    <div class="valor-blog-card__excerpt">
+                      {{ article.excerpt_or_content | strip_html | truncatewords: 30 }}
+                    </div>
+                  {%- endif -%}
+
+                  <a href="{{ article.url }}" class="valor-blog-card__cta">
+                    {{ 'blog.read_more' | t | default: 'Read more' }}
+                    <span aria-hidden="true">&rarr;</span>
+                  </a>
+                </div>
+              </article>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if paginate.pages > 1 -%}
+          {%- render 'pagination', paginate: paginate -%}
+        {%- endif -%}
+      {%- else -%}
+        <p class="valor-blog__empty">{{ 'blog.empty' | t | default: 'No articles yet — check back soon.' }}</p>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .valor-blog {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .valor-blog__inner {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+    box-sizing: border-box;
+  }
+
+  .valor-blog__header {
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .valor-blog__header--left   { text-align: left; }
+  .valor-blog__header--center { text-align: center; }
+  .valor-blog__header--right  { text-align: right; }
+
+  .valor-blog__title {
+    margin: 0;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  .valor-blog__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: clamp(1.5rem, 3vw, 2.5rem) clamp(1rem, 2vw, 2rem);
+  }
+
+  /* Grid layout: 1 col mobile, 2 col tablet, 3 col desktop. */
+  .valor-blog__list--grid {
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 750px) {
+    .valor-blog__list--grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (min-width: 990px) {
+    .valor-blog__list--grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* List layout: full width, single column with media on the left
+     side from tablet up. */
+  .valor-blog__list--list {
+    grid-template-columns: 1fr;
+    max-width: 56rem;
+    margin: 0 auto;
+  }
+  @media (min-width: 750px) {
+    .valor-blog__list--list .valor-blog-card {
+      display: grid;
+      grid-template-columns: 18rem 1fr;
+      gap: clamp(1.25rem, 2vw, 2rem);
+      align-items: start;
+    }
+    .valor-blog__list--list .valor-blog-card__body {
+      padding-top: 0.25rem;
+    }
+  }
+
+  .valor-blog__item {
+    margin: 0;
+  }
+
+  /* === Article card === */
+  .valor-blog-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+  }
+
+  .valor-blog-card__media {
+    display: block;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--color-foreground) 4%, transparent);
+    text-decoration: none;
+  }
+  .valor-blog-card__media--landscape { aspect-ratio: 4 / 3; }
+  .valor-blog-card__media--square    { aspect-ratio: 1 / 1; }
+  .valor-blog-card__media--portrait  { aspect-ratio: 3 / 4; }
+
+  .valor-blog-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .valor-blog-card__media:hover .valor-blog-card__image { transform: scale(1.04); }
+  }
+
+  .valor-blog-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+  }
+  .valor-blog-card__placeholder-svg {
+    width: 50%;
+    height: 50%;
+  }
+
+  .valor-blog-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    flex: 1 1 auto;
+  }
+
+  .valor-blog-card__meta {
+    margin: 0;
+    font-size: var(--font-size-body-xs);
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .valor-blog-card__title {
+    margin: 0;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+  .valor-blog-card__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .valor-blog-card__link:hover {
+    text-decoration: underline;
+  }
+
+  .valor-blog-card__excerpt {
+    margin: 0;
+    font-size: var(--font-size-body-base);
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  }
+
+  .valor-blog-card__cta {
+    margin-top: auto;
+    align-self: flex-start;
+    color: inherit;
+    text-decoration: none;
+    font-size: var(--font-size-body-sm);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--color-foreground);
+    padding-bottom: 0.125rem;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .valor-blog-card__cta:hover {
+    color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
+    border-bottom-color: color-mix(in srgb, var(--color-foreground) 50%, transparent);
+  }
+
+  .valor-blog__empty {
+    margin: 2rem 0;
+    text-align: center;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Blog",
+  "tag": "section",
+  "class": "valor-section-blog",
+  "settings": [
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Title size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Article cards"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Layout",
+      "options": [
+        { "value": "grid", "label": "Grid (3 columns desktop)" },
+        { "value": "list", "label": "List (single column with side media)" }
+      ],
+      "default": "grid"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_image",
+      "label": "Show featured image",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "landscape", "label": "Landscape (4:3)" },
+        { "value": "square",    "label": "Square (1:1)" },
+        { "value": "portrait",  "label": "Portrait (3:4)" }
+      ],
+      "default": "landscape"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show publish date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_excerpt",
+      "label": "Show excerpt",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "posts_per_page",
+      "label": "Posts per page",
+      "min": 3,
+      "max": 24,
+      "step": 1,
+      "default": 9
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ]
+}
+{% endschema %}

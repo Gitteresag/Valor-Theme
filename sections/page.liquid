@@ -1,0 +1,140 @@
+{%- comment -%}
+  Page section.
+
+  Renders the page object that the merchant has created in the Shopify
+  admin (Online Store → Pages). The actual content (title, body) is set
+  via the admin, not via section settings — this section just controls
+  how it is displayed: padding, container width, alignment, and sizing.
+
+  Visual styling lives in assets/page-layout.css so it can be shared
+  with the Policy and 404 sections, which use the same .valor-page
+  layout but never appear together with this section on a single page.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/page
+{%- endcomment -%}
+
+{{ 'page-layout.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign container = section.settings.container_width | default: 'narrow'
+  assign show_title = section.settings.show_title
+  assign heading_size = section.settings.heading_size | default: 'large'
+  assign body_size = section.settings.body_size | default: 'medium'
+  assign heading_align = section.settings.heading_alignment | default: 'left'
+  assign body_align = section.settings.body_alignment | default: 'left'
+-%}
+
+<div
+  class="valor-page valor-page--{{ container }}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-page__inner">
+    {%- if show_title -%}
+      <header class="valor-page__header valor-page__header--{{ heading_align }}">
+        <h1 class="valor-page__title valor-heading valor-heading--{{ heading_size }}">{{ page.title | escape }}</h1>
+      </header>
+    {%- endif -%}
+
+    <div class="valor-page__content valor-page__content--{{ body_align }} valor-page__content--body-{{ body_size }} rte">
+      {{ page.content }}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Page",
+  "tag": "section",
+  "class": "valor-section-page",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show page title",
+      "default": true,
+      "info": "Hide if you want to design your own header inside the page content."
+    },
+    {
+      "type": "select",
+      "id": "container_width",
+      "label": "Content width",
+      "info": "How wide the page content sits within the page. Independent of the theme's overall page width — narrow widths keep long-form text easier to read.",
+      "options": [
+        { "value": "narrow", "label": "Narrow — best for long-form text" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "wide", "label": "Wide" }
+      ],
+      "default": "narrow"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Title size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "body_size",
+      "label": "Body size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "body_alignment",
+      "label": "Body alignment",
+      "info": "Centered body works well for short pages like About or Contact. Left alignment is best for long-form text.",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ]
+}
+{% endschema %}

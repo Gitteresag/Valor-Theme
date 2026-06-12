@@ -1,0 +1,83 @@
+{%- comment -%}
+  Complementary products block, rendered inside main-product.
+
+  This is an upsell block ("Pairs well with") shown near the buy
+  buttons. It uses Shopify's Product Recommendations API with
+  intent=complementary, which returns products the merchant has
+  manually associated via the Shopify Search & Discovery app.
+
+  Distinct from related-products section:
+    - related-products: section at the bottom of the page,
+      "You may also like", grid of vertical cards, automatic
+      recommendations.
+    - complementary-products (this block): inline in product info,
+      "Pairs well with", small horizontal mini-cards, manually
+      curated recommendations.
+
+  Asset loading:
+    Both product-card.css and product-recommendations.js are loaded
+    here, even though related-products.liquid loads them too. This
+    block must work standalone — a merchant can remove the
+    related-products section from the product template and this
+    block must still render and fetch correctly. The script is
+    guarded against double-load with a customElements.get() check
+    plus IIFE wrapper, and stylesheet_tag deduplicates automatically.
+
+  Visibility:
+    Live mode, no recommendations → block is hidden via [hidden];
+                                    customers never see an empty
+                                    "Pairs well with" panel.
+    Live mode, recommendations    → JS reveals the block and injects
+      arrive via fetch              the rendered cards.
+    Theme Editor, no data         → A short helper appears so the
+                                    merchant can see and configure
+                                    the block, with a hint about
+                                    Search & Discovery.
+
+  Accepts:
+    block       {Block}    required — for shopify_attributes and settings
+    product     {Product}  required — the page's main product
+    section_id  {String}   required — for unique recommendation fetch URLs
+{%- endcomment -%}
+
+{{ 'product-card.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-recommendations.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign limit = block.settings.product_list_limit
+  assign heading = block.settings.heading
+
+  assign has_complementary = false
+  if recommendations.performed and recommendations.products_count > 0
+    assign has_complementary = true
+  endif
+-%}
+
+<div
+  class="valor-mp__complementary"
+  {{ block.shopify_attributes }}
+  {%- unless has_complementary or request.design_mode %} hidden{% endunless -%}
+>
+  {%- if heading != blank -%}
+    <h3 class="valor-mp__complementary-heading">{{ heading | escape }}</h3>
+  {%- endif -%}
+
+  <product-recommendations
+    class="valor-mp__complementary-list"
+    data-url="{{ routes.product_recommendations_url }}?limit={{ limit }}&intent=complementary"
+    data-section-id="{{ section_id }}"
+    data-product-id="{{ product.id }}"
+    data-reveal-host=".valor-mp__complementary"
+    {%- if has_complementary %} data-loaded="true"{% endif -%}
+  >
+    {%- if has_complementary -%}
+      {%- for recommendation in recommendations.products limit: limit -%}
+        {%- render 'product-card-horizontal', product: recommendation -%}
+      {%- endfor -%}
+    {%- elsif request.design_mode -%}
+      <div class="valor-mp__complementary-editor">
+        <p>{{ 'sections.main_product.complementary_empty_editor' | t | default: 'Complementary products will appear here once they are set up in the Shopify Search & Discovery app.' }}</p>
+      </div>
+    {%- endif -%}
+  </product-recommendations>
+</div>

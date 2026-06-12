@@ -1,0 +1,335 @@
+{%- liquid
+  assign section_priority = false
+  if section.location == 'template' and section.index == 1
+    assign section_priority = true
+  endif
+-%}
+
+<section
+  class="valor-promo-grid valor-promo-grid--columns-{{ section.settings.columns_desktop }}{% if section.settings.full_width %} valor-promo-grid--full{% endif %} valor-promo-grid--gap-{{ section.settings.gap }}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  {%- if section.settings.heading != blank or section.settings.text != blank -%}
+    <div class="valor-promo-grid__header valor-promo-grid__header--{{ section.settings.heading_alignment }}">
+      {%- if section.settings.heading != blank -%}
+        <h2 class="valor-promo-grid__heading valor-heading valor-heading--{{ section.settings.heading_size }}">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      {%- if section.settings.text != blank -%}
+        <div class="valor-promo-grid__text rte">{{ section.settings.text }}</div>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="valor-promo-grid__items">
+    {%- if section.blocks.size > 0 -%}
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign promo_image = block.settings.image
+          assign promo_loading = 'lazy'
+          assign promo_fetchpriority = 'auto'
+          if forloop.first and section_priority
+            assign promo_loading = 'eager'
+            assign promo_fetchpriority = 'high'
+          endif
+          assign has_link = false
+          if block.settings.link != blank
+            assign has_link = true
+          endif
+          assign promo_aria_label = block.settings.heading | default: block.settings.button_label
+          if promo_aria_label == blank
+            assign promo_aria_label = 'sections.promo_grid.card_link' | t
+          endif
+        -%}
+        <article
+          class="valor-promo-card valor-promo-card--size-{{ block.settings.card_size }} valor-promo-card--ratio-{{ section.settings.image_ratio }} valor-promo-card--content-{{ block.settings.content_position }} valor-promo-card--align-{{ block.settings.content_alignment }} valor-promo-card--text-{{ block.settings.text_color }}"
+          style="--valor-promo-overlay: {{ block.settings.overlay_opacity | times: 0.01 }};"
+          {{ block.shopify_attributes }}
+        >
+          {%- if has_link -%}
+            <a class="valor-promo-card__link" href="{{ block.settings.link }}" aria-label="{{ promo_aria_label | escape }}">
+          {%- endif -%}
+            <div class="valor-promo-card__media">
+              {%- if promo_image != blank -%}
+                <img
+                  class="valor-promo-card__image"
+                  srcset="{{ promo_image | image_url: width: 400 }} 400w, {{ promo_image | image_url: width: 650 }} 650w, {{ promo_image | image_url: width: 900 }} 900w, {{ promo_image | image_url: width: 1300 }} 1300w"
+                  src="{{ promo_image | image_url: width: 900 }}"
+                  sizes="(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw"
+                  alt="{{ promo_image.alt | escape }}"
+                  width="{{ promo_image.width }}"
+                  height="{{ promo_image.height }}"
+                  loading="{{ promo_loading }}"
+                  {%- if promo_fetchpriority == 'high' %} fetchpriority="high"{% endif -%}
+                >
+              {%- else -%}
+                {{ 'collection-1' | placeholder_svg_tag: 'valor-promo-card__placeholder' }}
+              {%- endif -%}
+              {%- if block.settings.overlay_opacity > 0 -%}
+                <span class="valor-promo-card__overlay" aria-hidden="true"></span>
+              {%- endif -%}
+            </div>
+            <div class="valor-promo-card__content">
+              {%- if block.settings.eyebrow != blank -%}
+                <p class="valor-promo-card__eyebrow">{{ block.settings.eyebrow | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.heading != blank -%}
+                <h3 class="valor-promo-card__heading">{{ block.settings.heading | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <div class="valor-promo-card__text rte">{{ block.settings.text }}</div>
+              {%- endif -%}
+              {%- if block.settings.button_label != blank -%}
+                <span class="valor-button valor-button--{% if block.settings.button_style_secondary %}secondary{% else %}primary{% endif %} valor-promo-card__button">
+                  {{ block.settings.button_label | escape }}
+                </span>
+              {%- endif -%}
+            </div>
+          {%- if has_link -%}
+            </a>
+          {%- endif -%}
+        </article>
+      {%- endfor -%}
+    {%- else -%}
+      {%- for i in (1..3) -%}
+        <article class="valor-promo-card valor-promo-card--ratio-{{ section.settings.image_ratio }} valor-promo-card--content-bottom-left valor-promo-card--align-left valor-promo-card--text-light">
+          <div class="valor-promo-card__media">
+            {{ 'collection-1' | placeholder_svg_tag: 'valor-promo-card__placeholder' }}
+            <span class="valor-promo-card__overlay" aria-hidden="true"></span>
+          </div>
+          <div class="valor-promo-card__content">
+            <h3 class="valor-promo-card__heading">{{ 'sections.promo_grid.placeholder_heading' | t }}</h3>
+          </div>
+        </article>
+      {%- endfor -%}
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .valor-promo-grid {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+  .shopify-section > .valor-promo-grid--full { grid-column: 1 / -1; }
+  .valor-promo-grid__header {
+    max-width: 48rem;
+    margin: 0 auto 2rem;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+  }
+  .valor-promo-grid__header--left { text-align: left; }
+  .valor-promo-grid__header--center { text-align: center; }
+  .valor-promo-grid__header--right { text-align: right; }
+  .valor-promo-grid__heading { margin: 0; }
+  .valor-promo-grid__text { margin-top: 0.75rem; color: color-mix(in srgb, var(--color-foreground) 78%, transparent); }
+  .valor-promo-grid__text > *:first-child { margin-top: 0; }
+  .valor-promo-grid__text > *:last-child { margin-bottom: 0; }
+  .valor-promo-grid__items {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .valor-promo-grid--gap-small .valor-promo-grid__items { gap: 0.75rem; }
+  .valor-promo-grid--gap-medium .valor-promo-grid__items { gap: 1.25rem; }
+  .valor-promo-grid--gap-large .valor-promo-grid__items { gap: 2rem; }
+  .valor-promo-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 18rem;
+    background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+    isolation: isolate;
+  }
+  .valor-promo-card__link {
+    position: absolute;
+    inset: 0;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+  }
+  .valor-promo-card__media { position: absolute; inset: 0; z-index: 0; }
+  .valor-promo-card__image,
+  .valor-promo-card__placeholder { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .valor-promo-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgb(0 0 0 / var(--valor-promo-overlay, 0.2));
+  }
+  .valor-promo-card--ratio-square { aspect-ratio: 1 / 1; }
+  .valor-promo-card--ratio-portrait { aspect-ratio: 4 / 5; }
+  .valor-promo-card--ratio-landscape { aspect-ratio: 16 / 10; }
+  .valor-promo-card__content {
+    position: relative;
+    z-index: 1;
+    min-height: inherit;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: clamp(1.25rem, 4vw, 2rem);
+    pointer-events: none;
+  }
+  .valor-promo-card__button { pointer-events: none; }
+  .valor-promo-card--content-top-left .valor-promo-card__content { justify-content: flex-start; align-items: flex-start; }
+  .valor-promo-card--content-top-center .valor-promo-card__content { justify-content: flex-start; align-items: center; }
+  .valor-promo-card--content-middle-left .valor-promo-card__content { justify-content: center; align-items: flex-start; }
+  .valor-promo-card--content-middle-center .valor-promo-card__content { justify-content: center; align-items: center; }
+  .valor-promo-card--content-bottom-left .valor-promo-card__content { justify-content: flex-end; align-items: flex-start; }
+  .valor-promo-card--content-bottom-center .valor-promo-card__content { justify-content: flex-end; align-items: center; }
+  .valor-promo-card--align-left .valor-promo-card__content { text-align: left; }
+  .valor-promo-card--align-center .valor-promo-card__content { text-align: center; }
+  .valor-promo-card--text-light { color: #fff; }
+  .valor-promo-card--text-dark { color: #111; }
+  .valor-promo-card__eyebrow { margin: 0; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600; }
+  .valor-promo-card__heading { margin: 0; font-size: clamp(1.5rem, 3vw, 2.4rem); line-height: 1.05; }
+  .valor-promo-card__text > *:first-child { margin-top: 0; }
+  .valor-promo-card__text > *:last-child { margin-bottom: 0; }
+  @media (min-width: 750px) {
+    .valor-promo-grid--columns-2 .valor-promo-grid__items { grid-template-columns: repeat(2, 1fr); }
+    .valor-promo-grid--columns-3 .valor-promo-grid__items { grid-template-columns: repeat(3, 1fr); }
+    .valor-promo-grid--columns-4 .valor-promo-grid__items { grid-template-columns: repeat(4, 1fr); }
+    .valor-promo-card--size-wide { grid-column: span 2; }
+    .valor-promo-card--size-tall { grid-row: span 2; min-height: 36rem; }
+    .valor-promo-card--size-large { grid-column: span 2; grid-row: span 2; min-height: 36rem; }
+  }
+  @media (max-width: 749px) {
+    .valor-promo-grid__header { margin-bottom: 1.5rem; }
+    .valor-promo-card { min-height: 18rem; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Promo grid",
+  "tag": "section",
+  "class": "valor-section-promo-grid",
+  "settings": [
+    { "type": "checkbox", "id": "full_width", "label": "Full width", "default": false },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Shop by story" },
+    { "type": "richtext", "id": "text", "label": "Text" },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h1", "label": "Large" },
+        { "value": "h2", "label": "Medium" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    { "type": "range", "id": "columns_desktop", "label": "Columns on desktop", "min": 2, "max": 4, "step": 1, "default": 3 },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "portrait", "label": "Portrait" },
+        { "value": "square", "label": "Square" },
+        { "value": "landscape", "label": "Landscape" }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "select",
+      "id": "gap",
+      "label": "Grid spacing",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    { "type": "header", "content": "Section padding" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "blocks": [
+    {
+      "type": "promo",
+      "name": "Promotion",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Image" },
+        { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Promotion" },
+        { "type": "richtext", "id": "text", "label": "Text" },
+        { "type": "url", "id": "link", "label": "Link" },
+        { "type": "text", "id": "button_label", "label": "Button label" },
+        { "type": "checkbox", "id": "button_style_secondary", "label": "Use outline style", "default": false },
+        {
+          "type": "select",
+          "id": "card_size",
+          "label": "Card size",
+          "options": [
+            { "value": "standard", "label": "Standard" },
+            { "value": "wide", "label": "Wide" },
+            { "value": "tall", "label": "Tall" },
+            { "value": "large", "label": "Large" }
+          ],
+          "default": "standard"
+        },
+        {
+          "type": "select",
+          "id": "content_position",
+          "label": "Content position",
+          "options": [
+            { "value": "top-left", "label": "Top left" },
+            { "value": "top-center", "label": "Top center" },
+            { "value": "middle-left", "label": "Middle left" },
+            { "value": "middle-center", "label": "Middle center" },
+            { "value": "bottom-left", "label": "Bottom left" },
+            { "value": "bottom-center", "label": "Bottom center" }
+          ],
+          "default": "bottom-left"
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Text alignment",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" }
+          ],
+          "default": "left"
+        },
+        {
+          "type": "select",
+          "id": "text_color",
+          "label": "Text color",
+          "options": [
+            { "value": "light", "label": "Light" },
+            { "value": "dark", "label": "Dark" }
+          ],
+          "default": "light"
+        },
+        { "type": "range", "id": "overlay_opacity", "label": "Overlay opacity", "min": 0, "max": 80, "step": 5, "unit": "%", "default": 25 }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Promo grid",
+      "blocks": [
+        { "type": "promo" },
+        { "type": "promo" },
+        { "type": "promo" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,265 @@
+{%- comment -%}
+  Renders the product variant picker.
+
+  Visual styles:
+    - pills:       text radio buttons
+    - dropdown:    native selects
+    - swatches:    Shopify native swatches with variant-image fallback for colour options
+    - size_text:   optional minimalist text radios for size-named options only
+
+  The minimalist size style is option-specific, so a product can use
+  colour swatches and a Lounge-style size row at the same time. Inputs
+  stay as native radios/selects so existing variant JavaScript can read
+  the selected options without a separate state system.
+
+  Accepts:
+    product            {Product} required
+    block              {Block} required
+    section_id         {String} required
+    class_prefix       {String} optional, default 'valor-mp'
+    picker_style       {String} optional override
+    size_option_style  {String} optional override, 'default' or 'minimal'
+    size_guide_block   {Block} optional popup block rendered inline for size options
+{%- endcomment -%}
+
+{%- unless product.has_only_default_variant -%}
+  {%- liquid
+    assign prefix = class_prefix | default: 'valor-mp'
+    assign resolved_picker_style = picker_style | default: block.settings.picker_style | default: 'pills'
+    assign resolved_size_option_style = size_option_style | default: block.settings.size_option_style | default: 'default'
+  -%}
+
+  <div
+    class="{{ prefix }}__variants"
+    {{ block.shopify_attributes }}
+    data-variant-picker
+    data-product-url="{{ product.url }}"
+  >
+    {%- for option in product.options_with_values -%}
+      {%- liquid
+        assign option_index = forloop.index0
+        assign option_idx0 = option.position | minus: 1
+        assign normalized_option = option.name | strip | downcase
+
+        assign is_color_option = false
+        if normalized_option contains 'color'
+          assign is_color_option = true
+        endif
+        if normalized_option contains 'colour'
+          assign is_color_option = true
+        endif
+        if normalized_option contains 'väri'
+          assign is_color_option = true
+        endif
+        if normalized_option contains 'färg'
+          assign is_color_option = true
+        endif
+        if normalized_option contains 'farbe'
+          assign is_color_option = true
+        endif
+        if normalized_option contains 'couleur'
+          assign is_color_option = true
+        endif
+        if normalized_option contains 'colore'
+          assign is_color_option = true
+        endif
+
+        assign is_size_option = false
+        if normalized_option contains 'size'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'koko'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'storlek'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'størrelse'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'storrelse'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'größe'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'grösse'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'grosse'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'taille'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'talla'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'taglia'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'maat'
+          assign is_size_option = true
+        endif
+        if normalized_option contains 'tamanho'
+          assign is_size_option = true
+        endif
+
+        assign render_size_text = false
+        if resolved_size_option_style == 'minimal' and is_size_option
+          assign render_size_text = true
+        endif
+
+        assign render_select = false
+        if resolved_picker_style == 'dropdown' and render_size_text == false
+          assign render_select = true
+        endif
+
+        assign render_swatches = false
+        if resolved_picker_style == 'swatches' and render_size_text == false
+          assign all_have_swatch = true
+          for value in option.values
+            assign has_swatch = false
+            if value.swatch.color or value.swatch.image
+              assign has_swatch = true
+            elsif is_color_option
+              for variant in product.variants
+                assign variant_option = variant.options[option_idx0]
+                if variant_option == value and variant.featured_media
+                  assign has_swatch = true
+                  break
+                endif
+              endfor
+            endif
+            unless has_swatch
+              assign all_have_swatch = false
+              break
+            endunless
+          endfor
+          if all_have_swatch and option.values.size > 0
+            assign render_swatches = true
+          endif
+        endif
+
+        assign values_modifier = 'pills'
+        assign value_label_class = prefix | append: '__option-pill'
+        if render_swatches
+          assign values_modifier = 'swatches'
+          assign value_label_class = prefix | append: '__option-swatch'
+        elsif render_size_text
+          assign values_modifier = 'size-text'
+          assign value_label_class = prefix | append: '__option-size-text'
+        endif
+      -%}
+
+      {%- if render_select -%}
+        <div class="{{ prefix }}__option-group">
+          <label
+            class="{{ prefix }}__option-label"
+            for="{{ prefix }}-select-{{ section_id }}-{{ option_index }}"
+          >{{ option.name }}</label>
+          <select
+            id="{{ prefix }}-select-{{ section_id }}-{{ option_index }}"
+            class="{{ prefix }}__option-select"
+            data-option-position="{{ option.position }}"
+            {% if prefix == 'valor-fp' %}data-section-id="{{ section_id }}"{% endif %}
+          >
+            {%- for value in option.values -%}
+              <option
+                value="{{ value | escape }}"
+                {% if option.selected_value == value %}selected{% endif %}
+              >{{ value }}</option>
+            {%- endfor -%}
+          </select>
+        </div>
+      {%- else -%}
+        <fieldset class="{{ prefix }}__option-group{% if render_size_text %} {{ prefix }}__option-group--size-text{% endif %}">
+          <legend class="{{ prefix }}__option-label{% if render_size_text %} {{ prefix }}__option-label--size-text{% endif %}">
+            <span class="{{ prefix }}__option-label-row">
+              <span class="{{ prefix }}__option-label-text">
+                {{ option.name }}{%- unless render_size_text -%}: <span
+                  class="{{ prefix }}__option-selected"
+                  data-selected-for="option-{{ section_id }}-{{ option_index }}"
+                >{{ option.selected_value }}</span>{%- endunless -%}
+              </span>
+              {%- if render_size_text -%}
+                <span
+                  class="visually-hidden"
+                  data-selected-for="option-{{ section_id }}-{{ option_index }}"
+                >{{ option.selected_value }}</span>
+              {%- endif -%}
+              {%- if is_size_option and size_guide_block != blank -%}
+                <span class="{{ prefix }}__option-size-guide">
+                  {%- render 'product-popup', block: size_guide_block, section_id: section_id, inline: true -%}
+                </span>
+              {%- endif -%}
+            </span>
+          </legend>
+
+          <div class="{{ prefix }}__option-values {{ prefix }}__option-values--{{ values_modifier }}">
+            {%- for value in option.values -%}
+              {%- liquid
+                assign input_id = prefix | append: '-opt-' | append: section_id | append: '-' | append: option_index | append: '-' | append: forloop.index0
+                assign is_selected = false
+                if option.selected_value == value
+                  assign is_selected = true
+                endif
+
+                assign swatch_color = nil
+                assign swatch_image_url = nil
+                if render_swatches
+                  if value.swatch.color
+                    assign swatch_color = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                  elsif value.swatch.image
+                    assign swatch_image_url = value.swatch.image | image_url: width: 100
+                  elsif is_color_option
+                    for variant in product.variants
+                      assign variant_option = variant.options[option_idx0]
+                      if variant_option == value and variant.featured_media
+                        assign swatch_image_url = variant.featured_media.preview_image | image_url: width: 100
+                        break
+                      endif
+                    endfor
+                  endif
+                endif
+              -%}
+              <input
+                type="radio"
+                id="{{ input_id }}"
+                name="options[{{ option.name | escape }}]"
+                value="{{ value | escape }}"
+                class="{{ prefix }}__option-input"
+                {% if is_selected %}checked{% endif %}
+                data-option-position="{{ option.position }}"
+                data-option-display="option-{{ section_id }}-{{ option_index }}"
+                {% if prefix == 'valor-fp' %}data-section-id="{{ section_id }}"{% endif %}
+              >
+              <label
+                for="{{ input_id }}"
+                class="{{ value_label_class }}"
+                {% if render_swatches and swatch_color %}
+                  style="--valor-swatch-color: {{ swatch_color }};"
+                {% elsif render_swatches and swatch_image_url %}
+                  style="--valor-swatch-image: url('{{ swatch_image_url }}');"
+                {% endif %}
+                {% if render_swatches %}
+                  title="{{ value | escape }}"
+                {% endif %}
+              >
+                {%- if render_swatches -%}
+                  <span class="visually-hidden">{{ value }}</span>
+                {%- else -%}
+                  <span class="{{ prefix }}__option-text">{{ value }}</span>
+                {%- endif -%}
+              </label>
+            {%- endfor -%}
+          </div>
+        </fieldset>
+      {%- endif -%}
+    {%- endfor -%}
+
+    <script type="application/json" data-section-variants="{{ section_id }}">
+      {{ product.variants | json }}
+    </script>
+  </div>
+{%- endunless -%}

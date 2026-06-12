@@ -1,0 +1,60 @@
+{%- comment -%}
+  Horizontal product card — a compact landscape card used by the
+  complementary-products block on the product page. Image on the
+  left (fixed-size square), title and price on the right.
+
+  Why a separate snippet instead of a modifier on product-card:
+    The vertical product-card has a portrait layout, dual-image
+    swap, sale/sold-out badges, vendor line, and a ratio system.
+    A horizontal mini-card needs none of that — the cleanest
+    approach is a small, focused snippet.
+
+  Styles live in assets/product-card.css under
+  .valor-card-horizontal.
+
+  Accepts:
+    product  {Product}  required
+{%- endcomment -%}
+
+{%- assign card_variant = product.selected_or_first_available_variant -%}
+
+<a href="{{ product.url }}" class="valor-card-horizontal" aria-label="{{ product.title | escape }}">
+  <div class="valor-card-horizontal__media">
+    {%- if product.featured_media -%}
+      <img
+        src="{{ product.featured_media | image_url: width: 160 }}"
+        srcset="
+          {{ product.featured_media | image_url: width: 80 }}  80w,
+          {{ product.featured_media | image_url: width: 160 }} 160w,
+          {{ product.featured_media | image_url: width: 240 }} 240w
+        "
+        sizes="80px"
+        alt="{{ product.featured_media.alt | default: product.title | escape }}"
+        loading="lazy"
+        width="80"
+        height="80"
+        class="valor-card-horizontal__image"
+      >
+    {%- else -%}
+      <div class="valor-card-horizontal__placeholder">
+        {{ 'product-1' | placeholder_svg_tag: 'valor-card-horizontal__placeholder-svg' }}
+      </div>
+    {%- endif -%}
+  </div>
+
+  <div class="valor-card-horizontal__info">
+    <div class="valor-card-horizontal__title">{{ product.title | escape }}</div>
+    <div class="valor-card-horizontal__price">
+      {%- if product.compare_at_price > product.price -%}
+        <span class="valor-card-horizontal__price-current valor-card-horizontal__price-current--sale">{{ product.price | money }}</span>
+        <span class="valor-card-horizontal__price-compare"><s>{{ product.compare_at_price | money }}</s></span>
+      {%- elsif product.price_varies -%}
+        {%- assign from_price = product.price | money -%}
+        <span class="valor-card-horizontal__price-current">{{ 'product.from_price' | t: price: from_price }}</span>
+      {%- else -%}
+        <span class="valor-card-horizontal__price-current">{{ product.price | money }}</span>
+      {%- endif -%}
+    </div>
+    {%- render 'product-unit-price', variant: card_variant, class_name: 'valor-card-horizontal__unit-price' -%}
+  </div>
+</a>

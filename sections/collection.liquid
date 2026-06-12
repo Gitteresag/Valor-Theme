@@ -1,0 +1,431 @@
+{%- comment -%}
+  Collection page
+
+  Layout:
+    Banner (optional)
+      → renders collection.image as a hero image when both the
+        merchant has uploaded one AND show_collection_image is on.
+        Hidden cleanly otherwise; we don't placeholder a missing image.
+    Header
+      → title + optional description.
+    Toolbar
+      → product count, mobile filter button, sort dropdown.
+    Layout
+      → desktop: facets sidebar (240px) + product grid.
+      → mobile:  facets in an off-canvas drawer (slides from the right).
+    Pagination
+      → Valor's BEM-styled pagination snippet (no default_pagination).
+
+  Filters:
+    Uses Shopify's storefront filter API (collection.filters), which
+    is what the Search & Discovery app populates. Tag-based filtering
+    is intentionally not supported — it's the legacy approach.
+
+  Section rendering:
+    The whole <valor-collection> element is the section's outer DOM.
+    On filter / sort change, JS fetches the current URL with
+    ?section_id=collection appended; Shopify returns just this
+    section's HTML; JS swaps the inner contents in place. No reload.
+
+  Settings (whole section):
+    show_collection_image  bool   default false  (banner toggle)
+    banner_height          enum   default medium (small | medium | large)
+    show_description       bool   default true
+    columns_desktop        int    default 4      (2..5)
+    columns_mobile         int    default 2      (1..2)
+    products_per_page      int    default 24     (8..48)
+    enable_filtering       bool   default true
+    enable_sorting         bool   default true
+    padding_top/bottom     range  controls vertical spacing
+{%- endcomment -%}
+
+{{ 'product-card.css' | asset_url | stylesheet_tag }}
+{{ 'collection.css'   | asset_url | stylesheet_tag }}
+{{ 'facets-bar.css'   | asset_url | stylesheet_tag }}
+<script src="{{ 'collection.js' | asset_url }}" defer></script>
+<script src="{{ 'grid-view.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign show_image       = section.settings.show_collection_image
+  assign banner_height    = section.settings.banner_height
+  assign show_description = section.settings.show_description
+  assign heading_size     = section.settings.heading_size | default: 'large'
+  assign heading_align    = section.settings.heading_alignment | default: 'center'
+  assign body_size        = section.settings.body_size | default: 'medium'
+  assign body_align       = section.settings.body_alignment | default: 'center'
+  assign cols_desktop     = section.settings.columns_desktop
+  assign cols_mobile      = section.settings.columns_mobile
+  assign per_page         = section.settings.products_per_page
+  assign image_ratio      = section.settings.image_ratio
+  assign show_secondary   = section.settings.show_secondary_image
+  assign show_vendor      = section.settings.show_vendor
+  assign enable_filtering = section.settings.enable_filtering
+  assign enable_sorting   = section.settings.enable_sorting
+
+  assign sort_by          = collection.sort_by | default: collection.default_sort_by
+
+  assign has_filters = false
+  if enable_filtering and collection.filters != empty
+    assign has_filters = true
+  endif
+
+  assign has_sorting = false
+  if enable_sorting and collection.sort_options.size > 1
+    assign has_sorting = true
+  endif
+
+  assign has_drawer_controls = false
+  if has_filters or has_sorting
+    assign has_drawer_controls = true
+  endif
+-%}
+
+<valor-collection
+  class="valor-collection"
+  data-collection-section-id="{{ section.id }}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  {%- if show_image and collection.image -%}
+    <div class="valor-collection__banner valor-collection__banner--height-{{ banner_height }}">
+      <img
+        src="{{ collection.image | image_url: width: 1600 }}"
+        srcset="
+          {{ collection.image | image_url: width: 600 }} 600w,
+          {{ collection.image | image_url: width: 1000 }} 1000w,
+          {{ collection.image | image_url: width: 1600 }} 1600w
+        "
+        sizes="100vw"
+        alt="{{ collection.image.alt | default: collection.title | escape }}"
+        class="valor-collection__banner-image"
+        loading="eager"
+        width="{{ collection.image.width }}"
+        height="{{ collection.image.height }}"
+      >
+    </div>
+  {%- endif -%}
+
+  <header class="valor-collection__header valor-collection__header--{{ heading_align }}">
+    <h1 class="valor-collection__title valor-heading valor-heading--{{ heading_size }}">{{ collection.title }}</h1>
+    {%- if show_description and collection.description != blank -%}
+      <div class="valor-collection__description valor-collection__description--{{ body_align }} valor-collection__description--body-{{ body_size }} rte">{{ collection.description }}</div>
+    {%- endif -%}
+  </header>
+
+  {%- paginate collection.products by per_page -%}
+    {%- liquid
+      assign active_filter_count = 0
+      for filter in collection.filters
+        assign active_filter_count = active_filter_count | plus: filter.active_values.size
+        if filter.type == 'price_range'
+          if filter.min_value.value or filter.max_value.value
+            assign active_filter_count = active_filter_count | plus: 1
+          endif
+        endif
+      endfor
+    -%}
+
+    {%- comment -%}
+      Mobile-only toolbar. Shows just the count and the "Filter and
+      sort" button that opens the drawer. The desktop sort dropdown
+      that used to live here moved into the horizontal filter bar
+      below to avoid showing it twice.
+    {%- endcomment -%}
+    <div class="valor-collection__toolbar valor-collection__toolbar--mobile">
+      <span class="valor-collection__count">
+        {%- if collection.products_count == 1 -%}
+          {{ 'collection.product_count.one' | t: count: collection.products_count }}
+        {%- else -%}
+          {{ 'collection.product_count.other' | t: count: collection.products_count }}
+        {%- endif -%}
+      </span>
+
+      {%- if has_drawer_controls -%}
+        <button
+          type="button"
+          class="valor-collection__filter-btn"
+          data-facets-open
+          aria-label="{{ 'collection.filters.filter_and_sort' | t }}"
+        >
+          <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+          <span>{{ 'collection.filters.filter_and_sort' | t }}</span>
+          {%- if active_filter_count > 0 -%}
+            <span class="valor-collection__filter-count">{{ active_filter_count }}</span>
+          {%- endif -%}
+        </button>
+      {%- endif -%}
+
+      {%- render 'grid-view-toggle', viewport: 'mobile' -%}
+    </div>
+
+    {%- comment -%}
+      Horizontal filter bar — desktop-only (CSS hides it on mobile).
+      Renders filters as click-down popovers with a sort select on
+      the right. Replaces the desktop sidebar/toolbar combo with a
+      cleaner top-of-grid bar that matches modern Shopify themes
+      (Dawn horizontal filter mode, Studio, Crave, etc).
+    {%- endcomment -%}
+    {%- if has_filters or has_sorting -%}
+      {%- render 'facets-bar',
+          results: collection,
+          paginate: paginate,
+          enable_filtering: enable_filtering,
+          show_sort: true,
+          has_sorting: has_sorting,
+          results_count: collection.products_count
+      -%}
+    {%- endif -%}
+
+    <div class="valor-collection__layout{% unless has_filters %} valor-collection__layout--no-sidebar{% endunless %}">
+      <div class="valor-collection__overlay" data-facets-close aria-hidden="true"></div>
+
+      {%- comment -%}
+        Mobile drawer aside. The same DOM hosts both the sort and the
+        filter list; CSS slides it in from the right when the drawer
+        opens, and pins it to the left in the layout otherwise. The
+        whole aside is hidden on desktop now (where the horizontal
+        filterbar above takes over) — see CSS rule for
+        `.valor-collection__sidebar` inside the desktop media query.
+      {%- endcomment -%}
+      <aside class="valor-collection__sidebar">
+        {%- if has_sorting -%}
+          <div class="valor-collection__sort-wrap valor-collection__sort-wrap--mobile">
+            <label class="valor-collection__sort-label">{{ 'collection.sort_by' | t }}</label>
+            <select
+              class="valor-collection__sort"
+              data-collection-sort
+              aria-label="{{ 'collection.sort_by' | t }}"
+            >
+              {%- for option in collection.sort_options -%}
+                <option value="{{ option.value }}" {% if option.value == sort_by %}selected{% endif %}>
+                  {{ option.name }}
+                </option>
+              {%- endfor -%}
+            </select>
+          </div>
+        {%- endif -%}
+
+        {%- if has_filters -%}
+          {%- render 'facets', results: collection, paginate: paginate -%}
+        {%- endif -%}
+      </aside>
+
+      <div class="valor-collection__main">
+        {%- if collection.products.size > 0 -%}
+          <div class="valor-collection__grid valor-collection__grid--cols-{{ cols_desktop }} valor-collection__grid--mobile-{{ cols_mobile }}">
+            {%- for product in collection.products -%}
+              {%- render 'product-card',
+                  product: product,
+                  image_ratio: image_ratio,
+                  show_secondary_image: show_secondary,
+                  show_vendor: show_vendor,
+                  show_price: true
+              -%}
+            {%- endfor -%}
+          </div>
+
+          {%- render 'pagination', paginate: paginate -%}
+        {%- else -%}
+          <div class="valor-collection__empty">
+            <p class="valor-collection__empty-text">{{ 'collection.no_products' | t }}</p>
+            {%- if active_filter_count > 0 -%}
+              <a href="{{ collection.url }}" class="valor-button valor-button--secondary">
+                {{ 'collection.filters.clear_all' | t }}
+              </a>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endpaginate -%}
+</valor-collection>
+
+{% schema %}
+{
+  "name": "t:general.collection",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_collection_image",
+      "label": "Show collection image as banner",
+      "info": "Uses the image set on the collection. Hidden if no image is uploaded.",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "banner_height",
+      "label": "Banner height",
+      "options": [
+        { "value": "small",  "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large",  "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "header",
+      "content": "Header"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Title size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "body_size",
+      "label": "Description size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "body_alignment",
+      "label": "Description alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Product grid"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        { "value": "1", "label": "1 column" },
+        { "value": "2", "label": "2 columns" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "header",
+      "content": "Product cards"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "adapt",     "label": "Adapt to image" },
+        { "value": "portrait",  "label": "Portrait (3:4)" },
+        { "value": "square",    "label": "Square (1:1)" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "label": "Show second image on hover",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Filtering and sorting"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_filtering",
+      "label": "Enable filtering",
+      "info": "Configure filters in the [Search & Discovery app](/admin/apps/search-and-discovery/configuration/filters).",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_sorting",
+      "label": "Enable sorting",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:general.collection"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,117 @@
+{% comment %}
+  Renders a reusable quantity input.
+
+  Accepts:
+  - id: {String} Input id
+  - name: {String} Input name
+  - value: {Number} Current quantity
+  - min: {Number} Native input min value
+  - data_min: {Number} Quantity rule min value for JS validation
+  - max: {Number} Quantity rule max value
+  - step: {Number} Quantity rule increment
+  - aria_label: {String} Input aria-label (optional override)
+  - decrease_label: {String} Decrease button accessible label (optional override)
+  - increase_label: {String} Increase button accessible label (optional override)
+  - data_line: {String|Number} Cart line number
+  - data_key: {String} Cart item key
+  - data_variant_id: {String|Number} Variant id
+  - form_id: {String} Optional form id
+  - disabled: {Boolean} Disable controls
+  - classes: {String} Additional wrapper classes
+
+  Usage:
+  {% render 'quantity-input',
+    id: quantity_id,
+    name: 'updates[]',
+    value: item.quantity,
+    min: 0,
+    data_min: item.variant.quantity_rule.min,
+    max: item.variant.quantity_rule.max,
+    step: item.variant.quantity_rule.increment,
+    data_line: line_index,
+    data_key: item.key,
+    data_variant_id: item.variant.id
+  %}
+{% endcomment %}
+
+{%- liquid
+  assign quantity_id = id | default: 'Quantity'
+  assign quantity_name = name | default: 'quantity'
+  assign quantity_value = value | default: 1
+  assign quantity_min = min | default: 1
+  assign quantity_data_min = data_min | default: quantity_min
+  assign quantity_step = step | default: 1
+
+  if quantity_step == blank or quantity_step == 0
+    assign quantity_step = 1
+  endif
+
+  assign default_quantity_label = 'cart.quantity_label' | t
+  assign default_decrease_label = 'cart.quantity_decrease' | t
+  assign default_increase_label = 'cart.quantity_increase' | t
+
+  assign quantity_aria_label = aria_label | default: default_quantity_label
+  assign quantity_decrease_label = decrease_label | default: default_decrease_label
+  assign quantity_increase_label = increase_label | default: default_increase_label
+
+  assign quantity_classes = 'valor-quantity'
+  if classes != blank
+    assign quantity_classes = quantity_classes | append: ' ' | append: classes
+  endif
+-%}
+
+<quantity-input class="{{ quantity_classes }}" data-valor-quantity-input>
+  <button
+    type="button"
+    class="valor-quantity__button valor-quantity__button--minus"
+    name="minus"
+    aria-label="{{ quantity_decrease_label | escape }}"
+    aria-controls="{{ quantity_id | escape }}"
+    data-quantity-minus
+    {% if disabled %}disabled{% endif %}
+  >
+    <span aria-hidden="true" class="valor-quantity__icon">
+      <svg viewBox="0 0 10 10" focusable="false">
+        <path d="M1.5 5h7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"></path>
+      </svg>
+    </span>
+  </button>
+
+  <input
+    id="{{ quantity_id | escape }}"
+    class="valor-quantity__input"
+    type="number"
+    name="{{ quantity_name | escape }}"
+    value="{{ quantity_value }}"
+    min="{{ quantity_min }}"
+    data-min="{{ quantity_data_min }}"
+    {% if max != blank %}max="{{ max }}" data-max="{{ max }}"{% endif %}
+    step="{{ quantity_step }}"
+    data-step="{{ quantity_step }}"
+    inputmode="numeric"
+    autocomplete="off"
+    aria-label="{{ quantity_aria_label | escape }}"
+    data-quantity-field
+    {% if data_line != blank %}data-line="{{ data_line }}"{% endif %}
+    {% if data_key != blank %}data-key="{{ data_key | escape }}"{% endif %}
+    {% if data_variant_id != blank %}data-variant-id="{{ data_variant_id }}"{% endif %}
+    {% if form_id != blank %}form="{{ form_id | escape }}"{% endif %}
+    {% if disabled %}disabled{% endif %}
+  >
+
+  <button
+    type="button"
+    class="valor-quantity__button valor-quantity__button--plus"
+    name="plus"
+    aria-label="{{ quantity_increase_label | escape }}"
+    aria-controls="{{ quantity_id | escape }}"
+    data-quantity-plus
+    {% if disabled %}disabled{% endif %}
+  >
+    <span aria-hidden="true" class="valor-quantity__icon">
+      <svg viewBox="0 0 10 10" focusable="false">
+        <path d="M5 1.5v7M1.5 5h7" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.5"></path>
+      </svg>
+    </span>
+  </button>
+</quantity-input>

@@ -1,0 +1,363 @@
+{%- comment -%}
+  List-collections section.
+
+  Renders the /collections page that shows every collection in the
+  shop. Layout matches the homepage Collection list section's
+  visual style (same .valor-collection-card classes), but with
+  pagination so big catalogs stay performant.
+
+  Settings:
+    title              merchant-set heading
+    heading_size       Small / Medium / Large
+    heading_alignment  Left / Center / Right
+    image_ratio        adapt / square / portrait
+    columns_desktop    2..5
+    columns_mobile     1 or 2
+    collections_per_page
+
+  Note on sorting: Liquid's `paginate` tag only works with Shopify's
+  built-in `collections` drop, not with arrays returned by `| sort` or
+  `| reverse`. We therefore use Shopify's default ordering (manual
+  position from the admin) and don't expose a sort-by setting here.
+  Merchants can reorder collections in Shopify admin → Products →
+  Collections → Reorder.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/list-collections
+{%- endcomment -%}
+
+{{ 'page-layout.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign heading_size  = section.settings.heading_size  | default: 'large'
+  assign heading_align = section.settings.heading_alignment | default: 'left'
+  assign image_ratio   = section.settings.image_ratio   | default: 'square'
+  assign cols_desktop  = section.settings.columns_desktop | default: 3
+  assign cols_mobile   = section.settings.columns_mobile  | default: 2
+  assign per_page      = section.settings.collections_per_page | default: 12
+
+  # Heading: use the merchant-set inline_richtext as-is. Don't pipe through
+  # the translation filter, since `t` would try to translate the literal
+  # string "Collections" and fall back to "Translation missing".
+  assign list_title = section.settings.title
+  if list_title == blank
+    assign list_title = 'collections.title' | t
+  endif
+-%}
+
+<div
+  class="valor-collections-page"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-collections-page__inner">
+    <header class="valor-collections-page__header valor-collections-page__header--{{ heading_align }}">
+      <h1 class="valor-collections-page__title valor-heading valor-heading--{{ heading_size }}">{{ list_title }}</h1>
+    </header>
+
+    {%- paginate collections by per_page -%}
+      {%- if collections.size > 0 -%}
+        <ul
+          class="valor-collections-page__grid valor-collections-page__grid--cols-{{ cols_desktop }} valor-collections-page__grid--mobile-{{ cols_mobile }}"
+          role="list"
+        >
+          {%- for collection in collections -%}
+            {%- assign collection_image_loading = 'lazy' -%}
+            {%- assign collection_image_fetchpriority = 'auto' -%}
+            {%- if section.location == 'template' and section.index == 1 and forloop.first -%}
+              {%- assign collection_image_loading = 'eager' -%}
+              {%- assign collection_image_fetchpriority = 'high' -%}
+            {%- endif -%}
+            <li class="valor-collections-page__item">
+              <a
+                href="{{ collection.url }}"
+                class="valor-collection-card valor-collection-card--ratio-{{ image_ratio }}"
+              >
+                <div class="valor-collection-card__media">
+                  {%- if collection.image != blank -%}
+                    <img
+                      class="valor-collection-card__image"
+                      srcset="{{ collection.image | image_url: width: 400 }} 400w, {{ collection.image | image_url: width: 600 }} 600w, {{ collection.image | image_url: width: 800 }} 800w, {{ collection.image | image_url: width: 1100 }} 1100w"
+                      src="{{ collection.image | image_url: width: 600 }}"
+                      sizes="(min-width: 990px) 33vw, 50vw"
+                      alt="{{ collection.image.alt | escape }}"
+                      width="{{ collection.image.width }}"
+                      height="{{ collection.image.height }}"
+                      loading="{{ collection_image_loading }}"
+                      fetchpriority="{{ collection_image_fetchpriority }}"
+                    >
+                  {%- elsif collection.products.first.featured_media != blank -%}
+                    {%- assign first_image = collection.products.first.featured_media -%}
+                    <img
+                      class="valor-collection-card__image"
+                      srcset="{{ first_image | image_url: width: 400 }} 400w, {{ first_image | image_url: width: 600 }} 600w, {{ first_image | image_url: width: 800 }} 800w"
+                      src="{{ first_image | image_url: width: 600 }}"
+                      sizes="(min-width: 990px) 33vw, 50vw"
+                      alt="{{ first_image.alt | escape }}"
+                      width="{{ first_image.width }}"
+                      height="{{ first_image.height }}"
+                      loading="{{ collection_image_loading }}"
+                      fetchpriority="{{ collection_image_fetchpriority }}"
+                    >
+                  {%- else -%}
+                    <div class="valor-collection-card__placeholder">
+                      {{ 'collection-1' | placeholder_svg_tag: 'valor-collection-card__placeholder-svg' }}
+                    </div>
+                  {%- endif -%}
+                </div>
+
+                <div class="valor-collection-card__body">
+                  <h2 class="valor-collection-card__title valor-heading valor-heading--small">{{ collection.title | escape }}</h2>
+                  <span class="valor-collection-card__count">
+                    {%- if collection.all_products_count == 1 -%}
+                      {{ 'collections.product_count_singular' | t | default: '1 product' }}
+                    {%- else -%}
+                      {{ 'collections.product_count' | t: count: collection.all_products_count | default: collection.all_products_count | append: ' products' }}
+                    {%- endif -%}
+                  </span>
+                </div>
+              </a>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if paginate.pages > 1 -%}
+          {%- render 'pagination', paginate: paginate -%}
+        {%- endif -%}
+      {%- else -%}
+        <p class="valor-collections-page__empty">{{ 'collections.empty' | t | default: 'No collections yet.' }}</p>
+      {%- endif -%}
+    {%- endpaginate -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .valor-collections-page {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  .valor-collections-page__inner {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+    box-sizing: border-box;
+  }
+
+  .valor-collections-page__header {
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .valor-collections-page__header--left   { text-align: left; }
+  .valor-collections-page__header--center { text-align: center; }
+  .valor-collections-page__header--right  { text-align: right; }
+
+  .valor-collections-page__title {
+    margin: 0;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+
+  .valor-collections-page__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: clamp(1.25rem, 2.5vw, 2rem);
+  }
+  .valor-collections-page__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .valor-collections-page__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .valor-collections-page__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .valor-collections-page__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
+
+  /* Mobile: 1 or 2 columns chosen by merchant. Override desktop column
+     counts when viewport is narrow so 4-5 col grids don't stay cramped
+     on phones. */
+  @media (max-width: 989px) {
+    .valor-collections-page__grid--cols-4,
+    .valor-collections-page__grid--cols-5 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 749px) {
+    .valor-collections-page__grid--mobile-1 { grid-template-columns: 1fr; }
+    .valor-collections-page__grid--mobile-2 { grid-template-columns: repeat(2, 1fr); }
+    .valor-collections-page__grid {
+      gap: 1rem;
+    }
+  }
+
+  .valor-collections-page__item {
+    margin: 0;
+  }
+
+  /* Use the same .valor-collection-card classes as the homepage
+     Collection list section. Inline the card styles here so this
+     section is self-contained and the styles travel with it. */
+  .valor-collection-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+  }
+
+  .valor-collection-card__media {
+    position: relative;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--color-foreground) 4%, transparent);
+  }
+  .valor-collection-card--ratio-square    .valor-collection-card__media { aspect-ratio: 1 / 1; }
+  .valor-collection-card--ratio-portrait  .valor-collection-card__media { aspect-ratio: 3 / 4; }
+  .valor-collection-card--ratio-adapt     .valor-collection-card__media { aspect-ratio: auto; }
+
+  .valor-collection-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .valor-collection-card--ratio-adapt .valor-collection-card__image {
+    height: auto;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .valor-collection-card:hover .valor-collection-card__image { transform: scale(1.04); }
+  }
+
+  .valor-collection-card__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+  }
+  .valor-collection-card__placeholder-svg {
+    width: 50%;
+    height: 50%;
+  }
+
+  .valor-collection-card__body {
+    padding: 0.875rem 0 0;
+  }
+  .valor-collection-card__title {
+    margin: 0 0 0.25rem;
+    line-height: 1.25;
+  }
+  .valor-collection-card__count {
+    font-size: var(--font-size-body-sm);
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  }
+
+  .valor-collections-page__empty {
+    margin: 2rem 0;
+    text-align: center;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Collections list",
+  "tag": "section",
+  "class": "valor-section-collections-page",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Heading",
+      "default": "Collections"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "small",  "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large",  "label": "Large" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "adapt",    "label": "Adapt to image" },
+        { "value": "portrait", "label": "Portrait (3:4)" },
+        { "value": "square",   "label": "Square (1:1)" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        { "value": "1", "label": "1 column" },
+        { "value": "2", "label": "2 columns" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "range",
+      "id": "collections_per_page",
+      "label": "Collections per page",
+      "min": 6,
+      "max": 30,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ]
+}
+{% endschema %}

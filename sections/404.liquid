@@ -1,0 +1,144 @@
+{%- comment -%}
+  404 (Page not found) section.
+
+  Renders the friendly error page when a customer hits a URL that
+  doesn't resolve to a product, collection, page, blog, or article.
+  Same design system (heading + body size + alignment + container
+  width + padding) as Page and Policy sections, so the 404 stays
+  visually consistent with the rest of the theme.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/404
+{%- endcomment -%}
+
+{{ 'page-layout.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign container = section.settings.container_width | default: 'narrow'
+  assign heading_size = section.settings.heading_size | default: 'large'
+  assign body_size = section.settings.body_size | default: 'medium'
+  assign heading_align = section.settings.heading_alignment | default: 'center'
+  assign body_align = section.settings.body_alignment | default: 'center'
+-%}
+
+<div
+  class="valor-page valor-page--{{ container }} valor-404"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-page__inner">
+    <header class="valor-page__header valor-page__header--{{ heading_align }}">
+      <h1 class="valor-page__title valor-heading valor-heading--{{ heading_size }}">{{ '404.title' | t }}</h1>
+    </header>
+
+    <div class="valor-page__content valor-page__content--{{ body_align }} valor-page__content--body-{{ body_size }}">
+      <p>{{ '404.not_found' | t }}</p>
+
+      <p class="valor-404__cta-wrap">
+        <a href="{{ routes.all_products_collection_url }}" class="valor-button valor-button--primary">
+          {{ '404.back_to_shopping' | t }}
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  /* Layout-only rule — typography, container width, and page-level
+     spacing come from assets/page-layout.css (loaded above). The CTA
+     uses .valor-button--primary from critical.css, the same primary
+     style as the cart's "Continue shopping" button. The content
+     wrapper deliberately omits the .rte class — the 404 body is just
+     a translated message and a CTA, not merchant rich-text — so
+     .rte a rules don't interfere with the button's own colors. */
+  .valor-404__cta-wrap {
+    margin-top: 1.5rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "404 page",
+  "tag": "section",
+  "class": "valor-section-404",
+  "settings": [
+    {
+      "type": "select",
+      "id": "container_width",
+      "label": "Content width",
+      "options": [
+        { "value": "narrow", "label": "Narrow" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "wide", "label": "Wide" }
+      ],
+      "default": "narrow"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Title size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Title alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "body_size",
+      "label": "Body size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "body_alignment",
+      "label": "Body alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 200,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    }
+  ]
+}
+{% endschema %}

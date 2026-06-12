@@ -1,0 +1,176 @@
+{
+  "general": {
+    "404": "Not found",
+    "article": "Article",
+    "block": "Block",
+    "blog": "Blog",
+    "cart": "Cart",
+    "collection": "Collection",
+    "collections": "Collections",
+    "collection_card": "Collection card",
+    "collections_grid": "Collections grid",
+    "colors": "Colors",
+    "column": "Column",
+    "content": "Content",
+    "custom_section": "Custom section",
+    "fonts": "Fonts",
+    "footer": "Footer",
+    "group": "Group",
+    "header": "Header",
+    "layout": "Layout",
+    "main": "Main",
+    "page": "Page",
+    "password": "Password",
+    "primary": "Primary",
+    "product": "Product",
+    "row": "Row",
+    "search": "Search",
+    "secondary": "Secondary",
+    "section": "Section",
+    "settings": "Settings",
+    "sidebar": "Sidebar",
+    "text": "Text",
+    "theme": "Theme",
+    "typography": "Typography"
+  },
+  "labels": {
+    "alignment": "Alignment",
+    "background": "Background",
+    "buttons_header": "Buttons",
+    "buttons_header_info": "Global button colors and shape. Leave a color empty to derive it from the background and foreground colors above.",
+    "button_background": "Button background",
+    "button_text": "Button text",
+    "button_border": "Button border",
+    "button_hover_background": "Button background on hover",
+    "button_hover_text": "Button text on hover",
+    "button_border_width": "Button border thickness",
+    "button_corner_radius": "Button corner radius",
+    "foreground": "Foreground",
+    "grid_gap": "Grid spacing",
+    "grid_item_width": "Grid item width",
+    "input_corner_radius": "Input corner radius",
+    "layout_direction": "Layout direction",
+    "menu": "Menu",
+    "customer_account_menu": "Customer account menu",
+    "padding": "Padding",
+    "page_margin": "Page margin",
+    "page_width": "Page width",
+    "show_payment_icons": "Show payment icons",
+    "text_style": "Text style",
+    "text": "Text",
+    "localization_header": "Localization",
+    "enable_country_selector": "Enable country/region selector",
+    "enable_country_selector_info": "To add a country/region, go to your [market settings](/admin/settings/markets).",
+    "enable_language_selector": "Enable language selector",
+    "enable_language_selector_info": "To add a language, go to your [language settings](/admin/settings/languages).",
+    "search_header": "Search",
+    "enable_search": "Enable search",
+    "enable_customer_avatar": "Show customer avatar",
+    "enable_customer_avatar_info": "Logged-in customers see their avatar instead of the account icon.",
+    "sticky_header": "Sticky header",
+    "sticky_header_type": "Sticky header behavior",
+    "sticky_none": "None",
+    "sticky_always": "Always pinned",
+    "cart_drawer": "Cart drawer",
+    "enable_discount_input": "Show discount code input",
+    "enable_cart_note": "Show order note input",
+    "button_outline_text": "Outline button text",
+    "button_outline_hover_text": "Outline button text on hover"
+  },
+  "options": {
+    "alignment": {
+      "left": "Left",
+      "center": "Center",
+      "right": "Right"
+    },
+    "direction": {
+      "horizontal": "Horizontal",
+      "vertical": "Vertical"
+    },
+    "page_width": {
+      "narrow": "Narrow",
+      "wide": "Wide",
+      "compact": "Compact"
+    },
+    "size": {
+      "large": "Large",
+      "small": "Small"
+    },
+    "text_style": {
+      "title": "Title",
+      "subtitle": "Subtitle",
+      "normal": "Normal text"
+    }
+  },
+  "sections": {
+    "main_product": {
+      "blocks": {
+        "payment_terms": {
+          "name": "Shop Pay Installments"
+        },
+        "buy_buttons": {
+          "settings": {
+            "show_gift_card_recipient": {
+              "label": "Show recipient form for gift cards",
+              "info": "Lets customers send gift card products to a recipient. Dynamic checkout is hidden when the recipient form is active."
+            }
+          }
+        },
+        "pickup_availability": {
+          "name": "Pickup availability"
+        }
+      }
+    },
+    "featured_product": {
+      "blocks": {
+        "payment_terms": {
+          "name": "Shop Pay Installments"
+        },
+        "buy_buttons": {
+          "settings": {
+            "show_gift_card_recipient": {
+              "label": "Show recipient form for gift cards",
+              "info": "Lets customers send gift card products to a recipient. Dynamic checkout is hidden when the recipient form is active."
+            }
+          }
+        },
+        "pickup_availability": {
+          "name": "Pickup availability"
+        },
+        "custom_liquid": {
+          "name": "Custom Liquid",
+          "settings": {
+            "custom_liquid": {
+              "label": "Custom Liquid",
+              "info": "Add app snippets or other Liquid code to create advanced customizations."
+            }
+          }
+        }
+      }
+    },
+    "custom_liquid": {
+      "name": "Custom Liquid",
+      "settings": {
+        "custom_liquid": {
+          "label": "Custom Liquid",
+          "info": "Add app snippets or other Liquid code to create advanced customizations."
+        },
+        "container_width": {
+          "label": "Content width",
+          "options": {
+            "narrow": "Narrow",
+            "page": "Page width",
+            "full": "Full width"
+          }
+        },
+        "spacing": "Section padding",
+        "padding_top": {
+          "label": "Top padding"
+        },
+        "padding_bottom": {
+          "label": "Bottom padding"
+        }
+      }
+    }
+  }
+}

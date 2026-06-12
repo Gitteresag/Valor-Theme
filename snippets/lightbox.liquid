@@ -1,0 +1,47 @@
+{%- comment -%}
+  Renders a single shared lightbox modal at the end of the page. Listens for
+  custom events to open/show specific images. Used by product galleries and
+  any future component that wants fullscreen image viewing.
+
+  Usage:
+    {% render 'lightbox' %}  (once, e.g. in theme.liquid or via the gallery)
+
+    Then dispatch from anywhere:
+      document.dispatchEvent(new CustomEvent('valor:lightbox:open', {
+        detail: { images: [{ src, alt, srcset }, ...], index: 0 }
+      }));
+{%- endcomment -%}
+
+<dialog
+  is="valor-lightbox"
+  class="valor-lightbox"
+  aria-label="{{ 'accessibility.lightbox' | t | default: 'Image viewer' }}"
+>
+  <button type="button" class="valor-lightbox__close" data-lightbox-close aria-label="{{ 'accessibility.close' | t | default: 'Close' }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <button type="button" class="valor-lightbox__nav valor-lightbox__nav--prev" data-lightbox-prev aria-label="{{ 'accessibility.previous' | t | default: 'Previous image' }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+  </button>
+
+  <div class="valor-lightbox__viewport" data-lightbox-viewport>
+    {% # theme-check-disable ImgWidthAndHeight %}
+    {% # Populated by lightbox.js, which sets width/height from the loaded image %}
+    <img class="valor-lightbox__image" data-lightbox-image alt="">
+    {% # theme-check-enable ImgWidthAndHeight %}
+  </div>
+
+  <button type="button" class="valor-lightbox__nav valor-lightbox__nav--next" data-lightbox-next aria-label="{{ 'accessibility.next' | t | default: 'Next image' }}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </button>
+
+  <div class="valor-lightbox__counter" data-lightbox-counter aria-live="polite"></div>
+</dialog>

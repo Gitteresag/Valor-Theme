@@ -1,0 +1,39 @@
+{%- comment -%}
+  Policy section.
+
+  Renders one of the shop's legal policies — Privacy, Refund, Shipping,
+  Terms of Service, Contact information, or Subscription policy. The
+  actual content (title + body) is managed in the Shopify admin under
+  Settings → Policies, NOT through section settings.
+
+  Following Dawn's convention, this section intentionally exposes NO
+  Theme Editor settings: policy pages are legal text whose presentation
+  should stay simple and consistent. The styling here matches the Page
+  template's "narrow + left" defaults so policies feel like part of the
+  same long-form prose family without per-page overrides.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/policy
+{%- endcomment -%}
+
+{{ 'page-layout.css' | asset_url | stylesheet_tag }}
+
+<div class="valor-page valor-page--narrow">
+  <div class="valor-page__inner">
+    <header class="valor-page__header valor-page__header--left">
+      <h1 class="valor-page__title valor-heading valor-heading--large">{{ policy.title | escape }}</h1>
+    </header>
+
+    <div class="valor-page__content valor-page__content--left valor-page__content--body-medium rte">
+      {{ policy.body }}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Policy",
+  "tag": "section",
+  "class": "valor-section-policy",
+  "settings": []
+}
+{% endschema %}

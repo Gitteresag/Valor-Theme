@@ -1,0 +1,274 @@
+{%- comment -%}
+  Related products — automatically suggests products to the customer
+  on a product page based on Shopify's product recommendations
+  (powered by Search & Discovery).
+
+  Layout & cards: deliberately reuse featured-collection's CSS classes
+  (.valor-featured-collection__inner, __title, __header, __grid,
+  __grid--cols-N, __grid--mobile-N, __grid--swipe-mobile) so the two
+  sections look identical and merchants only learn one set of card
+  controls.
+
+  Visibility:
+    Live mode, no recommendations → section is hidden via the [hidden]
+                                    attribute; customers never see an
+                                    empty "You may also like" block.
+    Live mode, recommendations    → JS reveals the section and injects
+      arrive via fetch              the rendered cards.
+    Theme Editor, no data         → A short info paragraph appears so
+                                    the merchant can see the section
+                                    exists.
+    Theme Editor, recommendations → Renders normally.
+
+  No fallback collection picker, no "view all" link, no manual product
+  list — recommendations are always automatic. This keeps the section
+  predictable for merchants installing the theme on a new store.
+{%- endcomment -%}
+
+{{ 'product-card.css' | asset_url | stylesheet_tag }}
+{{ 'featured-collection.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-recommendations.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign products_to_show = section.settings.products_to_show
+  assign columns_desktop = section.settings.columns_desktop
+  assign columns_mobile = section.settings.columns_mobile
+
+  assign has_recommendations = false
+  if recommendations.performed and recommendations.products_count > 0
+    assign has_recommendations = true
+  endif
+-%}
+
+<section
+  class="valor-featured-collection valor-related-products{% if section.settings.swipe_on_mobile %} valor-featured-collection--mobile-full-bleed{% endif %}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px; --valor-grid-gap: {{ section.settings.column_gap }}px; --valor-grid-gap-mobile: {{ section.settings.column_gap_mobile }}px; --valor-mobile-card-width: {{ section.settings.mobile_card_width }}%;"
+  {%- unless has_recommendations or request.design_mode %} hidden{% endunless -%}
+>
+  <product-recommendations
+    class="valor-featured-collection__inner{% if section.settings.full_width %} valor-featured-collection__inner--full-width{% endif %}"
+    data-url="{{ routes.product_recommendations_url }}?limit={{ products_to_show }}&intent=related"
+    data-section-id="{{ section.id }}"
+    data-product-id="{{ product.id }}"
+    {%- if has_recommendations %} data-loaded="true"{% endif -%}
+  >
+    {%- if has_recommendations -%}
+      {%- if section.settings.title != blank -%}
+        <header class="valor-featured-collection__header valor-featured-collection__header--align-{{ section.settings.heading_alignment }}">
+          <h2 class="valor-featured-collection__title valor-heading valor-heading--{{ section.settings.heading_size }}">
+            {{ section.settings.title }}
+          </h2>
+        </header>
+      {%- endif -%}
+
+      <div
+        class="valor-featured-collection__grid valor-featured-collection__grid--cols-{{ columns_desktop }} valor-featured-collection__grid--mobile-{{ columns_mobile }}{% if section.settings.swipe_on_mobile %} valor-featured-collection__grid--swipe-mobile{% endif %}"
+      >
+        {%- for recommendation in recommendations.products -%}
+          {%- render 'product-card',
+            product: recommendation,
+            image_ratio: section.settings.image_ratio,
+            show_secondary_image: section.settings.show_secondary_image,
+            show_vendor: section.settings.show_vendor,
+            show_price: true
+          -%}
+        {%- endfor -%}
+      </div>
+    {%- elsif request.design_mode -%}
+      <div class="valor-related-products__editor-info">
+        <p>{{ 'sections.related_products.editor_info' | t | default: 'Related products will appear here when product recommendations are available.' }}</p>
+      </div>
+    {%- endif -%}
+  </product-recommendations>
+</section>
+
+{% stylesheet %}
+  /* Editor-only info text shown when no recommendations are available
+     yet. Live customers never see this — the section is hidden via
+     the [hidden] attribute when there's no data. */
+  .valor-related-products__editor-info {
+    padding: 2rem clamp(1rem, 4vw, 3rem);
+    text-align: center;
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--color-foreground) 20%, transparent);
+    border-radius: var(--style-border-radius-inputs, 4px);
+    background-color: color-mix(in srgb, var(--color-foreground) 2%, transparent);
+  }
+  .valor-related-products__editor-info p {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Related products",
+  "tag": "section",
+  "class": "section valor-section-related-products",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "default": "You may also like",
+      "label": "Heading"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        { "value": "small",  "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large",  "label": "Large" }
+      ],
+      "default": "medium",
+      "label": "Heading size"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ],
+      "default": "left",
+      "label": "Heading alignment"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4,
+      "label": "Products to show"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "default": false,
+      "label": "Full width"
+    },
+    {
+      "type": "header",
+      "content": "Product cards"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        { "value": "adapt",     "label": "Adapt to image" },
+        { "value": "portrait",  "label": "Portrait (4:5)" },
+        { "value": "square",    "label": "Square (1:1)" },
+        { "value": "landscape", "label": "Landscape (4:3)" }
+      ],
+      "default": "portrait",
+      "label": "Image ratio"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "default": true,
+      "label": "Show second image on hover"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "default": false,
+      "label": "Show vendor"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 4,
+      "label": "Columns on desktop"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" }
+      ],
+      "default": "2",
+      "label": "Columns on mobile"
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "default": false,
+      "label": "Swipe on mobile"
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 70,
+      "label": "Mobile card width",
+      "info": "Only applies when swipe on mobile is enabled."
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16,
+      "label": "Column gap (desktop)"
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 12,
+      "label": "Column gap (mobile)"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 56
+    }
+  ],
+  "presets": [
+    {
+      "name": "Related products"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["product"]
+  }
+}
+{% endschema %}

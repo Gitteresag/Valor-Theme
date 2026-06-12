@@ -1,0 +1,34 @@
+{%- comment -%}
+  Renders a unit price line for a product variant or cart line item.
+
+  Accepts:
+    variant    {Variant}  optional
+    line_item  {LineItem} optional
+    class_name {String}   optional
+{%- endcomment -%}
+
+{%- liquid
+  assign unit_price_source = variant
+  if line_item != blank
+    assign unit_price_source = line_item
+  endif
+
+  assign unit_price_class = class_name | default: 'valor-product-unit-price'
+  assign has_unit_price = false
+  if unit_price_source != blank and unit_price_source.unit_price_measurement
+    assign has_unit_price = true
+  endif
+-%}
+
+<p
+  class="{{ unit_price_class }}"
+  data-unit-price-wrapper
+  {% unless has_unit_price %}hidden{% endunless %}
+>
+  <span class="visually-hidden">{{ 'product.unit_price' | t }}</span>
+  <span data-unit-price>
+    {%- if has_unit_price -%}
+      {{- unit_price_source.unit_price | unit_price_with_measurement: unit_price_source.unit_price_measurement -}}
+    {%- endif -%}
+  </span>
+</p>

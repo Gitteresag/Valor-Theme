@@ -1,0 +1,108 @@
+{%- comment -%}
+  Centralised JSON-LD output for the storefront. Rendered from
+  snippets/meta-tags.liquid on every page. Each block below opts
+  itself in based on request.page_type so a single render call
+  emits the right schema for every URL.
+
+  Emitted today:
+    Organization   — every page; powers brand-level rich results
+                     (logo, social profiles, description).
+    WebSite        — homepage only; enables Google's Sitelinks
+                     search box pointing at /search?q=...
+    Product        — product pages (Shopify's structured_data filter).
+    Article        — article pages (Shopify's structured_data filter).
+
+  Not emitted yet (room for a later release):
+    BreadcrumbList, LocalBusiness, FAQPage.
+{%- endcomment -%}
+
+{%- liquid
+  assign brand_description = settings.brand_description | default: '' | strip_html | strip_newlines | strip
+  assign logo_image = settings.logo
+
+  assign social_keys = 'social_instagram_url|social_facebook_url|social_x_url|social_tiktok_url|social_pinterest_url|social_youtube_url|social_linkedin_url|social_threads_url|social_snapchat_url|social_whatsapp_url' | split: '|'
+  assign social_buffer = ''
+  for key in social_keys
+    case key
+      when 'social_instagram_url'
+        assign url_value = settings.social_instagram_url
+      when 'social_facebook_url'
+        assign url_value = settings.social_facebook_url
+      when 'social_x_url'
+        assign url_value = settings.social_x_url
+      when 'social_tiktok_url'
+        assign url_value = settings.social_tiktok_url
+      when 'social_pinterest_url'
+        assign url_value = settings.social_pinterest_url
+      when 'social_youtube_url'
+        assign url_value = settings.social_youtube_url
+      when 'social_linkedin_url'
+        assign url_value = settings.social_linkedin_url
+      when 'social_threads_url'
+        assign url_value = settings.social_threads_url
+      when 'social_snapchat_url'
+        assign url_value = settings.social_snapchat_url
+      when 'social_whatsapp_url'
+        assign url_value = settings.social_whatsapp_url
+    endcase
+    if url_value != blank
+      if social_buffer != ''
+        assign social_buffer = social_buffer | append: '|'
+      endif
+      assign social_buffer = social_buffer | append: url_value
+    endif
+  endfor
+  assign social_urls = social_buffer | split: '|'
+-%}
+
+{%- comment -%} Organization — emitted on every page {%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": {{ shop.name | json }},
+  "url": {{ request.origin | json }}
+  {%- if logo_image != blank -%}
+    ,"logo": {{ logo_image | image_url: width: 500 | prepend: 'https:' | json }}
+  {%- endif -%}
+  {%- if brand_description != blank -%}
+    ,"description": {{ brand_description | json }}
+  {%- endif -%}
+  {%- if social_urls.size > 0 -%}
+    ,"sameAs": [
+      {%- for url in social_urls -%}
+        {{ url | json }}{%- unless forloop.last -%},{%- endunless -%}
+      {%- endfor -%}
+    ]
+  {%- endif -%}
+}
+</script>
+
+{%- if request.page_type == 'index' -%}
+  {%- assign search_target = request.origin | append: routes.search_url | append: '?q={search_term_string}' -%}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": {{ shop.name | json }},
+    "url": {{ request.origin | json }},
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {{ search_target | json }},
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+{%- endif -%}
+
+{%- if request.page_type == 'product' -%}
+  <script type="application/ld+json">
+    {{ product | structured_data }}
+  </script>
+{%- endif -%}
+
+{%- if request.page_type == 'article' -%}
+  <script type="application/ld+json">
+    {{ article | structured_data }}
+  </script>
+{%- endif -%}

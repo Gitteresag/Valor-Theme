@@ -1,0 +1,18 @@
+{%- comment -%}
+  Renders the SKU of the currently selected variant.
+
+  Accepts:
+    variant   {Variant}  required
+    block     {Block}    required — for settings.text_style and shopify_attributes
+
+  Hidden when the variant has no SKU.
+{%- endcomment -%}
+
+{%- if variant.sku != blank -%}
+  <p
+    class="valor-mp__sku valor-mp__sku--{{ block.settings.text_style }}"
+    {{ block.shopify_attributes }}
+  >
+    {{ 'product.sku' | t }}: {{ variant.sku }}
+  </p>
+{%- endif -%}

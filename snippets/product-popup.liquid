@@ -1,0 +1,119 @@
+{%- comment -%}
+  Pop-up modal for supporting product information such as size guides,
+  care instructions, materials, shipping details or warranty notes.
+
+  Display modes:
+    - default: standalone link block in the product information column
+    - inline: compact text link rendered beside a size option label
+
+  Empty customer-facing pop-ups do not render. In Theme Editor the
+  standalone mode keeps the existing helper card for empty content.
+
+  Accepts:
+    block       {Block} required
+    section_id  {String} required — unique dialog id prefix
+    inline      {Boolean} optional
+{%- endcomment -%}
+
+{%- liquid
+  assign content = block.settings.content
+  assign page_content = block.settings.page.content
+
+  assign has_content = false
+  if content != blank or page_content != blank
+    assign has_content = true
+  endif
+
+  assign is_inline = false
+  if inline
+    assign is_inline = true
+  endif
+
+  assign trigger_text = block.settings.text | default: 'Size guide'
+  assign dialog_id = 'ProductPopup-' | append: section_id | append: '-' | append: block.id
+-%}
+
+{%- if has_content -%}
+  <div class="valor-mp__popup{% if is_inline %} valor-mp__popup--inline{% endif %}" {{ block.shopify_attributes }}>
+    <button
+      type="button"
+      class="valor-mp__popup-trigger{% if is_inline %} valor-mp__popup-trigger--inline{% endif %}"
+      aria-haspopup="dialog"
+      aria-controls="{{ dialog_id }}"
+      data-popup-trigger="{{ dialog_id }}"
+    >
+      {%- unless is_inline -%}
+        {%- case block.settings.icon -%}
+          {%- when 'ruler' -%}
+            <svg class="valor-mp__popup-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0L2.7 16.7a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z"/>
+              <path d="m7.5 10.5 2 2"/>
+              <path d="m10.5 7.5 2 2"/>
+              <path d="m13.5 4.5 2 2"/>
+              <path d="m4.5 13.5 2 2"/>
+            </svg>
+          {%- when 'info' -%}
+            <svg class="valor-mp__popup-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="16" x2="12" y2="12"/>
+              <line x1="12" y1="8" x2="12.01" y2="8"/>
+            </svg>
+          {%- when 'question' -%}
+            <svg class="valor-mp__popup-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          {%- when 'shirt' -%}
+            <svg class="valor-mp__popup-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>
+            </svg>
+        {%- endcase -%}
+      {%- endunless -%}
+      <span class="valor-mp__popup-trigger-text">
+        {{- trigger_text | escape -}}
+      </span>
+    </button>
+
+    <dialog
+      id="{{ dialog_id }}"
+      class="valor-mp__popup-dialog"
+      aria-labelledby="{{ dialog_id }}-heading"
+    >
+      <div class="valor-mp__popup-dialog-inner">
+        <header class="valor-mp__popup-dialog-header">
+          <h2 id="{{ dialog_id }}-heading" class="valor-mp__popup-dialog-heading">
+            {{- trigger_text | escape -}}
+          </h2>
+          <button
+            type="button"
+            class="valor-mp__popup-close"
+            aria-label="{{ 'accessibility.close' | t }}"
+            data-popup-close
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="18" y1="6" x2="6" y2="18"/>
+              <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </header>
+        <div class="valor-mp__popup-dialog-content">
+          {%- if content != blank -%}
+            {{ content }}
+          {%- elsif page_content != blank -%}
+            {{ page_content }}
+          {%- endif -%}
+        </div>
+      </div>
+    </dialog>
+  </div>
+{%- elsif request.design_mode and is_inline == false -%}
+  <div class="valor-mp__popup-empty" {{ block.shopify_attributes }}>
+    <p class="valor-mp__popup-empty-heading">
+      {{- block.settings.text | default: 'Pop-up' | escape -}}
+    </p>
+    <p class="valor-mp__popup-empty-text">
+      {{ 'sections.main_product.popup_empty_editor' | t | default: 'Add modal content or select a page to show this pop-up link on the product page.' }}
+    </p>
+  </div>
+{%- endif -%}

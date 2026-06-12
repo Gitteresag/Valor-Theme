@@ -1,0 +1,166 @@
+{%- comment -%}
+  Renders Shopify gift card recipient fields inside a product form.
+
+  Accepts:
+    product  {Product} required
+    form     {Form} required
+    section  {Section} required
+{%- endcomment -%}
+
+{%- if product.gift_card? -%}
+  {{ 'recipient-form.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'recipient-form.js' | asset_url }}" defer></script>
+
+  {%- liquid
+    assign recipient_id = 'Recipient-' | append: section.id
+    assign has_recipient_errors = false
+    if form.errors
+      assign has_recipient_errors = true
+    endif
+  -%}
+
+  <valor-recipient-form
+    class="valor-recipient-form"
+    data-section-id="{{ section.id }}"
+    data-expanded-text="{{ 'recipient.form.expanded' | t | escape }}"
+    data-collapsed-text="{{ 'recipient.form.collapsed' | t | escape }}"
+  >
+    <div class="valor-recipient-form__toggle">
+      <input
+        id="{{ recipient_id }}-checkbox"
+        class="valor-recipient-form__checkbox"
+        type="checkbox"
+        name="properties[__shopify_send_gift_card_to_recipient]"
+        value="true"
+        aria-controls="{{ recipient_id }}-fields"
+        aria-expanded="{% if has_recipient_errors %}true{% else %}false{% endif %}"
+        data-recipient-toggle
+        {% if has_recipient_errors %}checked{% endif %}
+      >
+      <label class="valor-recipient-form__checkbox-label" for="{{ recipient_id }}-checkbox">
+        <span class="valor-recipient-form__checkbox-box" aria-hidden="true"></span>
+        <span>{{ 'recipient.form.checkbox' | t }}</span>
+      </label>
+    </div>
+
+    <p
+      id="{{ recipient_id }}-live-region"
+      class="visually-hidden"
+      role="status"
+      data-recipient-live-region
+    ></p>
+
+    <div
+      id="{{ recipient_id }}-errors"
+      class="valor-recipient-form__errors"
+      role="alert"
+      data-recipient-errors
+      {% unless has_recipient_errors %}hidden{% endunless %}
+    >
+      <p class="valor-recipient-form__errors-heading">{{ 'recipient.form.error_heading' | t }}</p>
+      <ul data-recipient-error-list>
+        {%- if form.errors -%}
+          {%- for field in form.errors -%}
+            <li>
+              {%- if field == 'form' -%}
+                {{ form.errors.messages[field] }}
+              {%- else -%}
+                <a href="#{{ recipient_id }}-{{ field | handleize }}">
+                  {{ form.errors.messages[field] }}
+                </a>
+              {%- endif -%}
+            </li>
+          {%- endfor -%}
+        {%- endif -%}
+      </ul>
+    </div>
+
+    <div
+      id="{{ recipient_id }}-fields"
+      class="valor-recipient-form__fields"
+      data-recipient-fields
+      {% unless has_recipient_errors %}hidden{% endunless %}
+    >
+      <div class="valor-recipient-form__field" data-recipient-field-row="email">
+        <label class="valor-recipient-form__label" for="{{ recipient_id }}-email">
+          {{ 'recipient.form.email_label' | t }}
+        </label>
+        <input
+          id="{{ recipient_id }}-email"
+          class="valor-recipient-form__input"
+          type="email"
+          name="properties[Recipient email]"
+          value="{{ form.email | escape }}"
+          autocomplete="email"
+          placeholder="{{ 'recipient.form.email' | t }}"
+          data-recipient-field
+          data-recipient-email
+          {% unless has_recipient_errors %}disabled{% endunless %}
+        >
+        <p id="{{ recipient_id }}-email-error" class="valor-recipient-form__field-error" data-recipient-field-error="email" hidden></p>
+      </div>
+
+      <div class="valor-recipient-form__field" data-recipient-field-row="name">
+        <label class="valor-recipient-form__label" for="{{ recipient_id }}-name">
+          {{ 'recipient.form.name_label' | t }}
+        </label>
+        <input
+          id="{{ recipient_id }}-name"
+          class="valor-recipient-form__input"
+          type="text"
+          name="properties[Recipient name]"
+          value="{{ form.name | escape }}"
+          autocomplete="name"
+          placeholder="{{ 'recipient.form.name' | t }}"
+          data-recipient-field
+          {% unless has_recipient_errors %}disabled{% endunless %}
+        >
+        <p id="{{ recipient_id }}-name-error" class="valor-recipient-form__field-error" data-recipient-field-error="name" hidden></p>
+      </div>
+
+      <div class="valor-recipient-form__field" data-recipient-field-row="message">
+        <label class="valor-recipient-form__label" for="{{ recipient_id }}-message">
+          {{ 'recipient.form.message_label' | t }}
+        </label>
+        <textarea
+          id="{{ recipient_id }}-message"
+          class="valor-recipient-form__textarea"
+          name="properties[Message]"
+          rows="4"
+          maxlength="200"
+          placeholder="{{ 'recipient.form.message' | t }}"
+          data-recipient-field
+          {% unless has_recipient_errors %}disabled{% endunless %}
+        >{{ form.message | escape }}</textarea>
+        <p class="valor-recipient-form__hint">{{ 'recipient.form.max_characters' | t: max_chars: 200 }}</p>
+        <p id="{{ recipient_id }}-message-error" class="valor-recipient-form__field-error" data-recipient-field-error="message" hidden></p>
+      </div>
+
+      <div class="valor-recipient-form__field" data-recipient-field-row="send_on">
+        <label class="valor-recipient-form__label" for="{{ recipient_id }}-send-on">
+          {{ 'recipient.form.send_on_label' | t }}
+        </label>
+        <input
+          id="{{ recipient_id }}-send-on"
+          class="valor-recipient-form__input"
+          type="date"
+          name="properties[Send on]"
+          value="{{ form.send_on | escape }}"
+          pattern="\d{4}-\d{2}-\d{2}"
+          placeholder="{{ 'recipient.form.send_on' | t }}"
+          data-recipient-field
+          {% unless has_recipient_errors %}disabled{% endunless %}
+        >
+        <p id="{{ recipient_id }}-send-on-error" class="valor-recipient-form__field-error" data-recipient-field-error="send_on" hidden></p>
+      </div>
+
+      <input
+        type="hidden"
+        name="properties[__shopify_offset]"
+        value=""
+        data-recipient-offset
+        {% unless has_recipient_errors %}disabled{% endunless %}
+      >
+    </div>
+  </valor-recipient-form>
+{%- endif -%}

@@ -1,0 +1,226 @@
+{%- comment -%}
+  Contact form section.
+
+  Renders Shopify's built-in {%- form 'contact' -%} so that submissions
+  flow into the merchant's email and Shopify Admin → Settings →
+  Notifications. There is no JavaScript: form posts traditionally,
+  Shopify processes it server-side, and on success the page reloads
+  with form.posted_successfully? = true so we can show the success
+  banner.
+
+  Layout pattern follows Dawn's contact-form.liquid: name + email on
+  one row (tablet+), then phone, then comment (textarea), then submit.
+  All field labels use templates.contact.form.* locale keys so they
+  translate into every storefront language automatically.
+
+  Used by templates/page.contact.json, but the section is also
+  configurable in the theme editor — merchants can drop it onto any
+  page (e.g. an "About us" page that needs an inline contact form).
+{%- endcomment -%}
+
+{{ 'contact-form.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign heading_alignment = section.settings.heading_alignment | default: 'center'
+  assign heading_size = section.settings.heading_size | default: 'medium'
+-%}
+
+<div
+  class="valor-contact-form"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-contact-form__inner">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="valor-contact-form__heading valor-contact-form__heading--align-{{ heading_alignment }} valor-heading valor-heading--{{ heading_size }}">
+        {{ section.settings.heading }}
+      </h2>
+    {%- else -%}
+      <h2 class="visually-hidden">{{ 'templates.contact.form.title' | t }}</h2>
+    {%- endif -%}
+
+    {%- form 'contact', id: 'ContactForm', class: 'valor-contact-form__form' -%}
+      {%- if form.posted_successfully? -%}
+        <div class="valor-contact-form__message valor-contact-form__message--success" role="status" tabindex="-1" autofocus>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          <span>{{ 'templates.contact.form.post_success' | t }}</span>
+        </div>
+      {%- elsif form.errors -%}
+        <div class="valor-contact-form__message valor-contact-form__message--error" role="alert" tabindex="-1" autofocus>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <div>
+            <strong>{{ 'templates.contact.form.error_heading' | t }}</strong>
+            <ul class="valor-contact-form__error-list">
+              {%- for field in form.errors -%}
+                <li>
+                  <a href="#ContactForm-{{ field }}">
+                    {{ form.errors.translated_fields[field] | capitalize }}
+                    {{ form.errors.messages[field] }}
+                  </a>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </div>
+      {%- endif -%}
+
+      <div class="valor-contact-form__row">
+        <div class="valor-contact-form__field">
+          <label class="valor-contact-form__label" for="ContactForm-name">
+            {{- 'templates.contact.form.name' | t -}}
+          </label>
+          <input
+            type="text"
+            id="ContactForm-name"
+            class="valor-contact-form__input"
+            name="contact[{{ 'templates.contact.form.name' | t }}]"
+            autocomplete="name"
+            value="{% if form.name %}{{ form.name | escape }}{% elsif customer %}{{ customer.name | escape }}{% endif %}"
+          >
+        </div>
+
+        <div class="valor-contact-form__field{% if form.errors contains 'email' %} valor-contact-form__field--error{% endif %}">
+          <label class="valor-contact-form__label" for="ContactForm-email">
+            {{- 'templates.contact.form.email' | t }} <span aria-hidden="true">*</span>
+          </label>
+          <input
+            type="email"
+            id="ContactForm-email"
+            class="valor-contact-form__input"
+            name="contact[email]"
+            autocomplete="email"
+            spellcheck="false"
+            autocapitalize="off"
+            value="{% if form.email %}{{ form.email | escape }}{% elsif customer %}{{ customer.email | escape }}{% endif %}"
+            aria-required="true"
+            {% if form.errors contains 'email' %}aria-invalid="true" aria-describedby="ContactForm-email-error"{% endif %}
+            required
+          >
+          {%- if form.errors contains 'email' -%}
+            <small class="valor-contact-form__field-error" id="ContactForm-email-error">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span class="visually-hidden">{{ 'accessibility.error' | t }}</span>
+              <span>
+                {{- form.errors.translated_fields.email | capitalize }}
+                {{ form.errors.messages.email -}}
+              </span>
+            </small>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="valor-contact-form__field">
+        <label class="valor-contact-form__label" for="ContactForm-phone">
+          {{- 'templates.contact.form.phone' | t -}}
+        </label>
+        <input
+          type="tel"
+          id="ContactForm-phone"
+          class="valor-contact-form__input"
+          name="contact[{{ 'templates.contact.form.phone' | t }}]"
+          autocomplete="tel"
+          pattern="[0-9\-\+\s\(\)]*"
+          value="{% if form.phone %}{{ form.phone | escape }}{% elsif customer %}{{ customer.phone | escape }}{% endif %}"
+        >
+      </div>
+
+      <div class="valor-contact-form__field">
+        <label class="valor-contact-form__label" for="ContactForm-body">
+          {{- 'templates.contact.form.comment' | t -}}
+        </label>
+        <textarea
+          rows="8"
+          id="ContactForm-body"
+          class="valor-contact-form__textarea"
+          name="contact[{{ 'templates.contact.form.comment' | t }}]"
+        >{{ form.body | escape }}</textarea>
+      </div>
+
+      <div class="valor-contact-form__submit-wrap">
+        <button type="submit" class="valor-button valor-button--primary">
+          {{ 'templates.contact.form.send' | t }}
+        </button>
+      </div>
+    {%- endform -%}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Contact form",
+  "tag": "section",
+  "class": "valor-section-contact-form",
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  },
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "label": "Heading",
+      "info": "Leave blank to hide. A visually hidden label is added for screen readers.",
+      "default": "Contact us"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "large"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact form"
+    }
+  ]
+}
+{% endschema %}

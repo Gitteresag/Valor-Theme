@@ -1,0 +1,5 @@
+[environments.dev]
+store = "valor-demo-store"
+
+[environments.staging]
+store = "valor-demo-store"

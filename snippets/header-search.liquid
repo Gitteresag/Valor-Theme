@@ -1,0 +1,118 @@
+{%- comment -%}
+  Renders a header search modal. Should be used with 'header.liquid'
+
+  Accepts:
+  - input_id: {String} Id for the search input element (required)
+
+  Usage:
+  {% render 'header-search', input_id: 'My-Id' %}
+{%- endcomment -%}
+
+{%- assign predictive_enabled = settings.enable_predictive_search -%}
+
+<button
+  type="button"
+  class="valor-header__icon valor-header__search-toggle"
+  aria-label="{{ 'general.search.search' | t }}"
+  aria-haspopup="dialog"
+  aria-controls="ValorSearchModal"
+  data-search-modal-open
+>
+  {{ 'icon-search.svg' | inline_asset_content }}
+</button>
+
+<dialog
+  id="ValorSearchModal"
+  class="valor-search-modal"
+  scroll-lock
+  aria-label="{{ 'general.search.search' | t }}"
+>
+  <div class="valor-search-modal__inner">
+    {%- if predictive_enabled -%}
+      <valor-predictive-search class="valor-psearch" data-loading-text="{{ 'accessibility.loading' | t }}">
+        <form action="{{ routes.search_url }}" method="get" role="search" class="valor-search-modal__form">
+          <div class="valor-search-modal__field">
+            <label for="{{ input_id }}" class="visually-hidden">{{ 'general.search.search' | t }}</label>
+            <span class="valor-search-modal__search-icon" aria-hidden="true">
+              {{- 'icon-search.svg' | inline_asset_content -}}
+            </span>
+            <input
+              class="valor-search-modal__input"
+              id="{{ input_id }}"
+              type="search"
+              name="q"
+              value="{{ search.terms | escape }}"
+              placeholder="{{ 'general.search.placeholder' | t }}"
+              role="combobox"
+              aria-expanded="false"
+              aria-controls="predictive-search-results"
+              aria-haspopup="listbox"
+              aria-autocomplete="list"
+              aria-owns="predictive-search-results"
+              autocomplete="off"
+              autocorrect="off"
+              autocapitalize="off"
+              spellcheck="false"
+            >
+            <input type="hidden" name="options[prefix]" value="last">
+            <button
+              type="reset"
+              class="valor-search-modal__reset"
+              aria-label="{{ 'general.search.reset' | t }}"
+              hidden
+            >
+              {{- 'icon-close.svg' | inline_asset_content -}}
+            </button>
+          </div>
+
+          {%- comment -%} Panel inside form, after .field — Dawn pattern {%- endcomment -%}
+          <div class="valor-psearch__panel" data-predictive-search aria-live="polite">
+            <div class="valor-psearch__loading" aria-hidden="true">
+              <span class="valor-psearch__spinner"></span>
+            </div>
+          </div>
+          <span class="visually-hidden" data-predictive-search-status role="status" aria-live="polite"></span>
+        </form>
+      </valor-predictive-search>
+    {%- else -%}
+      <form action="{{ routes.search_url }}" method="get" role="search" class="valor-search-modal__form">
+        <div class="valor-search-modal__field">
+          <label for="{{ input_id }}" class="visually-hidden">{{ 'general.search.search' | t }}</label>
+          <span class="valor-search-modal__search-icon" aria-hidden="true">
+            {{- 'icon-search.svg' | inline_asset_content -}}
+          </span>
+          <input
+            class="valor-search-modal__input"
+            id="{{ input_id }}"
+            type="search"
+            name="q"
+            value="{{ search.terms | escape }}"
+            placeholder="{{ 'general.search.placeholder' | t }}"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          >
+          <input type="hidden" name="options[prefix]" value="last">
+          <button
+            type="reset"
+            class="valor-search-modal__reset"
+            aria-label="{{ 'general.search.reset' | t }}"
+          >
+            {{- 'icon-close.svg' | inline_asset_content -}}
+          </button>
+        </div>
+      </form>
+    {%- endif -%}
+
+    <button
+      type="button"
+      class="valor-search-modal__close"
+      aria-label="{{ 'accessibility.close' | t }}"
+      data-search-modal-close
+    >
+      {{- 'icon-close.svg' | inline_asset_content -}}
+    </button>
+  </div>
+</dialog>
+

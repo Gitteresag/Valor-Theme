@@ -1,0 +1,83 @@
+{%- comment -%}
+  Renders a quantity selector with +/− buttons and an in-cart counter
+  next to the label.
+
+  The number input uses the form="..." attribute to associate itself with
+  the buy-buttons form, so the quantity travels with Add to cart even
+  though they are separate blocks.
+
+  In-cart counter has three modes depending on what the customer has
+  already added:
+    1. Only the selected variant is in the cart      → "(2 in cart)"
+    2. Selected variant + other variants of the same → "(1 of 3 in cart)"
+       product are both present
+    3. Other variants are in cart but not the         → "(2 total in cart)"
+       currently selected one
+
+  Mode 3 keeps the customer aware that they already have related items
+  without misleading them about the variant they're currently viewing.
+
+  Accepts:
+    product     {Product}  required — needed for the per-product total
+    variant     {Variant}  required — the currently selected variant
+    block       {Block}    required — for shopify_attributes
+    section_id  {String}   required — input id uniqueness
+    form_id     {String}   required — links the input to the product form
+{%- endcomment -%}
+
+{%- liquid
+  assign selected_qty = cart | item_count_for_variant: variant.id
+  assign total_qty = 0
+  for item in cart.items
+    if item.product_id == product.id
+      assign total_qty = total_qty | plus: item.quantity
+    endif
+  endfor
+-%}
+<div class="valor-mp__quantity" {{ block.shopify_attributes }}>
+  <label
+    for="Quantity-{{ section_id }}"
+    class="valor-mp__quantity-label"
+  >
+    {{- 'product.quantity_label' | t -}}
+    {%- if selected_qty > 0 and total_qty > selected_qty -%}
+      <span class="valor-mp__quantity-in-cart" data-mp-cart-qty>
+        ({{ 'product.in_cart_of' | t: selected: selected_qty, total: total_qty }})
+      </span>
+    {%- elsif selected_qty > 0 -%}
+      <span class="valor-mp__quantity-in-cart" data-mp-cart-qty>
+        ({{ 'product.in_cart_count' | t: count: selected_qty }})
+      </span>
+    {%- elsif total_qty > 0 -%}
+      <span class="valor-mp__quantity-in-cart" data-mp-cart-qty>
+        ({{ 'product.total_in_cart' | t: total: total_qty }})
+      </span>
+    {%- else -%}
+      <span class="valor-mp__quantity-in-cart" data-mp-cart-qty hidden></span>
+    {%- endif -%}
+  </label>
+  <div class="valor-mp__quantity-wrapper">
+    <button
+      type="button"
+      class="valor-mp__quantity-btn"
+      data-qty-action="decrease"
+      aria-label="{{ 'product.quantity_decrease' | t }}"
+    >−</button>
+    <input
+      type="number"
+      id="Quantity-{{ section_id }}"
+      name="quantity"
+      form="{{ form_id }}"
+      class="valor-mp__quantity-input"
+      value="1"
+      min="1"
+      inputmode="numeric"
+    >
+    <button
+      type="button"
+      class="valor-mp__quantity-btn"
+      data-qty-action="increase"
+      aria-label="{{ 'product.quantity_increase' | t }}"
+    >+</button>
+  </div>
+</div>

@@ -1,0 +1,169 @@
+{% comment %}theme-check-disable ImgLazyLoading{% endcomment %}
+{%- if predictive_search.performed -%}
+  {%- liquid
+    assign products = predictive_search.resources.products
+    assign collections = predictive_search.resources.collections
+    assign queries = predictive_search.resources.queries
+    assign pages = predictive_search.resources.pages
+    assign articles = predictive_search.resources.articles
+    assign total_results = products.size | plus: collections.size | plus: queries.size | plus: pages.size | plus: articles.size
+  -%}
+
+  <div id="predictive-search-results" class="valor-psearch__results" role="listbox">
+    {%- if total_results == 0 -%}
+      <p class="valor-psearch__empty">
+        {{ 'general.search.no_results_html' | t: terms: predictive_search.terms }}
+      </p>
+    {%- else -%}
+
+      {%- if queries.size > 0 -%}
+        <div class="valor-psearch__group">
+          <h3 class="valor-psearch__heading">{{ 'general.search.suggestions' | t }}</h3>
+          <ul class="valor-psearch__list" role="group" aria-label="{{ 'general.search.suggestions' | t }}">
+            {%- for query in queries -%}
+              <li
+                id="predictive-search-option-query-{{ forloop.index }}"
+                class="valor-psearch__item-wrap"
+                role="option"
+                aria-selected="false"
+              >
+                <a href="{{ query.url }}" class="valor-psearch__item valor-psearch__item--text" tabindex="-1">
+                  <span class="valor-psearch__query" aria-label="{{ query.text }}">{{ query.styled_text }}</span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      {%- if products.size > 0 -%}
+        <div class="valor-psearch__group">
+          <h3 class="valor-psearch__heading">{{ 'general.search.products' | t }}</h3>
+          <ul class="valor-psearch__list" role="group" aria-label="{{ 'general.search.products' | t }}">
+            {%- for product in products -%}
+              <li
+                id="predictive-search-option-product-{{ forloop.index }}"
+                class="valor-psearch__item-wrap"
+                role="option"
+                aria-selected="false"
+              >
+                <a href="{{ product.url }}" class="valor-psearch__item valor-psearch__item--product" tabindex="-1">
+                  {%- if product.featured_media != blank -%}
+                    <img
+                      class="valor-psearch__image"
+                      src="{{ product.featured_media | image_url: width: 120 }}"
+                      alt="{{ product.featured_media.alt | escape }}"
+                      width="60"
+                      height="60"
+                    >
+                  {%- else -%}
+                    <span class="valor-psearch__image valor-psearch__image--placeholder" aria-hidden="true"></span>
+                  {%- endif -%}
+                  <span class="valor-psearch__product-info">
+                    <span class="valor-psearch__product-title">{{ product.title | escape }}</span>
+                    <span class="valor-psearch__product-price">
+                      {%- if product.price_varies -%}
+                        {%- assign from_price = product.price_min | money -%}
+                        {{ 'general.search.from_price_html' | t: price: from_price }}
+                      {%- elsif product.compare_at_price > product.price -%}
+                        <span class="valor-psearch__price-current">{{ product.price | money }}</span>
+                        <s class="valor-psearch__price-compare">{{ product.compare_at_price | money }}</s>
+                      {%- else -%}
+                        {{ product.price | money }}
+                      {%- endif -%}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      {%- if collections.size > 0 -%}
+        <div class="valor-psearch__group">
+          <h3 class="valor-psearch__heading">{{ 'general.search.collections' | t }}</h3>
+          <ul class="valor-psearch__list" role="group" aria-label="{{ 'general.search.collections' | t }}">
+            {%- for collection in collections -%}
+              <li
+                id="predictive-search-option-collection-{{ forloop.index }}"
+                class="valor-psearch__item-wrap"
+                role="option"
+                aria-selected="false"
+              >
+                <a href="{{ collection.url }}" class="valor-psearch__item valor-psearch__item--text" tabindex="-1">
+                  <span>{{ collection.title | escape }}</span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+
+      {%- if pages.size > 0 or articles.size > 0 -%}
+        <div class="valor-psearch__group">
+          <h3 class="valor-psearch__heading">{{ 'general.search.pages_and_articles' | t }}</h3>
+          <ul class="valor-psearch__list" role="group" aria-label="{{ 'general.search.pages_and_articles' | t }}">
+            {%- for page in pages -%}
+              <li
+                id="predictive-search-option-page-{{ forloop.index }}"
+                class="valor-psearch__item-wrap"
+                role="option"
+                aria-selected="false"
+              >
+                <a href="{{ page.url }}" class="valor-psearch__item valor-psearch__item--text" tabindex="-1">
+                  <span>{{ page.title | escape }}</span>
+                </a>
+              </li>
+            {%- endfor -%}
+            {%- for article in articles -%}
+              <li
+                id="predictive-search-option-article-{{ forloop.index }}"
+                class="valor-psearch__item-wrap"
+                role="option"
+                aria-selected="false"
+              >
+                <a href="{{ article.url }}" class="valor-psearch__item valor-psearch__item--text" tabindex="-1">
+                  <span>{{ article.title | escape }}</span>
+                </a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+    <div class="valor-psearch__view-all-wrap">
+      <button
+        type="submit"
+        id="predictive-search-option-search-keywords"
+        class="valor-psearch__view-all"
+        tabindex="-1"
+        role="option"
+        aria-selected="false"
+      >
+        <span data-predictive-search-search-for-text>
+          {{- 'general.search.view_all_for_html' | t: terms: predictive_search.terms -}}
+        </span>
+        <span class="valor-psearch__view-all-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </div>
+
+  <span class="visually-hidden" data-predictive-search-live-region-count-value>
+    {%- liquid
+      if total_results == 0
+        echo 'general.search.no_results_html' | t: terms: predictive_search.terms
+      else
+        echo 'general.search.results_with_count' | t: count: total_results
+      endif
+    -%}
+  </span>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Predictive search",
+  "settings": []
+}
+{% endschema %}

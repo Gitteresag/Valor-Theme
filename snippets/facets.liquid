@@ -1,0 +1,199 @@
+{%- comment -%}
+  Renders Shopify's storefront filters (collection.filters / search.filters).
+
+  Filter types we render:
+    - list         (e.g. Vendor, Product type, Color, Size as a list of
+                   checkboxes; Shopify also exposes swatch presentation
+                   for some lists in 2024+ themes — we render text)
+    - boolean      (e.g. Availability — a single checkbox / two values)
+    - price_range  (min / max numeric inputs)
+
+  Filter types we don't render:
+    Anything else from Shopify's evolving filter system; the "values"
+    iteration falls through gracefully.
+
+  Layout:
+    Desktop: a vertical sidebar in the collection layout.
+    Mobile:  the same markup is wrapped in a drawer (see collection.liquid).
+    The same DOM is shared between both — no duplicate rendering — and
+    JS toggles [data-drawer-open] on the <valor-collection> host plus
+    .valor-collection-drawer-open on <body> to slide it in.
+
+  Accepts:
+    results       {Object}    required — collection or search result
+    paginate      {Paginate}  optional — total_items count for the
+                                         "X products" label
+{%- endcomment -%}
+
+{%- liquid
+  assign filters = results.filters
+  assign active_count = 0
+  for filter in filters
+    assign active_count = active_count | plus: filter.active_values.size
+    if filter.type == 'price_range'
+      if filter.min_value.value or filter.max_value.value
+        assign active_count = active_count | plus: 1
+      endif
+    endif
+  endfor
+
+  # Clear-all link target. The collection drop has a .url property; the
+  # search drop does not, so for search we rebuild the URL from the
+  # search route + the current terms (so clearing keeps the user on the
+  # same query, just without active filters).
+  assign facet_clear_url = results.url
+  if facet_clear_url == blank and results.terms
+    assign facet_clear_url = routes.search_url | append: '?q=' | append: results.terms
+  endif
+-%}
+
+<form class="valor-facets" data-facets>
+  <div class="valor-facets__header">
+    <h2 class="valor-facets__heading">{{ 'collection.filters.title' | t }}</h2>
+    {%- if active_count > 0 -%}
+      <a class="valor-facets__clear" href="{{ facet_clear_url }}">
+        {{ 'collection.filters.clear_all' | t }}
+      </a>
+    {%- endif -%}
+    <button
+      type="button"
+      class="valor-facets__close"
+      data-facets-close
+      aria-label="{{ 'accessibility.close' | t }}"
+    >
+      <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+
+  {%- if active_count > 0 -%}
+    <div class="valor-facets__active" role="list">
+      {%- for filter in filters -%}
+        {%- for value in filter.active_values -%}
+          <a class="valor-facets__pill" href="{{ value.url_to_remove }}" role="listitem">
+            <span>{{ filter.label }}: {{ value.label }}</span>
+            <svg aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </a>
+        {%- endfor -%}
+        {%- if filter.type == 'price_range' -%}
+          {%- if filter.min_value.value or filter.max_value.value -%}
+          <a class="valor-facets__pill" href="{{ filter.url_to_remove }}" role="listitem">
+            <span>
+              {{ filter.label }}:
+              {%- if filter.min_value.value -%} {{ filter.min_value.value | money }}{%- else -%} {{ 0 | money }}{%- endif -%}
+              –
+              {%- if filter.max_value.value -%} {{ filter.max_value.value | money }}{%- else -%} {{ filter.range_max | money }}{%- endif -%}
+            </span>
+            <svg aria-hidden="true" focusable="false" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </a>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  {%- endif -%}
+
+  <div class="valor-facets__groups">
+    {%- for filter in filters -%}
+      <details class="valor-facets__group" open>
+        <summary class="valor-facets__group-summary">
+          <span class="valor-facets__group-label">{{ filter.label }}</span>
+          <svg class="valor-facets__group-icon" aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </summary>
+
+        {%- case filter.type -%}
+          {%- when 'list' -%}
+            <ul class="valor-facets__values" role="list">
+              {%- for value in filter.values -%}
+                <li class="valor-facets__value">
+                  <label class="valor-facets__label">
+                    <input
+                      type="checkbox"
+                      name="{{ value.param_name }}"
+                      value="{{ value.value }}"
+                      class="valor-facets__checkbox"
+                      {% if value.active %}checked{% endif %}
+                      {% if value.count == 0 and value.active == false %}disabled{% endif %}
+                    >
+                    <span class="valor-facets__check-box" aria-hidden="true">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                    <span class="valor-facets__value-label">{{ value.label }}</span>
+                    {%- if value.count > 0 and value.active == false -%}
+                      <span class="valor-facets__value-count">({{ value.count }})</span>
+                    {%- endif -%}
+                  </label>
+                </li>
+              {%- endfor -%}
+            </ul>
+
+          {%- when 'boolean' -%}
+            <ul class="valor-facets__values" role="list">
+              {%- for value in filter.values -%}
+                <li class="valor-facets__value">
+                  <label class="valor-facets__label">
+                    <input
+                      type="checkbox"
+                      name="{{ value.param_name }}"
+                      value="{{ value.value }}"
+                      class="valor-facets__checkbox"
+                      {% if value.active %}checked{% endif %}
+                    >
+                    <span class="valor-facets__check-box" aria-hidden="true">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                    <span class="valor-facets__value-label">{{ value.label }}</span>
+                  </label>
+                </li>
+              {%- endfor -%}
+            </ul>
+
+          {%- when 'price_range' -%}
+            {%- comment -%}
+              Price inputs use type=text + inputmode=decimal (Dawn's
+              approach) so locale-specific decimal separators (comma
+              vs period) survive. money_without_currency renders the
+              value in the shop's locale; we DON'T strip punctuation
+              afterwards because that would silently turn 10.50 into
+              1050 in en-US locales. The browser sends back what the
+              user typed; Shopify normalises on the server.
+            {%- endcomment -%}
+            <div class="valor-facets__price">
+              <div class="valor-facets__price-row">
+                <label class="valor-facets__price-field">
+                  <span class="valor-facets__price-label">{{ 'collection.filters.from' | t }}</span>
+                  <span class="valor-facets__price-input-wrap">
+                    <span class="valor-facets__price-currency">{{ cart.currency.symbol }}</span>
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      name="{{ filter.min_value.param_name }}"
+                      value="{% if filter.min_value.value %}{{ filter.min_value.value | money_without_currency }}{% endif %}"
+                      placeholder="0"
+                      data-max="{{ filter.range_max | money_without_currency }}"
+                      class="valor-facets__price-input"
+                      data-facets-price-min
+                    >
+                  </span>
+                </label>
+                <label class="valor-facets__price-field">
+                  <span class="valor-facets__price-label">{{ 'collection.filters.to' | t }}</span>
+                  <span class="valor-facets__price-input-wrap">
+                    <span class="valor-facets__price-currency">{{ cart.currency.symbol }}</span>
+                    <input
+                      type="text"
+                      inputmode="decimal"
+                      name="{{ filter.max_value.param_name }}"
+                      value="{% if filter.max_value.value %}{{ filter.max_value.value | money_without_currency }}{% endif %}"
+                      placeholder="{{ filter.range_max | money_without_currency }}"
+                      data-max="{{ filter.range_max | money_without_currency }}"
+                      class="valor-facets__price-input"
+                      data-facets-price-max
+                    >
+                  </span>
+                </label>
+              </div>
+            </div>
+        {%- endcase -%}
+      </details>
+    {%- endfor -%}
+  </div>
+</form>

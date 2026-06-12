@@ -1,0 +1,106 @@
+{%- if section.settings.custom_liquid != blank -%}
+  <section
+    class="valor-custom-liquid valor-custom-liquid--{{ section.settings.container_width }}"
+    style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+  >
+    <div class="valor-custom-liquid__inner">
+      {{ section.settings.custom_liquid }}
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .valor-custom-liquid {
+    padding-top: var(--valor-section-padding-top, 40px);
+    padding-bottom: var(--valor-section-padding-bottom, 40px);
+    color: var(--color-foreground);
+    background-color: var(--color-background);
+  }
+
+  .valor-custom-liquid__inner {
+    width: 100%;
+    max-width: var(--page-width, 75rem);
+    margin: 0 auto;
+    padding: 0 max(var(--page-margin, 20px), 1rem);
+  }
+
+  .valor-custom-liquid--narrow .valor-custom-liquid__inner {
+    max-width: 45rem;
+  }
+
+  .shopify-section > .valor-custom-liquid--full {
+    grid-column: 1 / -1;
+  }
+
+  .valor-custom-liquid--full .valor-custom-liquid__inner {
+    max-width: none;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "t:sections.custom_liquid.name",
+  "tag": "section",
+  "class": "valor-section-custom-liquid",
+  "settings": [
+    {
+      "type": "liquid",
+      "id": "custom_liquid",
+      "label": "t:sections.custom_liquid.settings.custom_liquid.label",
+      "info": "t:sections.custom_liquid.settings.custom_liquid.info"
+    },
+    {
+      "type": "select",
+      "id": "container_width",
+      "label": "t:sections.custom_liquid.settings.container_width.label",
+      "options": [
+        {
+          "value": "narrow",
+          "label": "t:sections.custom_liquid.settings.container_width.options.narrow"
+        },
+        {
+          "value": "page",
+          "label": "t:sections.custom_liquid.settings.container_width.options.page"
+        },
+        {
+          "value": "full",
+          "label": "t:sections.custom_liquid.settings.container_width.options.full"
+        }
+      ],
+      "default": "page"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.custom_liquid.settings.spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.custom_liquid.settings.padding_top.label",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.custom_liquid.settings.padding_bottom.label",
+      "default": 40
+    }
+  ],
+  "presets": [
+    {
+      "name": "t:sections.custom_liquid.name"
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header", "footer"]
+  }
+}
+{% endschema %}

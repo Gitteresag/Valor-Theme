@@ -1,0 +1,104 @@
+{%- liquid
+  assign pick_up_availabilities = product_variant.store_availabilities | where: 'pick_up_enabled', true
+  assign closest_location = pick_up_availabilities.first
+-%}
+
+{%- if pick_up_availabilities.size > 0 -%}
+  <valor-pickup-availability-preview class="valor-pickup__preview">
+    <span
+      class="valor-pickup__status-dot{% if closest_location.available %} valor-pickup__status-dot--available{% else %} valor-pickup__status-dot--unavailable{% endif %}"
+      aria-hidden="true"
+    ></span>
+    <span class="valor-pickup__preview-content">
+      <span class="valor-pickup__preview-title">
+        {%- if closest_location.available -%}
+          {{ 'pickup_availability.available_at_html' | t: location_name: closest_location.location.name }}
+        {%- else -%}
+          {{ 'pickup_availability.unavailable_at_html' | t: location_name: closest_location.location.name }}
+        {%- endif -%}
+      </span>
+      {%- if closest_location.available and closest_location.pick_up_time != blank -%}
+        <span class="valor-pickup__preview-time">{{ closest_location.pick_up_time }}</span>
+      {%- endif -%}
+      <button
+        type="button"
+        class="valor-pickup__button"
+        aria-haspopup="dialog"
+        data-pickup-open
+      >
+        {%- if pick_up_availabilities.size == 1 -%}
+          {{ 'pickup_availability.view_store_info' | t }}
+        {%- else -%}
+          {{ 'pickup_availability.check_other_stores' | t }}
+        {%- endif -%}
+      </button>
+    </span>
+  </valor-pickup-availability-preview>
+
+  <valor-pickup-availability-drawer
+    class="valor-pickup-drawer"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ValorPickupAvailabilityTitle"
+    data-valor-pickup-drawer
+    hidden
+  >
+    <div class="valor-pickup-drawer__overlay" data-pickup-close></div>
+    <aside class="valor-pickup-drawer__panel">
+      <header class="valor-pickup-drawer__header">
+        <div>
+          <h2 id="ValorPickupAvailabilityTitle" class="valor-pickup-drawer__title">
+            {{ product_variant.product.title | escape }}
+          </h2>
+          {%- unless product_variant.product.has_only_default_variant -%}
+            <p class="valor-pickup-drawer__variant">{{ product_variant.title | escape }}</p>
+          {%- endunless -%}
+        </div>
+        <button
+          type="button"
+          class="valor-pickup-drawer__close"
+          aria-label="{{ 'accessibility.close' | t }}"
+          data-pickup-close
+        >
+          {{ 'icon-close.svg' | inline_asset_content }}
+        </button>
+      </header>
+
+      <ul class="valor-pickup-drawer__list" role="list">
+        {%- for availability in pick_up_availabilities -%}
+          <li class="valor-pickup-drawer__item">
+            <h3 class="valor-pickup-drawer__location">{{ availability.location.name | escape }}</h3>
+            <p class="valor-pickup-drawer__stock">
+              <span
+                class="valor-pickup__status-dot{% if availability.available %} valor-pickup__status-dot--available{% else %} valor-pickup__status-dot--unavailable{% endif %}"
+                aria-hidden="true"
+              ></span>
+              {%- if availability.available -%}
+                {{ 'pickup_availability.available' | t }}
+                {%- if availability.pick_up_time != blank -%}
+                  , {{ availability.pick_up_time | downcase }}
+                {%- endif -%}
+              {%- else -%}
+                {{ 'pickup_availability.currently_unavailable' | t }}
+              {%- endif -%}
+            </p>
+            {%- assign address = availability.location.address -%}
+            <address class="valor-pickup-drawer__address">
+              {{ address | format_address }}
+              {%- if address.phone != blank -%}
+                <br>{{ address.phone }}
+              {%- endif -%}
+            </address>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </aside>
+  </valor-pickup-availability-drawer>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Pickup availability",
+  "settings": []
+}
+{% endschema %}

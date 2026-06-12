@@ -1,0 +1,202 @@
+/* ============================================================================
+ * Featured collection — shared product grid styles
+ *
+ * These rules style the .valor-featured-collection / __inner / __header /
+ * __grid / __view-all class set used by:
+ *   - sections/featured-collection.liquid
+ *   - sections/related-products.liquid
+ *   - sections/main-cart.liquid (empty cart recommendations block)
+ *
+ * The classes were originally scoped via {% stylesheet %} inside
+ * featured-collection.liquid, but section-scoped stylesheets only load
+ * when that specific section is rendered. Pulling the CSS into a
+ * separate asset and loading it from each consuming section keeps the
+ * grid visually consistent across the storefront — same gap, same card
+ * sizing, same responsive behavior — regardless of which section is
+ * actually on the page.
+ * ============================================================================ */
+
+.valor-featured-collection {
+  padding-top: var(--valor-section-padding-top, 56px);
+  padding-bottom: var(--valor-section-padding-bottom, 56px);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+.valor-featured-collection__inner {
+  width: 100%;
+  max-width: 75rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+}
+.valor-featured-collection__inner--full-width {
+  max-width: none;
+}
+
+/* Header row */
+.valor-featured-collection__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+/* Centered heading: stack title and View all link vertically, centered.
+   The mobile View all button (at the bottom of the section) is unaffected. */
+.valor-featured-collection__header--align-center {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+/* Right alignment: stack vertically, end-aligned. Same logic as center
+   but pinned to the right edge of the section. */
+.valor-featured-collection__header--align-right {
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  gap: 0.75rem;
+}
+.valor-featured-collection__view-all {
+  color: var(--color-foreground);
+  text-decoration: none;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
+  transition: opacity 0.15s ease;
+}
+.valor-featured-collection__view-all:hover {
+  opacity: 0.7;
+}
+@media (max-width: 749px) {
+  .valor-featured-collection__view-all--desktop {
+    display: none;
+  }
+}
+
+/* Grid */
+.valor-featured-collection__grid {
+  display: grid;
+  gap: var(--valor-grid-gap, 16px);
+}
+.valor-featured-collection__grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+.valor-featured-collection__grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+.valor-featured-collection__grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+.valor-featured-collection__grid--cols-5 { grid-template-columns: repeat(5, 1fr); }
+
+@media (max-width: 989px) {
+  .valor-featured-collection__grid--cols-4,
+  .valor-featured-collection__grid--cols-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 749px) {
+  /* When swipe-on-mobile is enabled, escape the theme's centered content
+     column so the carousel can run edge-to-edge on the left. The header,
+     grid and view-all stay inside the section, but the section itself
+     spans the full viewport — the swipe grid then resets its own left
+     padding to 0 to start at the very edge. */
+  .shopify-section > .valor-featured-collection--mobile-full-bleed {
+    grid-column: 1 / -1;
+  }
+  /* On mobile, the gap can be tighter than desktop. Falls back to the
+     desktop value, then to 16px, if the mobile setting is unset. */
+  .valor-featured-collection__grid {
+    gap: var(--valor-grid-gap-mobile, var(--valor-grid-gap, 16px));
+  }
+  .valor-featured-collection__grid--mobile-1 {
+    grid-template-columns: 1fr;
+  }
+  .valor-featured-collection__grid--mobile-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  /* Swipe-on-mobile: horizontal scroll. Asymmetric padding makes the
+     first card start flush with the viewport's left edge while keeping
+     a comfortable gutter on the right so the last card never sticks
+     to the screen edge. scroll-padding aligns snap points to match. */
+  .valor-featured-collection__grid--swipe-mobile {
+    grid-template-columns: none;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: var(--valor-grid-gap-mobile, var(--valor-grid-gap, 16px));
+    margin-left: calc(-1 * clamp(1rem, 4vw, 3rem));
+    margin-right: calc(-1 * clamp(1rem, 4vw, 3rem));
+    padding-left: 0;
+    padding-right: clamp(1rem, 4vw, 3rem);
+    scroll-padding-left: 0;
+    scroll-padding-right: clamp(1rem, 4vw, 3rem);
+    -webkit-overflow-scrolling: touch;
+    /* Hide scrollbar — partially visible next card is the visual cue to swipe */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE / old Edge */
+  }
+  .valor-featured-collection__grid--swipe-mobile::-webkit-scrollbar {
+    display: none; /* Chrome / Safari / new Edge */
+  }
+  /* Card width is merchant-controlled; lower values show more of the
+     next card as a swipe affordance, higher values feel more immersive. */
+  .valor-featured-collection__grid--swipe-mobile > * {
+    flex: 0 0 var(--valor-mobile-card-width, 70%);
+    scroll-snap-align: start;
+  }
+
+  /* In swipe-on-mobile mode, the cards are visually anchored as a row
+     with the first card flush to the viewport's left edge. Left-aligned
+     card text reads awkwardly here because the title baseline pulls
+     against that hard edge — centering the text under each image
+     gives the carousel a cleaner, more intentional rhythm. Only
+     applies on mobile, only when swipe is active. Desktop and
+     non-swipe mobile keep the default left alignment. */
+  .valor-featured-collection__grid--swipe-mobile .valor-card__info {
+    text-align: center;
+  }
+  .valor-featured-collection__grid--swipe-mobile .valor-card__price {
+    justify-content: center;
+  }
+}
+
+/* Mobile view-all button */
+.valor-featured-collection__view-all-mobile {
+  display: none;
+  text-align: center;
+  margin-top: 2rem;
+}
+@media (max-width: 749px) {
+  .valor-featured-collection__view-all-mobile {
+    display: block;
+  }
+}
+
+/* ==========================================================================
+   Related-products override (mobile only)
+
+   The shared .valor-featured-collection--mobile-full-bleed technique uses
+   negative horizontal margins to bleed the carousel to the viewport edges.
+   This works fine for featured-collection on the homepage, but inside the
+   product page the surrounding template wrappers (product gallery + info
+   layout) can interact with the negative margin in ways that drag the
+   whole page slightly to the left on mobile, leaving an empty strip on
+   the right.
+
+   Rather than removing the full-bleed effect from featured-collection
+   (which works correctly on the homepage), we scope this fix specifically
+   to .valor-related-products. Trade-off: related-products on mobile loses
+   the edge-to-edge bleed and sits inside the regular page padding, but
+   the rest of the product page layout stays intact.
+   ========================================================================== */
+@media (max-width: 749px) {
+  .valor-section-related-products,
+  .valor-related-products.valor-featured-collection--mobile-full-bleed {
+    overflow-x: clip;
+  }
+  .valor-related-products .valor-featured-collection__grid--swipe-mobile {
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+  }
+}

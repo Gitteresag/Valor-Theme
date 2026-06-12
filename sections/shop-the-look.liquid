@@ -1,0 +1,311 @@
+{%- liquid
+  assign section_image = section.settings.image
+  assign section_priority = false
+  if section.location == 'template' and section.index == 1
+    assign section_priority = true
+  endif
+  assign image_loading = 'lazy'
+  assign image_fetchpriority = 'auto'
+  if section_priority
+    assign image_loading = 'eager'
+    assign image_fetchpriority = 'high'
+  endif
+-%}
+
+<section
+  class="valor-stl valor-stl--layout-{{ section.settings.layout }} valor-stl--image-{{ section.settings.image_width }}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-stl__inner">
+    <div class="valor-stl__content">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="valor-stl__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="valor-stl__heading valor-heading valor-heading--{{ section.settings.heading_size }}">{{ section.settings.heading }}</h2>
+      {%- endif -%}
+      {%- if section.settings.text != blank -%}
+        <div class="valor-stl__text rte">{{ section.settings.text }}</div>
+      {%- endif -%}
+    </div>
+
+    <div class="valor-stl__look">
+      <div class="valor-stl__image-wrap">
+        {%- if section_image != blank -%}
+          <img
+            class="valor-stl__image"
+            srcset="{{ section_image | image_url: width: 500 }} 500w, {{ section_image | image_url: width: 750 }} 750w, {{ section_image | image_url: width: 1100 }} 1100w, {{ section_image | image_url: width: 1500 }} 1500w, {{ section_image | image_url: width: 2000 }} 2000w"
+            src="{{ section_image | image_url: width: 1100 }}"
+            sizes="(min-width: 990px) 60vw, 100vw"
+            alt="{{ section_image.alt | escape }}"
+            width="{{ section_image.width }}"
+            height="{{ section_image.height }}"
+            loading="{{ image_loading }}"
+            {%- if image_fetchpriority == 'high' %} fetchpriority="high"{% endif -%}
+          >
+        {%- else -%}
+          <div class="valor-stl__placeholder">
+            {{ 'lifestyle-2' | placeholder_svg_tag: 'valor-stl__placeholder-svg' }}
+          </div>
+        {%- endif -%}
+
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign hotspot_product = block.settings.product
+            assign hotspot_label = block.settings.label | default: hotspot_product.title
+            if hotspot_label == blank
+              assign hotspot_label = 'sections.shop_the_look.hotspot' | t
+            endif
+            assign placeholder_title = block.settings.label
+            if placeholder_title == blank
+              assign placeholder_title = 'sections.shop_the_look.placeholder_product' | t
+            endif
+          -%}
+          <details
+            class="valor-stl__hotspot"
+            style="--valor-hotspot-x: {{ block.settings.x_position }}%; --valor-hotspot-y: {{ block.settings.y_position }}%;"
+            {{ block.shopify_attributes }}
+          >
+            <summary class="valor-stl__hotspot-button" aria-label="{{ hotspot_label | escape }}">
+              <span aria-hidden="true"></span>
+            </summary>
+            <div class="valor-stl__popover">
+              {%- if hotspot_product != blank -%}
+                <a class="valor-stl__popover-card" href="{{ hotspot_product.url }}">
+                  {%- if hotspot_product.featured_media != blank -%}
+                    <img
+                      class="valor-stl__popover-image"
+                      src="{{ hotspot_product.featured_media | image_url: width: 180 }}"
+                      alt="{{ hotspot_product.featured_media.alt | escape }}"
+                      width="{{ hotspot_product.featured_media.width }}"
+                      height="{{ hotspot_product.featured_media.height }}"
+                      loading="lazy"
+                    >
+                  {%- endif -%}
+                  <span class="valor-stl__popover-info">
+                    <span class="valor-stl__popover-title">{{ hotspot_product.title | escape }}</span>
+                    <span class="valor-stl__popover-price">{{ hotspot_product.price | money }}</span>
+                    <span class="valor-stl__popover-link">{{ 'sections.shop_the_look.view_product' | t }}</span>
+                  </span>
+                </a>
+              {%- else -%}
+                <div class="valor-stl__popover-card valor-stl__popover-card--placeholder">
+                  <span class="valor-stl__popover-title">{{ placeholder_title | escape }}</span>
+                </div>
+              {%- endif -%}
+            </div>
+          </details>
+        {%- endfor -%}
+      </div>
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="valor-stl__mobile-products" aria-label="{{ 'sections.shop_the_look.products_heading' | t }}">
+          {%- for block in section.blocks -%}
+            {%- assign mobile_product = block.settings.product -%}
+            {%- if mobile_product != blank -%}
+              <a class="valor-stl__mobile-product" href="{{ mobile_product.url }}">
+                {%- if mobile_product.featured_media != blank -%}
+                  <img
+                    class="valor-stl__mobile-product-image"
+                    src="{{ mobile_product.featured_media | image_url: width: 160 }}"
+                    alt="{{ mobile_product.featured_media.alt | escape }}"
+                    width="{{ mobile_product.featured_media.width }}"
+                    height="{{ mobile_product.featured_media.height }}"
+                    loading="lazy"
+                  >
+                {%- endif -%}
+                <span>
+                  <span class="valor-stl__mobile-product-title">{{ mobile_product.title | escape }}</span>
+                  <span class="valor-stl__mobile-product-price">{{ mobile_product.price | money }}</span>
+                </span>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .valor-stl {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background: var(--color-background);
+    color: var(--color-foreground);
+  }
+  .valor-stl__inner {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+    display: grid;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+  .valor-stl__content { max-width: 42rem; display: flex; flex-direction: column; gap: 0.85rem; }
+  .valor-stl__eyebrow { margin: 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 600; }
+  .valor-stl__heading { margin: 0; }
+  .valor-stl__text { color: color-mix(in srgb, var(--color-foreground) 78%, transparent); }
+  .valor-stl__text > *:first-child { margin-top: 0; }
+  .valor-stl__text > *:last-child { margin-bottom: 0; }
+  .valor-stl__look { display: grid; gap: 1rem; }
+  .valor-stl__image-wrap {
+    position: relative;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+  }
+  .valor-stl__image,
+  .valor-stl__placeholder { width: 100%; height: auto; display: block; }
+  .valor-stl__placeholder-svg { width: 100%; height: auto; }
+  .valor-stl__hotspot {
+    position: absolute;
+    left: var(--valor-hotspot-x, 50%);
+    top: var(--valor-hotspot-y, 50%);
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+  .valor-stl__hotspot-button {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    border: 2px solid var(--color-background);
+    background: var(--color-foreground);
+    color: var(--color-background);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 0 0.4rem color-mix(in srgb, var(--color-background) 28%, transparent);
+    list-style: none;
+  }
+  .valor-stl__hotspot-button::-webkit-details-marker { display: none; }
+  .valor-stl__hotspot-button span,
+  .valor-stl__hotspot-button span::before {
+    content: '';
+    display: block;
+    width: 0.75rem;
+    height: 2px;
+    border-radius: 999px;
+    background: currentColor;
+  }
+  .valor-stl__hotspot-button span::before { transform: rotate(90deg); }
+  .valor-stl__hotspot[open] .valor-stl__hotspot-button span::before { display: none; }
+  .valor-stl__popover {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 0.75rem);
+    transform: translateX(-50%);
+    width: min(17rem, 80vw);
+    padding: 0.75rem;
+    background: var(--color-background);
+    color: var(--color-foreground);
+    box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.16);
+  }
+  .valor-stl__popover-card {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    gap: 0.75rem;
+    align-items: center;
+    color: inherit;
+    text-decoration: none;
+  }
+  .valor-stl__popover-card--placeholder { display: block; }
+  .valor-stl__popover-image { width: 4rem; aspect-ratio: 1 / 1; height: auto; object-fit: cover; background: color-mix(in srgb, var(--color-foreground) 5%, transparent); }
+  .valor-stl__popover-info { display: grid; gap: 0.2rem; }
+  .valor-stl__popover-title,
+  .valor-stl__mobile-product-title { font-weight: 600; }
+  .valor-stl__popover-price,
+  .valor-stl__mobile-product-price { color: color-mix(in srgb, var(--color-foreground) 72%, transparent); font-size: 0.9rem; }
+  .valor-stl__popover-link { font-size: 0.85rem; text-decoration: underline; text-underline-offset: 0.2em; }
+  .valor-stl__mobile-products { display: grid; gap: 0.75rem; }
+  .valor-stl__mobile-product {
+    display: grid;
+    grid-template-columns: 4rem 1fr;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--color-foreground) 12%, transparent);
+    color: inherit;
+    text-decoration: none;
+  }
+  .valor-stl__mobile-product-image { width: 4rem; aspect-ratio: 1 / 1; height: auto; object-fit: cover; }
+  @media (min-width: 990px) {
+    .valor-stl--layout-side_by_side .valor-stl__inner { grid-template-columns: minmax(16rem, 0.8fr) minmax(0, 1.4fr); align-items: center; }
+    .valor-stl--layout-side_by_side.valor-stl--image-left .valor-stl__content { order: 2; }
+    .valor-stl--layout-side_by_side.valor-stl--image-left .valor-stl__look { order: 1; }
+    .valor-stl--image-narrow .valor-stl__inner { max-width: 64rem; }
+    .valor-stl__mobile-products { display: none; }
+  }
+  @media (max-width: 749px) {
+    .valor-stl__hotspot { display: none; }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Shop the look",
+  "tag": "section",
+  "class": "valor-section-shop-the-look",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Eyebrow" },
+    { "type": "inline_richtext", "id": "heading", "label": "Heading", "default": "Shop the look" },
+    { "type": "richtext", "id": "text", "label": "Text", "default": "<p>Connect lifestyle imagery with the products featured in it.</p>" },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "h1", "label": "Large" },
+        { "value": "h2", "label": "Medium" }
+      ],
+      "default": "h2"
+    },
+    { "type": "image_picker", "id": "image", "label": "Image" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Desktop layout",
+      "options": [
+        { "value": "stacked", "label": "Stacked" },
+        { "value": "side_by_side", "label": "Side by side" }
+      ],
+      "default": "stacked"
+    },
+    {
+      "type": "select",
+      "id": "image_width",
+      "label": "Image width",
+      "options": [
+        { "value": "narrow", "label": "Narrow" },
+        { "value": "wide", "label": "Wide" },
+        { "value": "left", "label": "Image left in side-by-side layout" }
+      ],
+      "default": "wide"
+    },
+    { "type": "header", "content": "Section padding" },
+    { "type": "range", "id": "padding_top", "label": "Top padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 },
+    { "type": "range", "id": "padding_bottom", "label": "Bottom padding", "min": 0, "max": 120, "step": 4, "unit": "px", "default": 56 }
+  ],
+  "blocks": [
+    {
+      "type": "hotspot",
+      "name": "Hotspot",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Product" },
+        { "type": "text", "id": "label", "label": "Accessible label" },
+        { "type": "range", "id": "x_position", "label": "Horizontal position", "min": 5, "max": 95, "step": 1, "unit": "%", "default": 50 },
+        { "type": "range", "id": "y_position", "label": "Vertical position", "min": 5, "max": 95, "step": 1, "unit": "%", "default": 50 }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop the look",
+      "blocks": [
+        { "type": "hotspot" },
+        { "type": "hotspot" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,79 @@
+{%- comment -%}
+  Renders a star rating + review count for the current product.
+
+  Reads from Shopify's review metafields, which is the standard
+  contract used by Judge.me, Loox, Shopify Product Reviews, and
+  most other rating apps:
+    product.metafields.reviews.rating.value      → Object{rating, scale_max}
+    product.metafields.reviews.rating_count      → Number (or Metafield)
+
+  If the rating metafield is missing or empty, the block silently
+  renders nothing — important for new stores that haven't set up
+  reviews yet, since we never want to show a fake "0 stars (0)"
+  widget.
+
+  Defensive read for rating_count:
+    Different review apps store this metafield slightly differently —
+    some return a plain Number, others return a Metafield wrapper
+    where the integer is at .value. We check both, falling back to
+    0 if neither produces a value.
+
+  Visuals: two layers of identical star rows. The bottom layer is
+  the empty (outlined) stars in muted colour; the top layer is the
+  filled stars in foreground colour, clipped to a width corresponding
+  to the rating percentage. This gives clean half-star and decimal
+  precision (e.g. 4.3 → 86% wide) without rendering different SVGs
+  per fractional value.
+
+  Accepts:
+    product  {Product}  required — for the metafields
+    block    {Block}    required — for shopify_attributes
+{%- endcomment -%}
+
+{%- liquid
+  assign rating_obj = product.metafields.reviews.rating.value
+
+  # Defensive read: rating_count may be a plain integer OR a Metafield
+  # object whose value is at .value, depending on the review app.
+  assign rating_count_meta = product.metafields.reviews.rating_count
+  assign rating_count = 0
+  if rating_count_meta.value
+    assign rating_count = rating_count_meta.value
+  elsif rating_count_meta != blank
+    assign rating_count = rating_count_meta
+  endif
+-%}
+
+{%- if rating_obj != blank and rating_obj.rating != blank -%}
+  {%- liquid
+    assign rating_value = rating_obj.rating | times: 1.0
+    assign scale_max = rating_obj.scale_max | default: 5
+    if scale_max == 0
+      assign scale_max = 5
+    endif
+    assign percent = rating_value | times: 100 | divided_by: scale_max
+  -%}
+  <div
+    class="valor-mp__rating"
+    {{ block.shopify_attributes }}
+  >
+    <div
+      class="valor-mp__rating-stars"
+      role="img"
+      aria-label="{{ 'product.rating' | t: rating: rating_value, scale: scale_max }}"
+      style="--valor-rating-percent: {{ percent }}%;"
+    >
+      <div class="valor-mp__rating-stars-empty" aria-hidden="true">★★★★★</div>
+      <div class="valor-mp__rating-stars-filled" aria-hidden="true">★★★★★</div>
+    </div>
+    {%- if rating_count > 0 -%}
+      <span class="valor-mp__rating-text">
+        {{- rating_value }} ({{ rating_count -}})
+      </span>
+    {%- else -%}
+      <span class="valor-mp__rating-text">
+        {{- rating_value -}}
+      </span>
+    {%- endif -%}
+  </div>
+{%- endif -%}

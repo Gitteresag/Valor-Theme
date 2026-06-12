@@ -1,0 +1,494 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Valor",
+    "theme_version": "1.3.1",
+    "theme_author": "Valor",
+    "theme_documentation_url": "https://valortheme.com",
+    "theme_support_url": "https://valortheme.com"
+  },
+  {
+    "name": "t:general.typography",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Headings"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_header_font",
+        "default": "work_sans_n6",
+        "label": "Font"
+      },
+      {
+        "type": "range",
+        "id": "heading_scale",
+        "label": "Font size scale",
+        "info": "How much larger headings are than body text. 100% means same as body, 150% means 50% larger.",
+        "min": 75,
+        "max": 150,
+        "step": 5,
+        "unit": "%",
+        "default": 100
+      },
+      {
+        "type": "header",
+        "content": "Body"
+      },
+      {
+        "type": "font_picker",
+        "id": "type_body_font",
+        "default": "work_sans_n4",
+        "label": "Font"
+      },
+      {
+        "type": "range",
+        "id": "body_scale",
+        "label": "Font size scale",
+        "info": "Scales all text in the theme. Headings keep their relative size set above.",
+        "min": 85,
+        "max": 130,
+        "step": 5,
+        "unit": "%",
+        "default": 100
+      }
+    ]
+  },
+  {
+    "name": "t:general.layout",
+    "settings": [
+      {
+        "type": "select",
+        "id": "max_page_width",
+        "label": "t:labels.page_width",
+        "options": [
+          {
+            "value": "75rem",
+            "label": "t:options.page_width.compact"
+          },
+          {
+            "value": "90rem",
+            "label": "t:options.page_width.narrow"
+          },
+          {
+            "value": "110rem",
+            "label": "t:options.page_width.wide"
+          }
+        ],
+        "default": "75rem"
+      },
+      {
+        "type": "range",
+        "id": "min_page_margin",
+        "min": 10,
+        "max": 100,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.page_margin",
+        "default": 20
+      }
+    ]
+  },
+  {
+    "name": "Brand",
+    "settings": [
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo image",
+        "info": "Leave empty to show shop name as text"
+      },
+      {
+        "type": "image_picker",
+        "id": "transparent_logo",
+        "label": "Transparent header logo",
+        "info": "Optional. Shown over image banners when transparent header is enabled. Use a light version of your logo for dark hero images, and preferably the same dimensions or aspect ratio as your main logo to avoid layout shifts when scrolling."
+      },
+      {
+        "type": "range",
+        "id": "logo_height",
+        "label": "Logo height (desktop)",
+        "min": 20,
+        "max": 150,
+        "step": 2,
+        "unit": "px",
+        "default": 40
+      },
+      {
+        "type": "range",
+        "id": "logo_height_mobile",
+        "label": "Logo height (mobile)",
+        "min": 16,
+        "max": 80,
+        "step": 2,
+        "unit": "px",
+        "default": 32
+      },
+      {
+        "type": "header",
+        "content": "Favicon"
+      },
+      {
+        "type": "image_picker",
+        "id": "favicon",
+        "label": "Favicon image",
+        "info": "Will be scaled down to 32 × 32 pixels. Use a square PNG; 512 × 512 is a good upload size."
+      },
+      {
+        "type": "header",
+        "content": "Brand information (footer)"
+      },
+      {
+        "type": "image_picker",
+        "id": "brand_image",
+        "label": "Brand image",
+        "info": "Used in the Footer brand information block."
+      },
+      {
+        "type": "range",
+        "id": "brand_image_width",
+        "min": 50,
+        "max": 400,
+        "step": 5,
+        "unit": "px",
+        "label": "Brand image width",
+        "default": 100
+      },
+      {
+        "type": "inline_richtext",
+        "id": "brand_headline",
+        "label": "Brand headline"
+      },
+      {
+        "type": "richtext",
+        "id": "brand_description",
+        "label": "Brand description"
+      }
+    ]
+  },
+  {
+    "name": "Cart",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_cart_drawer",
+        "label": "Enable cart drawer",
+        "info": "Cart icon opens a side drawer instead of navigating to the cart page.",
+        "default": true
+      },
+      {
+        "type": "collection",
+        "id": "continue_shopping_collection",
+        "label": "Continue shopping link",
+        "info": "Used by both the cart drawer and the cart page \"Continue shopping\" buttons. If left empty, falls back to /collections/all."
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_discount_input",
+        "label": "Show discount code input",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_cart_note",
+        "label": "Show order note input",
+        "default": false
+      }
+    ]
+  },
+  {
+    "name": "Search",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_predictive_search",
+        "label": "Enable predictive search",
+        "info": "Live search suggestions (products, collections, pages, articles) appear as the customer types.",
+        "default": true
+      }
+    ]
+  },
+  {
+    "name": "Products",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Sale badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_sale_badge",
+        "label": "Show sale badge on product cards",
+        "default": true,
+        "info": "Displays a badge on products that have a compare-at price set."
+      },
+      {
+        "type": "text",
+        "id": "sale_badge_text",
+        "label": "Sale badge text",
+        "default": "Sale"
+      },
+      {
+        "type": "header",
+        "content": "Sold out badge"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_soldout_badge",
+        "label": "Show sold out badge on product cards",
+        "default": true
+      },
+      {
+        "type": "text",
+        "id": "soldout_badge_text",
+        "label": "Sold out badge text",
+        "default": "Sold out"
+      },
+      {
+        "type": "header",
+        "content": "Product gallery"
+      },
+      {
+        "type": "checkbox",
+        "id": "gallery_enable_lightbox",
+        "label": "Enable lightbox",
+        "default": true,
+        "info": "Click product images to open a fullscreen viewer."
+      },
+      {
+        "type": "checkbox",
+        "id": "gallery_show_thumbnails",
+        "label": "Show thumbnails",
+        "default": true,
+        "info": "Show small image previews below the main image when there are multiple photos."
+      },
+      {
+        "type": "checkbox",
+        "id": "gallery_show_arrows",
+        "label": "Show navigation arrows",
+        "default": true,
+        "info": "Show clickable arrows on the main image to browse photos."
+      },
+      {
+        "type": "range",
+        "id": "gallery_arrow_size",
+        "label": "Arrow size",
+        "min": 32,
+        "max": 56,
+        "step": 4,
+        "unit": "px",
+        "default": 40
+      }
+    ]
+  },
+  {
+    "name": "Buttons",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Back to top"
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_back_to_top",
+        "label": "Enable back to top button",
+        "default": true,
+        "info": "Appears after the visitor has scrolled down."
+      },
+      {
+        "type": "select",
+        "id": "back_to_top_position_desktop",
+        "label": "Desktop position",
+        "options": [
+          {
+            "value": "right",
+            "label": "Bottom right"
+          },
+          {
+            "value": "left",
+            "label": "Bottom left"
+          }
+        ],
+        "default": "right"
+      },
+      {
+        "type": "select",
+        "id": "back_to_top_position_mobile",
+        "label": "Mobile position",
+        "options": [
+          {
+            "value": "right",
+            "label": "Bottom right"
+          },
+          {
+            "value": "left",
+            "label": "Bottom left"
+          },
+          {
+            "value": "center",
+            "label": "Bottom center (pill)"
+          }
+        ],
+        "default": "right",
+        "info": "Center renders a pill-shaped button instead of a circle."
+      }
+    ]
+  },
+  {
+    "name": "t:general.colors",
+    "settings": [
+      {
+        "type": "color",
+        "id": "background_color",
+        "default": "#FFFFFF",
+        "label": "t:labels.background"
+      },
+      {
+        "type": "color",
+        "id": "foreground_color",
+        "default": "#333333",
+        "label": "t:labels.foreground"
+      },
+      {
+        "type": "range",
+        "id": "input_corner_radius",
+        "min": 0,
+        "max": 10,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.input_corner_radius",
+        "default": 4
+      },
+      {
+        "type": "header",
+        "content": "t:labels.buttons_header",
+        "info": "t:labels.buttons_header_info"
+      },
+      {
+        "type": "color",
+        "id": "button_background_color",
+        "label": "t:labels.button_background"
+      },
+      {
+        "type": "color",
+        "id": "button_text_color",
+        "label": "t:labels.button_text"
+      },
+      {
+        "type": "color",
+        "id": "button_border_color",
+        "label": "t:labels.button_border"
+      },
+      {
+        "type": "color",
+        "id": "button_outline_text_color",
+        "label": "t:labels.button_outline_text"
+      },
+      {
+        "type": "color",
+        "id": "button_hover_background_color",
+        "label": "t:labels.button_hover_background"
+      },
+      {
+        "type": "color",
+        "id": "button_hover_text_color",
+        "label": "t:labels.button_hover_text"
+      },
+      {
+        "type": "color",
+        "id": "button_outline_hover_text_color",
+        "label": "t:labels.button_outline_hover_text"
+      },
+      {
+        "type": "range",
+        "id": "button_border_width",
+        "min": 0,
+        "max": 8,
+        "step": 0.5,
+        "unit": "px",
+        "label": "t:labels.button_border_width",
+        "default": 1.5
+      },
+      {
+        "type": "range",
+        "id": "button_corner_radius",
+        "min": 0,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.button_corner_radius",
+        "default": 4
+      }
+    ]
+  },
+  {
+    "name": "Social media",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Social media accounts",
+        "info": "Add the URLs to your social media profiles. Empty fields are hidden."
+      },
+      {
+        "type": "url",
+        "id": "social_instagram_url",
+        "label": "Instagram",
+        "info": "https://instagram.com/yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_facebook_url",
+        "label": "Facebook",
+        "info": "https://facebook.com/yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_x_url",
+        "label": "X (Twitter)",
+        "info": "https://x.com/yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok_url",
+        "label": "TikTok",
+        "info": "https://tiktok.com/@yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_pinterest_url",
+        "label": "Pinterest",
+        "info": "https://pinterest.com/yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_youtube_url",
+        "label": "YouTube",
+        "info": "https://youtube.com/@yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_linkedin_url",
+        "label": "LinkedIn",
+        "info": "https://linkedin.com/company/yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_threads_url",
+        "label": "Threads",
+        "info": "https://threads.net/@yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_snapchat_url",
+        "label": "Snapchat",
+        "info": "https://snapchat.com/add/yourstore"
+      },
+      {
+        "type": "url",
+        "id": "social_whatsapp_url",
+        "label": "WhatsApp",
+        "info": "https://wa.me/yournumber"
+      }
+    ]
+  }
+]

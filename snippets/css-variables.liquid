@@ -1,0 +1,145 @@
+{%- liquid
+  # Pre-compute body font variants. font_modify is more expressive than
+  # accessing font.variants directly, but it can return nil for fonts that
+  # don't have the requested variant — fall back to the base font in those
+  # cases so we always have a usable variable.
+  assign body_font = settings.type_body_font
+  assign body_font_bold = body_font | font_modify: 'weight', 'bold' | default: body_font
+  assign body_font_italic = body_font | font_modify: 'style', 'italic' | default: body_font
+  assign body_font_bold_italic = body_font_bold | font_modify: 'style', 'italic' | default: body_font_bold
+
+  assign heading_font = settings.type_header_font
+  assign heading_font_bold = heading_font | font_modify: 'weight', 'bold' | default: heading_font
+  assign heading_font_italic = heading_font | font_modify: 'style', 'italic' | default: heading_font
+  assign heading_font_bold_italic = heading_font_bold | font_modify: 'style', 'italic' | default: heading_font_bold
+-%}
+
+{% style %}
+  /* Body font variants — bold and italic are common in prose, so we load
+     them up-front to avoid the synthesised-bold artefacts the browser
+     produces when the real variant isn't loaded. */
+  {{ body_font | font_face: font_display: 'swap' }}
+  {{ body_font_bold | font_face: font_display: 'swap' }}
+  {{ body_font_italic | font_face: font_display: 'swap' }}
+  {{ body_font_bold_italic | font_face: font_display: 'swap' }}
+
+  /* Heading font variants — same four variants, so <em> inside headings
+     uses a real italic glyph rather than the browser's faux-italic slant. */
+  {{ heading_font | font_face: font_display: 'swap' }}
+  {{ heading_font_bold | font_face: font_display: 'swap' }}
+  {{ heading_font_italic | font_face: font_display: 'swap' }}
+  {{ heading_font_bold_italic | font_face: font_display: 'swap' }}
+
+  :root {
+    /* Body font tokens */
+    --font-body--family: {{ body_font.family }}, {{ body_font.fallback_families }};
+    --font-body--style: {{ body_font.style }};
+    --font-body--weight: {{ body_font.weight }};
+    --font-body--weight-bold: {{ body_font_bold.weight }};
+
+    /* Heading font tokens */
+    --font-heading--family: {{ heading_font.family }}, {{ heading_font.fallback_families }};
+    --font-heading--style: {{ heading_font.style }};
+    --font-heading--weight: {{ heading_font.weight }};
+    --font-heading--weight-bold: {{ heading_font_bold.weight }};
+
+    /* Type scales.
+       Body scale is applied to the root font size (html element) in
+       critical.css, so changing body_scale rescales every rem-based
+       size in the theme together — fonts, paddings, line-heights.
+       Heading scale is *relative to body_scale*, mirroring Dawn:
+       this prevents body_scale from unintentionally changing heading
+       sizes, while heading_scale controls headings independently.
+       Example: body 130, heading 100 → headings keep their intended 100% scale,
+                body 100, heading 150 → headings are 50% larger than body. */
+    --font-body-scale: {{ settings.body_scale | divided_by: 100.0 }};
+    --font-heading-scale: {{ settings.heading_scale | times: 1.0 | divided_by: settings.body_scale }};
+
+    /* Centralised typography scale.
+       Heading sizes are calc()-multiplied by --font-heading-scale so the
+       Theme Editor's "Font size scale" setting still works. The clamp()
+       values use modern fluid typography: a hard floor on small viewports,
+       a smooth interpolation across the middle, and a hard ceiling on
+       wide screens — set with `clamp(min, base + slope*vw, max)`.
+
+       Body sizes are plain rem values. Because critical.css scales
+       <html> font-size by --font-body-scale, every rem here is already
+       multiplied by the body scale — no double-scaling needed. */
+    --font-size-heading-xs:      calc(var(--font-heading-scale, 1) * clamp(0.875rem, 0.84rem + 0.18vw, 1rem));
+    --font-size-heading-sm:      calc(var(--font-heading-scale, 1) * clamp(1rem,     0.96rem + 0.22vw, 1.125rem));
+    --font-size-heading-md:      calc(var(--font-heading-scale, 1) * clamp(1.125rem, 1.02rem + 0.55vw, 1.5rem));
+    --font-size-heading-lg:      calc(var(--font-heading-scale, 1) * clamp(1.5rem,   1.36rem + 0.75vw, 2rem));
+    --font-size-heading-xl:      calc(var(--font-heading-scale, 1) * clamp(2rem,     1.78rem + 1.10vw, 2.75rem));
+    --font-size-heading-2xl:     calc(var(--font-heading-scale, 1) * clamp(2.5rem,   2.15rem + 1.75vw, 3.75rem));
+    --font-size-heading-display: calc(var(--font-heading-scale, 1) * clamp(3rem,     2.40rem + 3.00vw, 5rem));
+
+    --font-size-body-2xs:  0.75rem;
+    --font-size-body-xs:   0.8125rem;
+    --font-size-body-sm:   0.875rem;
+    --font-size-body-md:   0.9375rem;
+    --font-size-body-base: 1rem;
+    --font-size-body-lg:   1.125rem;
+
+    /* Layout */
+    --page-width: {{ settings.max_page_width }};
+    --page-margin: {{ settings.min_page_margin }}px;
+
+    /* Colors */
+    --color-background: {{ settings.background_color }};
+    --color-foreground: {{ settings.foreground_color }};
+
+    /* Buttons — global button tokens used by every CTA-style button.
+       Empty color settings fall back to the foreground/background pair,
+       preserving the original look until a merchant customizes them.
+       Outline buttons get their own text tokens so their label color can
+       differ from their border color. */
+    --color-button-bg:                     {{ settings.button_background_color | default: settings.foreground_color }};
+    --color-button-text:                   {{ settings.button_text_color | default: settings.background_color }};
+    --color-button-border:                 {{ settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
+    --color-button-hover-bg:               {{ settings.button_hover_background_color | default: settings.button_background_color | default: settings.foreground_color }};
+    --color-button-hover-text:             {{ settings.button_hover_text_color | default: settings.button_text_color | default: settings.background_color }};
+    --color-button-hover-border:           {{ settings.button_hover_background_color | default: settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
+    --color-button-outline-text:           {{ settings.button_outline_text_color | default: settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
+    --color-button-outline-border:         {{ settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
+    --color-button-outline-hover-bg:       {{ settings.button_hover_background_color | default: settings.button_background_color | default: settings.foreground_color }};
+    --color-button-outline-hover-text:     {{ settings.button_outline_hover_text_color | default: settings.button_hover_text_color | default: settings.background_color }};
+    --color-button-outline-hover-border:   {{ settings.button_hover_background_color | default: settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
+    {%- if settings.button_hover_background_color != blank or settings.button_hover_text_color != blank or settings.button_outline_hover_text_color != blank %}
+    --button-hover-opacity: 1;
+    {%- else %}
+    --button-hover-opacity: 0.85;
+    {%- endif %}
+    --style-button-border-width:   {{ settings.button_border_width }}px;
+    --style-border-radius-buttons: {{ settings.button_corner_radius }}px;
+
+    /* Borders & dividers — three opacity levels for visual hierarchy.
+
+       --valor-border-subtle:  decorative inner lines (cards, list rows,
+                                input internal borders). Visible on close
+                                inspection but doesn't compete for attention.
+       --valor-border-default: structural page dividers (header, footer,
+                                filter bar, cart totals). Should be clearly
+                                visible without dominating the layout.
+       --valor-border-strong:  interactive surfaces (mobile accordions,
+                                expand-collapse rows). Reads as a tappable
+                                separator on touch devices where 1px on
+                                a high-DPR mobile screen is easy to miss
+                                with lower opacity. */
+    --valor-border-subtle:  color-mix(in srgb, var(--color-foreground) 16%, transparent);
+    --valor-border-default: color-mix(in srgb, var(--color-foreground) 24%, transparent);
+    --valor-border-strong:  var(--color-foreground);
+
+    /* Status colors — semantic colors used to communicate success/error
+       across the theme. Hardcoded rather than tied to --color-foreground
+       because their meaning (red = error, green = success) must remain
+       consistent regardless of how the merchant configures the theme.
+
+       --valor-color-error:   error states, validation messages, danger badges
+       --valor-color-success: success states, savings, in-stock confirmations */
+    --valor-color-error:   #b91c1c;
+    --valor-color-success: #15803d;
+
+    /* Inputs */
+    --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
+  }
+{% endstyle %}

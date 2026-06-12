@@ -1,0 +1,77 @@
+{%- comment -%}
+  Renders a collapsible row with a heading and rich-text content,
+  using the native <details>/<summary> elements so the accordion
+  works without any JavaScript.
+
+  Content priority — content OR page, never both:
+    1. block.settings.content (rich text editor)  → use this
+    2. block.settings.page.content                 → fallback if content blank
+  This matches what the schema's `info` text promises ("Falls back to
+  the selected page's title if left blank") so a merchant who fills
+  in both doesn't get duplicate content rendered twice.
+
+  Empty-state behaviour:
+    Live mode, no content    → block stays out of the DOM; customer
+                               doesn't see an empty "Heading" row.
+    Theme Editor, no content → a small helper card is shown so the
+                               merchant knows the block exists and can
+                               see what to do next.
+
+  Heading falls back to the selected page's title when no heading is
+  set explicitly.
+
+  Accepts:
+    block  {Block}  required
+{%- endcomment -%}
+
+{%- liquid
+  assign heading = block.settings.heading
+  if heading == blank and block.settings.page != blank
+    assign heading = block.settings.page.title
+  endif
+
+  assign content = block.settings.content
+  assign page_content = block.settings.page.content
+
+  assign has_content = false
+  if content != blank or page_content != blank
+    assign has_content = true
+  endif
+-%}
+
+{%- if has_content -%}
+  <details class="valor-mp__collapsible" {{ block.shopify_attributes }}>
+    <summary class="valor-mp__collapsible-summary">
+      <span class="valor-mp__collapsible-heading">
+        {{- heading | default: 'Heading' | escape -}}
+      </span>
+      <svg
+        class="valor-mp__collapsible-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        aria-hidden="true"
+      >
+        <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </summary>
+    <div class="valor-mp__collapsible-content">
+      {%- if content != blank -%}
+        {{ content }}
+      {%- elsif page_content != blank -%}
+        {{ page_content }}
+      {%- endif -%}
+    </div>
+  </details>
+{%- elsif request.design_mode -%}
+  <div class="valor-mp__collapsible-empty" {{ block.shopify_attributes }}>
+    <p class="valor-mp__collapsible-empty-heading">
+      {{- heading | default: 'Collapsible row' | escape -}}
+    </p>
+    <p class="valor-mp__collapsible-empty-text">
+      {{ 'sections.main_product.collapsible_empty_editor' | t | default: 'Add row content or select a page to show this collapsible row on the product page.' }}
+    </p>
+  </div>
+{%- endif -%}

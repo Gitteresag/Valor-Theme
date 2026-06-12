@@ -1,0 +1,81 @@
+{%- comment -%}
+  Renders a single product card.
+
+  Accepts:
+  - product: {Object} product object (required)
+  - image_ratio: {String} 'adapt' | 'square' | 'portrait' | 'landscape' (default: 'adapt')
+  - show_secondary_image: {Boolean} swap image on hover (default: false)
+  - show_vendor: {Boolean} show vendor name (default: false)
+  - show_price: {Boolean} show price (default: true)
+{%- endcomment -%}
+
+{%- liquid
+  assign image_ratio = image_ratio | default: 'adapt'
+  assign card_variant = product.selected_or_first_available_variant
+  if show_price == nil
+    assign show_price = true
+  endif
+-%}
+
+<article class="valor-card valor-card--ratio-{{ image_ratio }}{% if show_secondary_image and product.media.size > 1 %} valor-card--swap-image{% endif %}">
+  <a href="{{ product.url }}" class="valor-card__link" aria-label="{{ product.title | escape }}">
+    <div class="valor-card__media">
+      {%- if product.featured_media != blank -%}
+        <img
+          class="valor-card__image valor-card__image--primary"
+          srcset="{{ product.featured_media | image_url: width: 250 }} 250w, {{ product.featured_media | image_url: width: 400 }} 400w, {{ product.featured_media | image_url: width: 600 }} 600w, {{ product.featured_media | image_url: width: 800 }} 800w, {{ product.featured_media | image_url: width: 1100 }} 1100w"
+          src="{{ product.featured_media | image_url: width: 600 }}"
+          sizes="(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw"
+          alt="{{ product.featured_media.alt | escape }}"
+          width="{{ product.featured_media.width }}"
+          height="{{ product.featured_media.height }}"
+          loading="lazy"
+        >
+        {%- if show_secondary_image and product.media.size > 1 -%}
+          {%- assign secondary = product.media[1] -%}
+          <img
+            class="valor-card__image valor-card__image--secondary"
+            srcset="{{ secondary | image_url: width: 400 }} 400w, {{ secondary | image_url: width: 600 }} 600w, {{ secondary | image_url: width: 800 }} 800w"
+            src="{{ secondary | image_url: width: 600 }}"
+            sizes="(min-width: 990px) 25vw, (min-width: 750px) 33vw, 50vw"
+            alt="{{ secondary.alt | escape }}"
+            width="{{ secondary.width }}"
+            height="{{ secondary.height }}"
+            loading="lazy"
+          >
+        {%- endif -%}
+      {%- else -%}
+        <div class="valor-card__placeholder">
+          {{ 'product-1' | placeholder_svg_tag: 'valor-card__placeholder-svg' }}
+        </div>
+      {%- endif -%}
+
+      {%- if product.compare_at_price > product.price and product.available and settings.show_sale_badge -%}
+        <span class="valor-card__badge valor-card__badge--sale">{{ settings.sale_badge_text | default: 'Sale' | escape }}</span>
+      {%- elsif product.available == false and settings.show_soldout_badge -%}
+        <span class="valor-card__badge valor-card__badge--soldout">{{ settings.soldout_badge_text | default: 'Sold out' | escape }}</span>
+      {%- endif -%}
+    </div>
+
+    <div class="valor-card__info">
+      {%- if show_vendor and product.vendor != blank -%}
+        <div class="valor-card__vendor">{{ product.vendor }}</div>
+      {%- endif -%}
+      <h3 class="valor-card__title">{{ product.title | escape }}</h3>
+      {%- if show_price -%}
+        <div class="valor-card__price">
+          {%- if product.compare_at_price > product.price -%}
+            <span class="valor-card__price-current valor-card__price-current--sale">{{ product.price | money }}</span>
+            <span class="valor-card__price-compare"><s>{{ product.compare_at_price | money }}</s></span>
+          {%- elsif product.price_varies -%}
+            {%- assign from_price = product.price | money -%}
+            <span class="valor-card__price-current">{{ 'product.from_price' | t: price: from_price }}</span>
+          {%- else -%}
+            <span class="valor-card__price-current">{{ product.price | money }}</span>
+          {%- endif -%}
+        </div>
+        {%- render 'product-unit-price', variant: card_variant, class_name: 'valor-card__unit-price' -%}
+      {%- endif -%}
+    </div>
+  </a>
+</article>

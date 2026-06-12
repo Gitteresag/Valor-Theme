@@ -1,0 +1,514 @@
+{%- comment -%}
+  Article (single blog post) section.
+
+  Block-based layout matching Dawn's main-article structure:
+    featured_image  — hero image at the top, three height options
+    title           — H1 + optional date and author meta
+    content         — article.content rendered through .rte
+    share           — small share row (web share api fallback to copy)
+
+  After the blocks, if blog.comments_enabled? is true, the section
+  renders the comments list and a post-comment form. Comment styling
+  is intentionally minimal — most jewelry / fashion stores leave
+  comments off, so we don't over-invest in editorial comment UI.
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/article
+{%- endcomment -%}
+
+{{ 'page-layout.css' | asset_url | stylesheet_tag }}
+
+<article
+  class="valor-article"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+
+      {%- when '@app' -%}
+        <div class="valor-article__app valor-page valor-page--narrow">
+          <div class="valor-page__inner">
+            {% render block %}
+          </div>
+        </div>
+
+      {%- when 'featured_image' -%}
+        {%- if article.image -%}
+          <div class="valor-article__hero valor-article__hero--{{ block.settings.image_height }}" {{ block.shopify_attributes }}>
+            {%- assign hero_alt = article.image.alt | default: article.title | escape -%}
+            {{ article.image | image_url: width: 2200 | image_tag:
+              loading: 'eager',
+              fetchpriority: 'high',
+              widths: '375,550,750,1100,1500,2200',
+              sizes: '(min-width: 1280px) 1200px, 100vw',
+              width: article.image.width,
+              height: article.image.height,
+              alt: hero_alt,
+              class: 'valor-article__hero-image'
+            }}
+          </div>
+        {%- endif -%}
+
+      {%- when 'title' -%}
+        <header class="valor-article__header valor-page valor-page--narrow" {{ block.shopify_attributes }}>
+          <div class="valor-page__inner">
+            <h1 class="valor-article__title valor-heading valor-heading--{{ block.settings.heading_size | default: 'large' }}">
+              {{ article.title | escape }}
+            </h1>
+
+            {%- if block.settings.show_date or block.settings.show_author -%}
+              <p class="valor-article__meta">
+                {%- if block.settings.show_date -%}
+                  <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">
+                    {{ article.published_at | date: format: 'date' }}
+                  </time>
+                {%- endif -%}
+                {%- if block.settings.show_date and block.settings.show_author and article.author != blank %} · {% endif -%}
+                {%- if block.settings.show_author and article.author != blank -%}
+                  <span class="valor-article__author">{{ article.author | escape }}</span>
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+          </div>
+        </header>
+
+      {%- when 'content' -%}
+        <div class="valor-article__content valor-page valor-page--narrow" {{ block.shopify_attributes }}>
+          <div class="valor-page__inner">
+            <div class="valor-page__content valor-page__content--left valor-page__content--body-medium rte">
+              {{ article.content }}
+            </div>
+          </div>
+        </div>
+
+      {%- when 'share' -%}
+        <div class="valor-article__share-wrap valor-page valor-page--narrow" {{ block.shopify_attributes }}>
+          <div class="valor-page__inner">
+            <div class="valor-article__share">
+              {%- if block.settings.share_label != blank -%}
+                <span class="valor-article__share-label">{{ block.settings.share_label }}</span>
+              {%- endif -%}
+              <a
+                href="https://www.facebook.com/sharer.php?u={{ shop.url | append: article.url }}"
+                class="valor-article__share-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="{{ 'blog.share_on' | t: network: 'Facebook' }}"
+              >Facebook</a>
+              <a
+                href="https://twitter.com/share?text={{ article.title | url_encode }}&url={{ shop.url | append: article.url }}"
+                class="valor-article__share-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="{{ 'blog.share_on' | t: network: 'Twitter' }}"
+              >Twitter</a>
+              <a
+                href="https://pinterest.com/pin/create/button/?url={{ shop.url | append: article.url }}{% if article.image %}&media={{ article.image | image_url: width: 800 }}&description={{ article.title | url_encode }}{% endif %}"
+                class="valor-article__share-link"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="{{ 'blog.share_on' | t: network: 'Pinterest' }}"
+              >Pinterest</a>
+            </div>
+          </div>
+        </div>
+
+    {%- endcase -%}
+  {%- endfor -%}
+
+  {%- if blog.comments_enabled? -%}
+    <section class="valor-article__comments valor-page valor-page--narrow" id="comments">
+      <div class="valor-page__inner">
+        <h2 class="valor-article__comments-title valor-heading valor-heading--medium">
+          {%- if article.comments_count > 0 -%}
+            {{ 'blog.comments_count' | t: count: article.comments_count | default: article.comments_count }}
+          {%- else -%}
+            {{ 'blog.comments' | t | default: 'Comments' }}
+          {%- endif -%}
+        </h2>
+
+        {%- if article.comments_count > 0 -%}
+          {%- paginate article.comments by 10 -%}
+            <ul class="valor-article__comment-list" role="list">
+              {%- for comment in article.comments -%}
+                <li class="valor-article__comment" id="{{ comment.id }}">
+                  <p class="valor-article__comment-meta">
+                    <strong class="valor-article__comment-author">{{ comment.author }}</strong>
+                    <time class="valor-article__comment-date" datetime="{{ comment.created_at | date: '%Y-%m-%d' }}">
+                      {{ comment.created_at | date: format: 'date' }}
+                    </time>
+                  </p>
+                  <div class="valor-article__comment-body rte">{{ comment.content }}</div>
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            {%- if paginate.pages > 1 -%}
+              {%- render 'pagination', paginate: paginate -%}
+            {%- endif -%}
+          {%- endpaginate -%}
+        {%- endif -%}
+
+        {%- form 'new_comment', article -%}
+          <h3 class="valor-article__comment-form-title valor-heading valor-heading--small">
+            {{ 'blog.comment_form_title' | t | default: 'Leave a comment' }}
+          </h3>
+
+          {%- if form.posted_successfully? -%}
+            <p class="valor-article__comment-success" role="status">
+              {%- if blog.moderated? -%}
+                {{ 'blog.comment_pending' | t | default: 'Your comment was posted successfully. We will publish it in a little while, as our blog is moderated.' }}
+              {%- else -%}
+                {{ 'blog.comment_added' | t | default: 'Your comment was posted successfully.' }}
+              {%- endif -%}
+            </p>
+          {%- endif -%}
+
+          {%- if form.errors -%}
+            <p class="valor-article__comment-error" role="alert">
+              {{ form.errors | default_errors }}
+            </p>
+          {%- endif -%}
+
+          <div class="valor-article__comment-fields">
+            <label for="CommentAuthor" class="valor-article__comment-label">
+              {{ 'blog.comment_name' | t | default: 'Name' }}
+            </label>
+            <input
+              type="text"
+              name="comment[author]"
+              id="CommentAuthor"
+              class="valor-article__comment-input"
+              autocomplete="name"
+              value="{{ form.author }}"
+              required
+            >
+
+            <label for="CommentEmail" class="valor-article__comment-label">
+              {{ 'blog.comment_email' | t | default: 'Email' }}
+            </label>
+            <input
+              type="email"
+              name="comment[email]"
+              id="CommentEmail"
+              class="valor-article__comment-input"
+              autocomplete="email"
+              value="{{ form.email }}"
+              required
+            >
+
+            <label for="CommentBody" class="valor-article__comment-label">
+              {{ 'blog.comment_body' | t | default: 'Message' }}
+            </label>
+            <textarea
+              name="comment[body]"
+              id="CommentBody"
+              class="valor-article__comment-textarea"
+              rows="5"
+              required
+            >{{ form.body }}</textarea>
+          </div>
+
+          {%- if blog.moderated? -%}
+            <p class="valor-article__comment-moderation">
+              {{ 'blog.comment_moderated_html' | t | default: 'Please note, comments need to be approved before they are published.' }}
+            </p>
+          {%- endif -%}
+
+          <button type="submit" class="valor-button valor-button--primary valor-article__comment-submit">
+            {{ 'blog.comment_post' | t | default: 'Post comment' }}
+          </button>
+        {%- endform -%}
+      </div>
+    </section>
+  {%- endif -%}
+</article>
+
+{% stylesheet %}
+  /* Article wrapper handles only top/bottom section padding;
+     internal blocks use the shared .valor-page* layout for width and
+     gutters so the title, content, and comments stay aligned. */
+  .valor-article {
+    padding-top: var(--valor-section-padding-top, 0);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  /* === Hero image === */
+  .valor-article__hero {
+    width: 100%;
+    margin: 0 0 clamp(2rem, 5vw, 3.5rem);
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--color-foreground) 4%, transparent);
+  }
+  .valor-article__hero--small  { aspect-ratio: 16 / 9; max-height: 22rem; }
+  .valor-article__hero--medium { aspect-ratio: 16 / 9; max-height: 32rem; }
+  .valor-article__hero--large  { aspect-ratio: 16 / 9; max-height: 44rem; }
+  .valor-article__hero--adapt  { /* Use natural image aspect ratio */ }
+
+  .valor-article__hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .valor-article__hero--adapt .valor-article__hero-image {
+    height: auto;
+  }
+
+  /* === Header === */
+  .valor-article__header {
+    margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .valor-article__title {
+    margin: 0 0 1rem;
+    line-height: 1.15;
+    letter-spacing: 0;
+  }
+  .valor-article__meta {
+    margin: 0;
+    font-size: var(--font-size-body-sm);
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* === Share === */
+  .valor-article__share-wrap {
+    margin-top: clamp(2rem, 4vw, 3rem);
+  }
+  .valor-article__share {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--valor-border-default);
+    border-bottom: 1px solid var(--valor-border-default);
+  }
+  .valor-article__share-label {
+    font-size: var(--font-size-body-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 0.5rem;
+    color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+  }
+  .valor-article__share-link {
+    color: inherit;
+    text-decoration: none;
+    font-size: var(--font-size-body-sm);
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 0.125rem;
+    transition: opacity 0.15s ease;
+  }
+  .valor-article__share-link:hover { opacity: 0.7; }
+
+  /* === Comments === */
+  .valor-article__comments {
+    margin-top: clamp(3rem, 6vw, 4.5rem);
+  }
+  .valor-article__comments-title {
+    margin: 0 0 1.5rem;
+  }
+  .valor-article__comment-list {
+    list-style: none;
+    margin: 0 0 2.5rem;
+    padding: 0;
+  }
+  .valor-article__comment {
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--valor-border-subtle);
+  }
+  .valor-article__comment:last-child {
+    border-bottom: 1px solid var(--valor-border-subtle);
+  }
+  .valor-article__comment-meta {
+    display: flex;
+    gap: 0.75rem;
+    align-items: baseline;
+    margin: 0 0 0.5rem;
+    font-size: var(--font-size-body-sm);
+  }
+  .valor-article__comment-author {
+    font-weight: 500;
+  }
+  .valor-article__comment-date {
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  }
+  .valor-article__comment-body {
+    margin: 0;
+    font-size: var(--font-size-body-base);
+  }
+
+  .valor-article__comment-form-title {
+    margin: 0 0 1.25rem;
+  }
+  .valor-article__comment-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .valor-article__comment-label {
+    font-size: var(--font-size-body-sm);
+    color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+    margin-bottom: -0.625rem;
+  }
+  .valor-article__comment-input,
+  .valor-article__comment-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--valor-border-strong);
+    border-radius: var(--style-border-radius-inputs, 4px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-body--family);
+    font-size: var(--font-size-body-base);
+    line-height: 1.4;
+    box-sizing: border-box;
+  }
+  .valor-article__comment-textarea {
+    resize: vertical;
+    min-height: 8rem;
+  }
+  .valor-article__comment-input:focus,
+  .valor-article__comment-textarea:focus {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+
+  .valor-article__comment-success {
+    margin: 0 0 1.25rem;
+    padding: 0.875rem 1rem;
+    border-left: 3px solid var(--valor-color-success);
+    background-color: color-mix(in srgb, var(--valor-color-success) 8%, transparent);
+    color: var(--valor-color-success);
+    font-size: var(--font-size-body-sm);
+  }
+  .valor-article__comment-error {
+    margin: 0 0 1.25rem;
+    padding: 0.875rem 1rem;
+    border-left: 3px solid var(--valor-color-error);
+    background-color: color-mix(in srgb, var(--valor-color-error) 8%, transparent);
+    color: var(--valor-color-error);
+    font-size: var(--font-size-body-sm);
+  }
+  .valor-article__comment-moderation {
+    margin: 0 0 1.25rem;
+    font-size: var(--font-size-body-sm);
+    color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Article",
+  "tag": "section",
+  "class": "valor-section-article",
+  "blocks": [
+    { "type": "@app" },
+    {
+      "type": "featured_image",
+      "name": "Featured image",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "image_height",
+          "label": "Image height",
+          "options": [
+            { "value": "adapt",  "label": "Adapt to image" },
+            { "value": "small",  "label": "Small" },
+            { "value": "medium", "label": "Medium" },
+            { "value": "large",  "label": "Large" }
+          ],
+          "default": "medium"
+        }
+      ]
+    },
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "heading_size",
+          "label": "Heading size",
+          "options": [
+            { "value": "small",  "label": "Small" },
+            { "value": "medium", "label": "Medium" },
+            { "value": "large",  "label": "Large" }
+          ],
+          "default": "large"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_date",
+          "label": "Show publish date",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "show_author",
+          "label": "Show author",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "content",
+      "name": "Content",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "share",
+      "name": "Share",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "share_label",
+          "label": "Share label",
+          "default": "Share"
+        }
+      ]
+    }
+  ],
+  "default": {
+    "blocks": [
+      { "type": "featured_image" },
+      { "type": "title" },
+      { "type": "content" },
+      { "type": "share" }
+    ]
+  },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ]
+}
+{% endschema %}

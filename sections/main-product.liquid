@@ -1,0 +1,845 @@
+{{ 'product-info.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'product-info.js' | asset_url }}" defer></script>
+
+{%- comment -%}
+  Main product section — the heart of the product page.
+
+  This is the section used by templates/product.json. It renders the
+  media gallery alongside merchant-configurable info blocks (title,
+  price, variant picker, buy buttons, etc.).
+
+  Current state (v0.23.x):
+    - Layout: media + info grid, sticky info on desktop, media_width
+      and media_position controls, mobile full-bleed image option,
+      configurable aspect ratio and fit.
+    - Gallery: shared snippets/product-media-gallery.liquid with
+      lightbox / thumbnails / arrows togglable per section or globally.
+    - Variant picker: option-based styles for pills, dropdowns, swatches, and optional minimal size values.
+      Switches resolve to a variant client-side and update price, SKU,
+      inventory, gallery image, URL and Add-to-cart state without a
+      page reload.
+    - Cart sync: in-cart count next to the quantity label updates on
+      add-to-cart and cart-drawer changes via custom events. Three-mode
+      counter handles selected variant only / selected + others / others
+      only with the right localised string.
+    - Block types:
+        Core info        @app, vendor, text, title, price, payment_terms,
+                         sku, inventory
+        Buy flow         variant_picker, quantity_selector, buy_buttons,
+                         pickup_availability, complementary
+        Below-the-fold   description, rating, collapsible_tab, popup,
+                         custom_liquid, share
+
+  Structure:
+    - Block-level rendering for the more complex blocks (price, sku,
+      inventory, variant_picker, quantity_selector, buy_buttons, share,
+      rating, collapsible_tab, popup) lives in shared snippets under
+      snippets/product-*.liquid.
+    - Simple blocks (@app, vendor, text, title, description,
+      custom_liquid) render inline because they're trivial 1-5 line
+      HTML and don't benefit from the indirection.
+    - Component-level CSS (price, variants, quantity, rating,
+      collapsible, popup, etc.) lives in assets/product-info.css.
+      Section-level layout CSS (wrapper, grid, media column, sticky
+      info) stays in this file's {% stylesheet %}.
+    - All interactive JS lives in assets/product-info.js as a
+      <product-info> custom element. The info column is wrapped in
+      that element so the script's connectedCallback() can find its
+      own scope without DOM traversal from a section-id selector.
+{%- endcomment -%}
+
+{%- liquid
+  assign sticky          = section.settings.enable_sticky_info
+  assign media_width     = section.settings.media_width
+  assign media_position  = section.settings.media_position
+  assign media_fit       = section.settings.media_fit
+  assign media_aspect    = section.settings.media_aspect_ratio
+  assign current_variant = product.selected_or_first_available_variant
+  assign product_form_id = 'product-form-' | append: section.id
+
+  # Resolve gallery overrides: section-level 'default' falls back to the
+  # theme-wide setting so merchants can configure a global preference and
+  # then opt in/out per product page. Same pattern as featured-product.
+  assign enable_lightbox = settings.gallery_enable_lightbox
+  if section.settings.enable_lightbox == 'on'
+    assign enable_lightbox = true
+  elsif section.settings.enable_lightbox == 'off'
+    assign enable_lightbox = false
+  endif
+
+  assign show_thumbnails = settings.gallery_show_thumbnails
+  if section.settings.show_thumbnails == 'on'
+    assign show_thumbnails = true
+  elsif section.settings.show_thumbnails == 'off'
+    assign show_thumbnails = false
+  endif
+
+  assign show_arrows = settings.gallery_show_arrows
+  if section.settings.show_arrows == 'on'
+    assign show_arrows = true
+  elsif section.settings.show_arrows == 'off'
+    assign show_arrows = false
+  endif
+
+  assign use_inline_size_guide = false
+  for candidate_block in section.blocks
+    if candidate_block.type == 'variant_picker' and candidate_block.settings.size_option_style == 'minimal'
+      assign use_inline_size_guide = true
+      break
+    endif
+  endfor
+
+  assign inline_size_guide_block = nil
+  if use_inline_size_guide
+    for candidate_block in section.blocks
+      if candidate_block.type == 'popup' and candidate_block.settings.display_style == 'inline_size'
+        assign inline_size_guide_block = candidate_block
+        break
+      endif
+    endfor
+  endif
+-%}
+
+<section
+  class="valor-mp valor-mp--media-{{ media_width }} valor-mp--media-{{ media_position }}{% if sticky %} valor-mp--sticky{% endif %}{% if section.settings.image_size_mobile == 'full' %} valor-mp--image-full-mobile{% endif %}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+  data-section-id="{{ section.id }}"
+>
+  <div class="valor-mp__inner">
+    <div class="valor-mp__media" data-mp-gallery="{{ section.id }}">
+      {%- render 'product-media-gallery',
+          product: product,
+          section_id: section.id,
+          aspect: media_aspect,
+          enable_lightbox: enable_lightbox,
+          show_thumbnails: show_thumbnails,
+          show_arrows: show_arrows,
+          media_fit: media_fit,
+          priority: true
+      -%}
+    </div>
+
+    <product-info
+      class="valor-mp__info"
+      data-section-id="{{ section.id }}"
+      data-product-id="{{ product.id }}"
+      data-product-url="{{ product.url }}"
+      data-money-format="{{ shop.money_format | escape }}"
+    >
+      <script type="application/json" data-product-info-i18n>
+        {
+          "addToCart":       {{ 'product.add_to_cart'       | t | json }},
+          "soldOut":         {{ 'product.sold_out'          | t | json }},
+          "sale":            {{ 'product.sale'              | t | json }},
+          "sku":             {{ 'product.sku'               | t | json }},
+          "inCart":          {{ 'product.in_cart'           | t | json }},
+          "inCartCount":     {{ 'product.in_cart_count'     | t | json }},
+          "inCartOf":        {{ 'product.in_cart_of'        | t | json }},
+          "totalInCart":     {{ 'product.total_in_cart'     | t | json }},
+          "inStock":         {{ 'product.in_stock'          | t | json }},
+          "lowStock":        {{ 'product.low_stock'         | t | json }},
+          "lowStockCount":   {{ 'product.low_stock_count'   | t | json }},
+          "outOfStock":      {{ 'product.out_of_stock'      | t | json }},
+          "shareLinkCopied": {{ 'product.share_link_copied' | t | json }}
+        }
+      </script>
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+
+          {%- when '@app' -%}
+            {%- render block -%}
+
+          {%- when 'vendor' -%}
+            {%- if product.vendor != blank -%}
+              <p
+                class="valor-mp__vendor valor-mp__vendor--{{ block.settings.text_style }}"
+                {{ block.shopify_attributes }}
+              >
+                {%- if block.settings.show_as_link -%}
+                  <a href="{{ product.vendor | url_for_vendor }}">{{ product.vendor }}</a>
+                {%- else -%}
+                  {{ product.vendor }}
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+
+          {%- when 'text' -%}
+            {%- if block.settings.text != blank -%}
+              <p
+                class="valor-mp__text valor-mp__text--{{ block.settings.text_style }}"
+                {{ block.shopify_attributes }}
+              >
+                {{- block.settings.text -}}
+              </p>
+            {%- endif -%}
+
+          {%- when 'title' -%}
+            <h1 class="valor-mp__title valor-heading valor-heading--{{ block.settings.heading_size | default: 'medium' }}" {{ block.shopify_attributes }}>
+              {{- product.title | escape -}}
+            </h1>
+
+          {%- when 'price' -%}
+            {%- render 'product-price', variant: current_variant, block: block -%}
+
+          {%- when 'payment_terms' -%}
+            {%- assign payment_terms_form_id = 'payment-terms-' | append: section.id | append: '-' | append: block.id -%}
+            {%- render 'product-payment-terms',
+                product: product,
+                variant: current_variant,
+                block: block,
+                form_id: payment_terms_form_id
+            -%}
+
+          {%- when 'sku' -%}
+            {%- render 'product-sku', variant: current_variant, block: block -%}
+
+          {%- when 'inventory' -%}
+            {%- render 'product-inventory', variant: current_variant, block: block -%}
+
+          {%- when 'variant_picker' -%}
+            {%- render 'product-variant-picker',
+                product: product,
+                block: block,
+                section_id: section.id,
+                class_prefix: 'valor-mp',
+                size_guide_block: inline_size_guide_block
+            -%}
+
+          {%- when 'quantity_selector' -%}
+            {%- render 'product-quantity',
+                product: product,
+                variant: current_variant,
+                block: block,
+                section_id: section.id,
+                form_id: product_form_id
+            -%}
+
+          {%- when 'buy_buttons' -%}
+            {%- render 'product-buy-buttons',
+                product: product,
+                variant: current_variant,
+                block: block,
+                form_id: product_form_id,
+                section: section
+            -%}
+
+          {%- when 'pickup_availability' -%}
+            {%- render 'product-pickup-availability',
+                variant: current_variant,
+                block: block,
+                section: section
+            -%}
+
+          {%- when 'complementary' -%}
+            {%- render 'complementary-products',
+                block: block,
+                product: product,
+                section_id: section.id
+            -%}
+
+          {%- when 'description' -%}
+            {%- if product.description != blank -%}
+              <div class="valor-mp__description rte" {{ block.shopify_attributes }}>
+                {{ product.description }}
+              </div>
+            {%- endif -%}
+
+          {%- when 'share' -%}
+            {%- render 'product-share', block: block -%}
+
+          {%- when 'rating' -%}
+            {%- render 'product-rating', product: product, block: block -%}
+
+          {%- when 'collapsible_tab' -%}
+            {%- render 'product-collapsible-tab', block: block -%}
+
+          {%- when 'popup' -%}
+            {%- liquid
+              assign render_popup_block = true
+              if inline_size_guide_block != blank and block.settings.display_style == 'inline_size'
+                assign render_popup_block = false
+              endif
+            -%}
+            {%- if render_popup_block -%}
+              {%- render 'product-popup', block: block, section_id: section.id -%}
+            {%- endif -%}
+
+          {%- when 'custom_liquid' -%}
+            {%- if block.settings.custom_liquid != blank -%}
+              <div class="valor-mp__custom-liquid" {{ block.shopify_attributes }}>
+                {{ block.settings.custom_liquid }}
+              </div>
+            {%- endif -%}
+
+        {%- endcase -%}
+      {%- endfor -%}
+    </product-info>
+  </div>
+</section>
+
+{% stylesheet %}
+  /* === Section wrapper === */
+  .valor-mp {
+    padding-top: var(--valor-section-padding-top, 36px);
+    padding-bottom: var(--valor-section-padding-bottom, 36px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  /* === Inner grid: media + info ===
+     Mobile: single column, media on top, info below.
+     Desktop: 2 columns whose ratio depends on media_width, optionally
+     swapped with --media-right. */
+  .valor-mp__inner {
+    width: 100%;
+    max-width: 75rem;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  @media (min-width: 750px) {
+    .valor-mp__inner {
+      gap: 3rem;
+      align-items: start;
+    }
+    /* Media size = the relative width of the media column.
+       small  → media is smallest (1/3), info column is widest
+       medium → media and info are roughly equal
+       large  → media is largest (2/3), info column is narrowest
+       Same convention as Dawn and as Valor's featured-product.
+
+       For media-right, the grid-template-columns are simply reversed —
+       this gives the media column the same width as in media-left, just
+       on the other side. (Earlier we used `order: 2` on the media child,
+       but that only swaps the visual order without swapping the column
+       widths, so a "small media on the right" ended up rendered in the
+       wide column. Reversing the columns is the correct fix.) */
+    .valor-mp--media-left.valor-mp--media-small  .valor-mp__inner { grid-template-columns: minmax(0, 0.35fr) minmax(0, 0.65fr); }
+    .valor-mp--media-left.valor-mp--media-medium .valor-mp__inner { grid-template-columns: minmax(0, 0.5fr)  minmax(0, 0.5fr);  }
+    .valor-mp--media-left.valor-mp--media-large  .valor-mp__inner { grid-template-columns: minmax(0, 0.65fr) minmax(0, 0.35fr); }
+
+    .valor-mp--media-right.valor-mp--media-small  .valor-mp__inner { grid-template-columns: minmax(0, 0.65fr) minmax(0, 0.35fr); }
+    .valor-mp--media-right.valor-mp--media-medium .valor-mp__inner { grid-template-columns: minmax(0, 0.5fr)  minmax(0, 0.5fr);  }
+    .valor-mp--media-right.valor-mp--media-large  .valor-mp__inner { grid-template-columns: minmax(0, 0.35fr) minmax(0, 0.65fr); }
+
+    /* Right-side media: swap visual order without changing source order */
+    .valor-mp--media-right .valor-mp__media { order: 2; }
+  }
+
+  /* === Media column === */
+  .valor-mp__media {
+    width: 100%;
+    min-width: 0; /* Prevent grid blowout from oversized children */
+  }
+
+  /* Full-width image on mobile — stretches ONLY the main image
+     edge-to-edge while thumbnails and product info stay within the
+     section's padding.
+
+     Theme shell wraps every section in a CSS grid where children are
+     constrained to the centre column (.shopify-section > * { grid-column: 2 }).
+     A negative margin alone can only compensate the section's own padding,
+     not the grid's centre column — so we first promote the section to
+     span the full grid (grid-column: 1 / -1), then apply the classic
+     full-bleed trick (width: 100vw + margin-left: calc(50% - 50vw)) to
+     the main image element itself. Same approach as featured-product. */
+  @media (max-width: 749px) {
+    .shopify-section > .valor-mp--image-full-mobile {
+      grid-column: 1 / -1;
+    }
+    .valor-mp--image-full-mobile .valor-product-media__main {
+      width: 100vw;
+      max-width: 100vw;
+      margin-left: calc(50% - 50vw);
+      margin-right: calc(50% - 50vw);
+    }
+  }
+
+  /* === Info column ===
+     Sticky on desktop only — on mobile the info naturally appears below
+     the gallery and sticky behaviour would just confuse the scroll.
+
+     Sticky implementation: position: sticky + align-self: start. The
+     info column stays anchored near the top of the viewport while the
+     media column scrolls past it. We deliberately don't constrain
+     max-height or set overflow-y: auto — that would make the info
+     column scroll *internally* (a separate scrollbar inside the
+     content), which is what the previous version did and feels
+     broken from the customer's perspective. With sticky alone, if
+     the info is taller than the viewport, the page scrolls naturally
+     once the customer reaches the bottom of the info — a much more
+     intuitive interaction. */
+  .valor-mp__info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+  @media (min-width: 990px) {
+    .valor-mp--sticky .valor-mp__info {
+      position: sticky;
+      /* Falls back to 5rem when --valor-header-height is not yet defined.
+         Future header refactor can populate the variable for pixel-accurate
+         offset. */
+      top: calc(var(--valor-header-height, 5rem) + 1rem);
+      align-self: start;
+    }
+  }
+
+  /* Component-level styles (text, title, price, sku, vendor, inventory,
+     variants, quantity, buy-buttons, description, share) live in
+     assets/product-info.css so they can be shared across product
+     sections. Layout-only rules — section wrapper, grid, media column,
+     image-full-mobile, info column flex + sticky — stay in this file. */
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Product information",
+  "tag": "section",
+  "class": "section valor-section-main-product",
+  "blocks": [
+    { "type": "@app" },
+    {
+      "type": "vendor",
+      "name": "Vendor",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "text_style",
+          "options": [
+            { "value": "body",      "label": "Body" },
+            { "value": "subtitle",  "label": "Subtitle" },
+            { "value": "uppercase", "label": "Uppercase" }
+          ],
+          "default": "uppercase",
+          "label": "Text style"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_as_link",
+          "default": false,
+          "label": "Link to vendor collection"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Text",
+      "settings": [
+        {
+          "type": "inline_richtext",
+          "id": "text",
+          "default": "Text block",
+          "label": "Text"
+        },
+        {
+          "type": "select",
+          "id": "text_style",
+          "options": [
+            { "value": "body",      "label": "Body" },
+            { "value": "subtitle",  "label": "Subtitle" },
+            { "value": "uppercase", "label": "Uppercase" }
+          ],
+          "default": "body",
+          "label": "Text style"
+        }
+      ]
+    },
+    { "type": "title",    "name": "Title",    "limit": 1, "settings": [
+      {
+        "type": "select",
+        "id": "heading_size",
+        "label": "Heading size",
+        "options": [
+          { "value": "small", "label": "Small" },
+          { "value": "medium", "label": "Medium" },
+          { "value": "large", "label": "Large" }
+        ],
+        "default": "medium"
+      }
+    ] },
+    { "type": "price",    "name": "Price",    "limit": 1, "settings": [] },
+    {
+      "type": "payment_terms",
+      "name": "t:sections.main_product.blocks.payment_terms.name",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "sku",
+      "name": "SKU",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "text_style",
+          "options": [
+            { "value": "body",      "label": "Body" },
+            { "value": "subtitle",  "label": "Subtitle" },
+            { "value": "uppercase", "label": "Uppercase" }
+          ],
+          "default": "body",
+          "label": "Text style"
+        }
+      ]
+    },
+    {
+      "type": "inventory",
+      "name": "Inventory status",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "range",
+          "id": "inventory_threshold",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 10,
+          "label": "Low-stock threshold",
+          "info": "Show \"Low stock\" when inventory is at or below this number."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_inventory_quantity",
+          "default": true,
+          "label": "Show exact quantity when low"
+        }
+      ]
+    },
+    {
+      "type": "variant_picker",
+      "name": "Variant picker",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "picker_style",
+          "options": [
+            { "value": "pills",    "label": "Pills" },
+            { "value": "dropdown", "label": "Dropdown" },
+            { "value": "swatches", "label": "Swatches" }
+          ],
+          "default": "pills",
+          "label": "Picker style",
+          "info": "Swatches use the native colour or image swatches set in Shopify (Products → Options → Swatches). Falls back to pills automatically if any value is missing swatch data."
+        },
+        {
+          "type": "select",
+          "id": "size_option_style",
+          "options": [
+            { "value": "default", "label": "Default" },
+            { "value": "minimal", "label": "Minimal text" }
+          ],
+          "default": "default",
+          "label": "Size option style",
+          "info": "Minimal text applies only to options named Size, Koko, Storlek, Taille, Taglia, Talla and similar size labels."
+        }
+      ]
+    },
+    {
+      "type": "quantity_selector",
+      "name": "Quantity selector",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "buy_buttons",
+      "name": "Buy buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_dynamic_checkout",
+          "default": true,
+          "label": "Show dynamic checkout buttons",
+          "info": "By selecting this, each customer will see their preferred payment method (Shop Pay, Apple Pay, etc.)."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_gift_card_recipient",
+          "default": true,
+          "label": "t:sections.main_product.blocks.buy_buttons.settings.show_gift_card_recipient.label",
+          "info": "t:sections.main_product.blocks.buy_buttons.settings.show_gift_card_recipient.info"
+        }
+      ]
+    },
+    {
+      "type": "pickup_availability",
+      "name": "t:sections.main_product.blocks.pickup_availability.name",
+      "limit": 1,
+      "settings": []
+    },
+    {
+      "type": "complementary",
+      "name": "Complementary products",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Set complementary products in the Shopify Search & Discovery app (Apps → Search & Discovery → Recommendations). The block stays hidden on the storefront when no recommendations are configured."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Pairs well with"
+        },
+        {
+          "type": "range",
+          "id": "product_list_limit",
+          "label": "Maximum products to show",
+          "min": 2,
+          "max": 4,
+          "step": 1,
+          "default": 3
+        }
+      ]
+    },
+    { "type": "description", "name": "Description", "limit": 1, "settings": [] },
+    {
+      "type": "share",
+      "name": "Share",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "share_label",
+          "default": "Share",
+          "label": "Share label"
+        }
+      ]
+    },
+    {
+      "type": "rating",
+      "name": "Rating",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Reads from product.metafields.reviews.rating — works with Judge.me, Loox, Shopify Product Reviews, and other apps that follow the standard reviews metafield. The block stays hidden until reviews are available."
+        }
+      ]
+    },
+    {
+      "type": "collapsible_tab",
+      "name": "Collapsible row",
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "default": "Collapsible row",
+          "label": "Heading",
+          "info": "Falls back to the selected page's title if left blank."
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Row content"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Page",
+          "info": "Use the contents of a page as a fallback for Row content. Pages are managed in Online Store \u2192 Pages."
+        }
+      ]
+    },
+    {
+      "type": "popup",
+      "name": "Pop-up",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "default": "Size guide",
+          "label": "Link text"
+        },
+        {
+          "type": "select",
+          "id": "icon",
+          "options": [
+            { "value": "none",     "label": "None" },
+            { "value": "ruler",    "label": "Ruler" },
+            { "value": "info",     "label": "Info" },
+            { "value": "question", "label": "Question mark" },
+            { "value": "shirt",    "label": "Shirt" }
+          ],
+          "default": "ruler",
+          "label": "Icon"
+        },
+        {
+          "type": "select",
+          "id": "display_style",
+          "label": "Display style",
+          "options": [
+            { "value": "block", "label": "Separate block" },
+            { "value": "inline_size", "label": "Inline with size option" }
+          ],
+          "default": "block",
+          "info": "Inline style shows this pop-up link next to the Size option when the variant picker uses Minimal text for size options."
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Modal content"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Page",
+          "info": "Use the contents of a page as a fallback for Modal content."
+        }
+      ]
+    },
+    {
+      "type": "custom_liquid",
+      "name": "Custom Liquid",
+      "settings": [
+        {
+          "type": "liquid",
+          "id": "custom_liquid",
+          "label": "Custom Liquid",
+          "info": "Add app snippets or other Liquid code to create advanced customizations."
+        }
+      ]
+    }
+  ],
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_sticky_info",
+      "default": true,
+      "label": "Enable sticky content on desktop"
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "media_width",
+      "options": [
+        { "value": "small",  "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large",  "label": "Large" }
+      ],
+      "default": "large",
+      "label": "Desktop media width",
+      "info": "Sets the media-to-info column ratio on desktop. Has no effect on mobile, where the media stacks above the info."
+    },
+    {
+      "type": "select",
+      "id": "media_position",
+      "options": [
+        { "value": "left",  "label": "Left" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left",
+      "label": "Media position",
+      "info": "Position is automatically set to top on mobile."
+    },
+    {
+      "type": "select",
+      "id": "media_aspect_ratio",
+      "options": [
+        { "value": "square",   "label": "Square (1:1)" },
+        { "value": "portrait", "label": "Portrait (4:5)" },
+        { "value": "adapt",    "label": "Adapt to image" }
+      ],
+      "default": "square",
+      "label": "Media aspect ratio",
+      "info": "Square and Portrait crop or letterbox the image to fit. Adapt uses each image's natural aspect ratio."
+    },
+    {
+      "type": "select",
+      "id": "media_fit",
+      "options": [
+        { "value": "cover",   "label": "Cover (fill, may crop)" },
+        { "value": "contain", "label": "Contain (show full image)" }
+      ],
+      "default": "cover",
+      "label": "Media fit",
+      "info": "Cover fills the frame and crops if needed. Contain shows the whole image with letterboxing. Has no visible effect with Adapt aspect ratio."
+    },
+    {
+      "type": "select",
+      "id": "image_size_mobile",
+      "options": [
+        { "value": "default", "label": "Default" },
+        { "value": "full",    "label": "Full width" }
+      ],
+      "default": "default",
+      "label": "Mobile image size"
+    },
+    {
+      "type": "header",
+      "content": "Gallery"
+    },
+    {
+      "type": "select",
+      "id": "enable_lightbox",
+      "options": [
+        { "value": "default", "label": "Use theme default" },
+        { "value": "on",      "label": "On" },
+        { "value": "off",     "label": "Off" }
+      ],
+      "default": "default",
+      "label": "Lightbox zoom",
+      "info": "Theme defaults are managed in Theme settings → Products."
+    },
+    {
+      "type": "select",
+      "id": "show_thumbnails",
+      "options": [
+        { "value": "default", "label": "Use theme default" },
+        { "value": "on",      "label": "On" },
+        { "value": "off",     "label": "Off" }
+      ],
+      "default": "default",
+      "label": "Show thumbnails"
+    },
+    {
+      "type": "select",
+      "id": "show_arrows",
+      "options": [
+        { "value": "default", "label": "Use theme default" },
+        { "value": "on",      "label": "On" },
+        { "value": "off",     "label": "Off" }
+      ],
+      "default": "default",
+      "label": "Show navigation arrows",
+      "info": "Arrow size is set globally in Theme settings → Products."
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Top padding",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "label": "Bottom padding",
+      "default": 36
+    }
+  ],
+  "enabled_on": {
+    "templates": ["product"]
+  }
+}
+{% endschema %}

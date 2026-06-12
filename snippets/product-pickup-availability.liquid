@@ -1,0 +1,39 @@
+{%- comment -%}
+  Renders the pickup availability host for the selected variant.
+
+  Accepts:
+    variant  {Variant} required
+    block    {Block} optional
+    section  {Section} required
+{%- endcomment -%}
+
+{%- if variant != blank -%}
+  {{ 'pickup-availability.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'pickup-availability.js' | asset_url }}" defer></script>
+
+  {%- liquid
+    assign pickup_id = 'PickupAvailability-' | append: section.id
+    assign pick_up_availabilities = variant.store_availabilities | where: 'pick_up_enabled', true
+  -%}
+
+  <div class="valor-product-pickup" {% if block %}{{ block.shopify_attributes }}{% endif %}>
+    <valor-pickup-availability
+      id="{{ pickup_id }}"
+      class="valor-pickup"
+      data-root-url="{{ routes.root_url }}"
+      data-variant-id="{{ variant.id }}"
+      data-pickup-id="{{ pickup_id }}"
+      {% if variant.available and pick_up_availabilities.size > 0 %}available{% endif %}
+    >
+      <template>
+        <valor-pickup-availability-preview class="valor-pickup__preview valor-pickup__preview--error">
+          <span class="valor-pickup__status-dot valor-pickup__status-dot--unavailable" aria-hidden="true"></span>
+          <span class="valor-pickup__preview-text">{{ 'pickup_availability.error' | t }}</span>
+          <button type="button" class="valor-pickup__button" data-pickup-refresh>
+            {{ 'pickup_availability.refresh' | t }}
+          </button>
+        </valor-pickup-availability-preview>
+      </template>
+    </valor-pickup-availability>
+  </div>
+{%- endif -%}

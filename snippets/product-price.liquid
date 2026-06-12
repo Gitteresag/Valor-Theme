@@ -1,0 +1,36 @@
+{%- comment -%}
+  Renders product price (current + compare-at + sale badge + unit price + tax note).
+
+  Accepts:
+    variant   {Variant}  required — the currently selected variant
+    block     {Block}    optional — used for shopify_attributes
+
+  Used by:
+    sections/main-product.liquid
+    (future) sections/featured-product.liquid
+{%- endcomment -%}
+
+{%- assign attrs = '' -%}
+{%- if block -%}
+  {%- assign attrs = block.shopify_attributes -%}
+{%- endif -%}
+
+<div class="valor-mp__price" {{ attrs }}>
+  {%- if variant.compare_at_price > variant.price -%}
+    <span class="valor-mp__price-current valor-mp__price-current--sale">
+      {{- variant.price | money -}}
+    </span>
+    <s class="valor-mp__price-compare">
+      {{- variant.compare_at_price | money -}}
+    </s>
+    <span class="valor-mp__price-badge">{{ 'product.sale' | t }}</span>
+  {%- else -%}
+    <span class="valor-mp__price-current">
+      {{- variant.price | money -}}
+    </span>
+  {%- endif -%}
+</div>
+{%- render 'product-unit-price', variant: variant, class_name: 'valor-mp__unit-price' -%}
+{%- if cart.taxes_included -%}
+  <p class="valor-mp__tax">{{ 'product.include_taxes' | t }}</p>
+{%- endif -%}

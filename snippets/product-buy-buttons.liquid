@@ -1,0 +1,67 @@
+{%- comment -%}
+  Renders the Add to cart button plus (optionally) Shopify's dynamic
+  checkout buttons (Shop Pay, Apple Pay, Google Pay, etc.).
+
+  The form's hidden id input is wired up by JS as variants change, so
+  Add to cart always submits the correct variant ID without a reload.
+
+  Accepts:
+    product   {Product}  required — used by the {% form %} tag
+    variant   {Variant}  required — the currently selected variant
+                                    (initial id and availability state)
+    block     {Block}    required — for settings.show_dynamic_checkout
+                                    and shopify_attributes
+    form_id   {String}   required — must match the form="..." attribute
+                                    used by the quantity input
+{%- endcomment -%}
+
+{%- liquid
+  assign gift_card_recipient_enabled = false
+  if block.settings.show_gift_card_recipient and product.gift_card?
+    assign gift_card_recipient_enabled = true
+  endif
+
+  assign show_dynamic_checkout = block.settings.show_dynamic_checkout
+  if gift_card_recipient_enabled
+    assign show_dynamic_checkout = false
+  endif
+-%}
+
+<div class="valor-mp__buy" {{ block.shopify_attributes }}>
+  {%- form 'product', product, id: form_id, class: 'valor-mp__form', novalidate: 'novalidate' -%}
+    <input
+      type="hidden"
+      name="id"
+      value="{{ variant.id }}"
+      data-variant-id-input
+    >
+    {%- if gift_card_recipient_enabled -%}
+      {%- render 'product-recipient-form', product: product, form: form, section: section -%}
+    {%- endif -%}
+    <button
+      type="submit"
+      name="add"
+      class="valor-button valor-button--primary valor-mp__add"
+      {% unless variant.available %}disabled{% endunless %}
+      data-add-button
+    >
+      <span data-add-button-text>
+        {%- if variant.available -%}
+          {{ 'product.add_to_cart' | t }}
+        {%- else -%}
+          {{ 'product.sold_out' | t }}
+        {%- endif -%}
+      </span>
+    </button>
+    {%- if show_dynamic_checkout -%}
+      {{ form | payment_button }}
+    {%- endif -%}
+    {%- comment -%}
+      Inline error target. Hidden by default; cart-drawer.js fills this
+      in if /cart/add.js returns a Shopify error (out of stock, sold
+      out, quantity exceeds inventory, etc.) — keeps the customer on
+      the product page rather than redirecting them to an error screen.
+    {%- endcomment -%}
+    <div class="valor-mp__add-error" data-cart-error role="alert" hidden></div>
+  {%- endform -%}
+</div>

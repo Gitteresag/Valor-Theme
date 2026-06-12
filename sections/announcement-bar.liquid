@@ -1,0 +1,374 @@
+{%- if section.blocks.size > 0 -%}
+  {%- liquid
+    assign show_arrows = false
+    if section.blocks.size > 1 and section.settings.auto_rotate == false
+      assign show_arrows = true
+    endif
+  -%}
+
+  <section
+    class="valor-announcement-bar full-width{% if section.settings.show_separator %} valor-announcement-bar--separator{% endif %}"
+    role="region"
+    aria-label="{{ 'sections.announcement_bar.aria_label' | t }}"
+    style="
+      {%- if section.settings.background_color != 'rgba(0,0,0,0)' and section.settings.background_color != blank -%}
+        --announcement-bg: {{ section.settings.background_color }};
+      {%- endif -%}
+      {%- if section.settings.text_color != 'rgba(0,0,0,0)' and section.settings.text_color != blank -%}
+        --announcement-fg: {{ section.settings.text_color }};
+      {%- endif -%}
+    "
+  >
+    <div
+      class="valor-announcement-bar__inner"
+      {% if section.settings.auto_rotate and section.blocks.size > 1 %}
+        data-auto-rotate
+        data-rotate-speed="{{ section.settings.rotate_speed }}"
+      {% endif %}
+    >
+      {%- if show_arrows -%}
+        <button type="button" class="valor-announcement-bar__arrow valor-announcement-bar__arrow--prev" data-prev aria-label="{{ 'sections.announcement_bar.previous' | t }}">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M8 14L2 8L8 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      {%- endif -%}
+
+      <div class="valor-announcement-bar__items" aria-live="polite">
+        {%- for block in section.blocks -%}
+          <div
+            class="valor-announcement-bar__item{% if forloop.first %} valor-announcement-bar__item--active{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.link != blank -%}
+              <a href="{{ block.settings.link }}" class="valor-announcement-bar__link">
+                <span class="valor-announcement-bar__text">{{ block.settings.text }}</span>
+              </a>
+            {%- else -%}
+              <span class="valor-announcement-bar__text">{{ block.settings.text }}</span>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+
+      {%- if show_arrows -%}
+        <button type="button" class="valor-announcement-bar__arrow valor-announcement-bar__arrow--next" data-next aria-label="{{ 'sections.announcement_bar.next' | t }}">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M2 14L8 8L2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      {%- endif -%}
+    </div>
+  </section>
+{%- endif -%}
+
+{% stylesheet %}
+  .valor-announcement-bar {
+    background-color: var(--announcement-bg, transparent);
+    color: var(--announcement-fg, inherit);
+  }
+  .valor-announcement-bar--separator {
+    border-bottom: 1px solid var(--valor-border-default);
+  }
+  .valor-announcement-bar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 0.875rem var(--page-margin);
+  }
+  .valor-announcement-bar__items {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+  }
+  .valor-announcement-bar__item {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transition: opacity 300ms ease-in-out;
+    pointer-events: none;
+    text-align: center;
+  }
+  .valor-announcement-bar__item--active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .valor-announcement-bar__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .valor-announcement-bar__link:hover .valor-announcement-bar__text {
+    text-decoration: underline;
+  }
+  .valor-announcement-bar__text {
+    font-size: 0.875rem;
+    display: inline-block;
+  }
+  .valor-announcement-bar__arrow {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    opacity: 0.6;
+    transition: opacity 150ms;
+  }
+  .valor-announcement-bar__arrow:hover {
+    opacity: 1;
+  }
+  .valor-announcement-bar__arrow svg {
+    display: block;
+  }
+
+  /* Prepaint homepage announcement bar transparent before the hero has
+     rendered. Without this, the bar can briefly draw in its solid colour,
+     then transition to transparent once :has() starts matching. */
+  html.valor-page-index:not(.valor-transparent-header-ready) .valor-announcement-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 110;
+    width: 100%;
+    color: #fff;
+    background-color: transparent;
+    background-image: linear-gradient(
+      to bottom,
+      var(--announcement-bg, var(--color-background)) 50%,
+      rgba(0, 0, 0, 0) 50%
+    );
+    background-size: 100% 200%;
+    background-position: 0 100%;
+    border-bottom-color: rgba(255, 255, 255, 0.22);
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+    overflow: hidden;
+    pointer-events: auto;
+    transition: none;
+  }
+
+  /* Transparent homepage header support.
+     When the first homepage image banner uses the transparent header, the
+     announcement bar becomes part of the same fixed header stack instead of
+     remaining in normal page flow. This prevents the transparent header from
+     sitting below a bar that has already scrolled away. The visual transition
+     uses the same ICIW-style background-position slide as the header so both
+     surfaces change state together. */
+  @supports selector(body:has(*)) {
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger[data-transparent-header-behavior="always"]) .valor-announcement-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 110;
+      width: 100%;
+      color: #fff;
+      background-color: transparent;
+      background-image: linear-gradient(
+        to bottom,
+        var(--announcement-bg, var(--color-background)) 50%,
+        rgba(0, 0, 0, 0) 50%
+      );
+      background-size: 100% 200%;
+      background-position: 0 100%;
+      transform: translateY(0);
+      opacity: 1;
+      visibility: visible;
+      overflow: hidden;
+      pointer-events: auto;
+      transition: none;
+      will-change: transform, opacity, background-position, color;
+    }
+
+    html.valor-transparent-header-ready body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger[data-transparent-header-behavior="always"]) .valor-announcement-bar {
+      transition:
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background-position 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0s linear 0s;
+    }
+
+    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger[data-transparent-header-behavior="always"]) .valor-announcement-bar--separator {
+      border-bottom-color: rgba(255, 255, 255, 0.22);
+    }
+
+    body:has(.valor-section-header.valor-section-header--transparent-solid) .valor-announcement-bar {
+      color: var(--announcement-fg, var(--color-foreground));
+      background-position: 0 0;
+      transform: translateY(-100%);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition:
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background-position 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0s linear 0.3s;
+    }
+
+    body:has(.valor-section-header.valor-section-header--transparent-solid) .valor-announcement-bar__arrow {
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 80ms ease,
+        visibility 0s linear 80ms;
+    }
+
+    body:has(.valor-section-header.valor-section-header--transparent-solid) .valor-announcement-bar--separator {
+      border-bottom-color: transparent;
+    }
+
+    /* When the mobile drawer is open, the drawer/backdrop is the active
+       surface. Hide the fixed announcement bar and its carousel controls so
+       an arrow cannot remain visible on the blurred side area. */
+    body.valor-drawer-open .valor-announcement-bar,
+    body.valor-drawer-open .valor-announcement-bar__arrow {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .valor-announcement-bar,
+    .valor-announcement-bar__item {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (function () {
+    document.querySelectorAll('.valor-announcement-bar__inner').forEach(function (bar) {
+      var items = bar.querySelectorAll('.valor-announcement-bar__item');
+      if (items.length < 2) return;
+
+      var current = 0;
+      var transitioning = false;
+      var transitionDuration = 300;
+
+      function goTo(next) {
+        if (transitioning || next === current) return;
+        transitioning = true;
+
+        items[current].classList.remove('valor-announcement-bar__item--active');
+
+        setTimeout(function () {
+          current = (next + items.length) % items.length;
+          items[current].classList.add('valor-announcement-bar__item--active');
+          transitioning = false;
+        }, transitionDuration);
+      }
+
+      var prevBtn = bar.querySelector('[data-prev]');
+      var nextBtn = bar.querySelector('[data-next]');
+      if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
+      if (nextBtn) nextBtn.addEventListener('click', function () { goTo(current + 1); });
+
+      if (bar.hasAttribute('data-auto-rotate')) {
+        var speed = parseInt(bar.getAttribute('data-rotate-speed'), 10) * 1000;
+        setInterval(function () { goTo(current + 1); }, speed);
+      }
+    });
+  })();
+
+  /* Publish announcement-bar height as a CSS custom property so the
+     transparent header (defined in header.liquid) can offset itself
+     correctly. Updates on resize and when Theme Editor reloads sections. */
+  (function () {
+    function updateAnnouncementHeight() {
+      var bar = document.querySelector('.valor-announcement-bar');
+      var height = bar ? Math.ceil(bar.getBoundingClientRect().height) : 0;
+      document.documentElement.style.setProperty('--valor-announcement-height', height + 'px');
+    }
+    updateAnnouncementHeight();
+    window.addEventListener('resize', updateAnnouncementHeight);
+    document.addEventListener('shopify:section:load', updateAnnouncementHeight);
+    document.addEventListener('shopify:section:unload', updateAnnouncementHeight);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Announcement bar",
+  "max_blocks": 3,
+  "settings": [
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "info": "Leave empty to inherit page background"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "info": "Leave empty to inherit page text color"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_separator",
+      "label": "Show separator line below bar",
+      "default": false
+    },
+    {
+      "type": "paragraph",
+      "content": "When a homepage banner uses the transparent header, the announcement bar automatically becomes transparent and fixed above the header. The separator line stays subtle in transparent mode and returns to the normal divider color when the header becomes solid."
+    },
+    {
+      "type": "header",
+      "content": "Auto-rotate"
+    },
+    {
+      "type": "paragraph",
+      "content": "Auto-rotate works only when there are 2 or more announcements. When auto-rotate is off, navigation arrows appear instead."
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_rotate",
+      "label": "Auto-rotate announcements",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "rotate_speed",
+      "label": "Change every",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 5
+    }
+  ],
+  "blocks": [
+    {
+      "type": "announcement",
+      "name": "Announcement",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Welcome to our store"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

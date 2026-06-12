@@ -1,0 +1,43 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-cart",
+      "blocks": {
+        "discount_code": {
+          "type": "discount_code"
+        },
+        "shipping_note": {
+          "type": "shipping_note"
+        },
+        "cart_note": {
+          "type": "cart_note"
+        },
+        "trust_badges": {
+          "type": "trust_badges"
+        }
+      },
+      "block_order": [
+        "discount_code",
+        "shipping_note",
+        "cart_note",
+        "trust_badges"
+      ],
+      "settings": {
+        "heading_alignment": "left",
+        "summary_text_alignment": "center"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}

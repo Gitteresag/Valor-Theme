@@ -1,0 +1,174 @@
+/* ============================================================================
+ * Contact form section
+ *
+ * Renders /contact and any page using the page.contact template. Pairs with
+ * sections/contact-form.liquid. Pattern follows Dawn's contact-form section
+ * but with Valor naming conventions and styling. Layout is intentionally
+ * narrow so the form sits comfortably on tall content like FAQ or About
+ * pages, where the form is usually preceded by a page block above.
+ * ============================================================================ */
+
+.valor-contact-form {
+  padding-top: var(--valor-section-padding-top, 36px);
+  padding-bottom: var(--valor-section-padding-bottom, 36px);
+}
+
+.valor-contact-form__inner {
+  width: 100%;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+}
+
+.valor-contact-form__heading {
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+
+.valor-contact-form__heading--align-left { text-align: left; }
+.valor-contact-form__heading--align-right { text-align: right; }
+
+.valor-contact-form__form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+/* Two-column row for name + email on tablet/desktop. On mobile the rows
+   collapse to a single column for thumb-comfort. The merchant cannot
+   change this — the layout decision is opinionated for legibility. */
+.valor-contact-form__row {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 1fr;
+}
+@media screen and (min-width: 750px) {
+  .valor-contact-form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.valor-contact-form__field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.valor-contact-form__label {
+  font-size: var(--font-size-body-sm);
+  margin-bottom: 0.375rem;
+  color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+}
+
+.valor-contact-form__input,
+.valor-contact-form__textarea {
+  width: 100%;
+  font: inherit;
+  font-size: var(--font-size-body-base);
+  line-height: 1.5;
+  color: var(--color-foreground);
+  background-color: var(--color-background);
+  border: 1px solid var(--valor-border-strong);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  padding: 0.875rem 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.valor-contact-form__input:focus,
+.valor-contact-form__textarea:focus {
+  outline: none;
+  border-color: var(--color-foreground);
+  box-shadow: 0 0 0 1px var(--color-foreground);
+}
+
+.valor-contact-form__textarea {
+  resize: vertical;
+  min-height: 8rem;
+}
+
+.valor-contact-form__field--error .valor-contact-form__input,
+.valor-contact-form__field--error .valor-contact-form__textarea {
+  border-color: var(--color-error, var(--valor-color-error));
+  box-shadow: 0 0 0 1px var(--color-error, var(--valor-color-error));
+}
+
+.valor-contact-form__field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+  font-size: var(--font-size-body-xs);
+  color: var(--color-error, var(--valor-color-error));
+}
+
+.valor-contact-form__field-error svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.valor-contact-form__submit-wrap {
+  margin-top: 0.5rem;
+}
+
+/* Inline messages above the form: success after a successful POST,
+   error summary if the form has validation errors. The success state
+   uses the same green tint pattern as the cart's discount notice for
+   consistency across the storefront. */
+.valor-contact-form__message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 0 0 1.5rem;
+  border-radius: var(--style-border-radius-inputs, 4px);
+  font-size: var(--font-size-body-md);
+  line-height: 1.5;
+}
+
+.valor-contact-form__message--success {
+  background-color: rgba(21, 128, 61, 0.08);
+  color: var(--valor-color-success);
+  border-left: 3px solid var(--valor-color-success);
+}
+
+.valor-contact-form__message--error {
+  background-color: rgba(192, 0, 0, 0.06);
+  color: var(--color-error, var(--valor-color-error));
+  border-left: 3px solid var(--color-error, var(--valor-color-error));
+}
+
+.valor-contact-form__message svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.valor-contact-form__error-list {
+  list-style: none;
+  margin: 0.375rem 0 0;
+  padding: 0;
+}
+
+.valor-contact-form__error-list li {
+  margin: 0.125rem 0;
+}
+
+.valor-contact-form__error-list a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* Visually hidden helper for accessible labels that we hide visually
+   (e.g. when the heading is set to blank but we still want a label
+   present in the DOM for screen-readers). */
+.valor-contact-form .visually-hidden {
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  width: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+}

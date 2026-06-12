@@ -1,0 +1,179 @@
+{%- liquid
+  assign line_style = section.settings.line_style
+  assign line_color = section.settings.line_color
+  assign line_thickness = section.settings.line_thickness
+  assign width_mode = section.settings.width_mode
+  assign custom_width = section.settings.custom_width
+  assign alignment = section.settings.alignment
+-%}
+
+<section
+  class="valor-separator valor-separator--width-{{ width_mode }} valor-separator--align-{{ alignment }} valor-separator--style-{{ line_style }}{% if width_mode == 'full' %} full-width{% endif %}"
+  style="
+    --valor-section-padding-top: {{ section.settings.padding_top }}px;
+    --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --valor-separator-thickness: {{ line_thickness }}px;
+    --valor-separator-style: {{ line_style }};
+    --valor-separator-custom-width: {{ custom_width }}%;
+    {%- if line_color != blank -%}--valor-separator-color: {{ line_color }};{%- endif -%}
+  "
+>
+  <div class="valor-separator__line" role="separator" aria-orientation="horizontal"></div>
+</section>
+
+{% stylesheet %}
+  .valor-separator {
+    padding-top: var(--valor-section-padding-top, 24px);
+    padding-bottom: var(--valor-section-padding-bottom, 24px);
+    display: flex;
+    width: 100%;
+  }
+
+  /* Alignment — controls where the line sits within its container.
+     Has no visual effect when width-mode = full and the line fills 100%,
+     but it still applies to width-mode = container/custom. */
+  .valor-separator--align-left   { justify-content: flex-start; }
+  .valor-separator--align-center { justify-content: center; }
+  .valor-separator--align-right  { justify-content: flex-end; }
+
+  /* The line itself. Width depends on the mode below. */
+  .valor-separator__line {
+    border-top:
+      var(--valor-separator-thickness, 1px)
+      var(--valor-separator-style, solid)
+      var(--valor-separator-color, currentColor);
+    /* Border-only — no box height. The padding on .valor-separator gives
+       the section its visible height. */
+    height: 0;
+    width: 100%;
+  }
+
+  /* Width modes.
+     - full        → section spans the viewport (.full-width on parent grid),
+                     line fills 100% of section.
+     - container   → section is constrained to --content-width by the
+                     Shopify section grid, line fills 100% of that.
+     - custom      → section is constrained to --content-width, line is
+                     a percentage of it set by --valor-separator-custom-width.
+     The first two share the same line behaviour, so only custom needs an override. */
+  .valor-separator--width-custom .valor-separator__line {
+    width: var(--valor-separator-custom-width, 50%);
+  }
+
+  /* Browsers refuse to render border-style: double below 3px because there
+     isn't enough room for two lines plus a gap. Force a 3px floor when the
+     style is double so a 1–2px setting still renders something visible. */
+  .valor-separator--style-double .valor-separator__line {
+    border-top-width: max(3px, var(--valor-separator-thickness, 1px));
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Separator",
+  "tag": "section",
+  "class": "valor-section-separator",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Style"
+    },
+    {
+      "type": "select",
+      "id": "line_style",
+      "label": "Line style",
+      "options": [
+        { "value": "solid",  "label": "Solid" },
+        { "value": "dashed", "label": "Dashed" },
+        { "value": "dotted", "label": "Dotted" },
+        { "value": "double", "label": "Double" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "color",
+      "id": "line_color",
+      "label": "Line color",
+      "info": "Leave empty to use the theme's foreground color."
+    },
+    {
+      "type": "range",
+      "id": "line_thickness",
+      "label": "Line thickness",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 1,
+      "info": "For 'Double' style, 3px or more renders best."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width_mode",
+      "label": "Width",
+      "options": [
+        { "value": "container", "label": "Container width" },
+        { "value": "full",      "label": "Full viewport width" },
+        { "value": "custom",    "label": "Custom" }
+      ],
+      "default": "container"
+    },
+    {
+      "type": "range",
+      "id": "custom_width",
+      "label": "Custom width",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 50,
+      "info": "Used only when Width is set to Custom. Percentage of the container width."
+    },
+    {
+      "type": "select",
+      "id": "alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left",   "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right",  "label": "Right" }
+      ],
+      "default": "center",
+      "info": "Has no effect when Width is set to Full viewport width."
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    }
+  ],
+  "presets": [
+    {
+      "name": "Separator"
+    }
+  ]
+}
+{% endschema %}

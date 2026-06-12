@@ -1,0 +1,54 @@
+{%- comment -%}
+  Pagination — renders Previous / page numbers / Next links for any
+  paginated context (collection, search, blog, etc.). The output is
+  a real <nav> with proper aria attributes.
+
+  We don't use Shopify's `default_pagination` filter because it
+  doesn't give us BEM-friendly class hooks and renders disabled
+  states differently than we'd like.
+
+  Accepts:
+    paginate  {Paginate}  required — the paginate object from {% paginate %}
+{%- endcomment -%}
+
+{%- if paginate.parts.size > 0 -%}
+  <nav class="valor-pagination" role="navigation" aria-label="{{ 'accessibility.pagination' | t }}">
+    {%- if paginate.previous -%}
+      <a class="valor-pagination__link valor-pagination__link--prev" href="{{ paginate.previous.url }}" aria-label="{{ 'accessibility.previous_page' | t }}">
+        <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <span>{{ 'general.pagination.previous' | t }}</span>
+      </a>
+    {%- else -%}
+      <span class="valor-pagination__link valor-pagination__link--prev valor-pagination__link--disabled" aria-hidden="true">
+        <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        <span>{{ 'general.pagination.previous' | t }}</span>
+      </span>
+    {%- endif -%}
+
+    <ol class="valor-pagination__list" role="list">
+      {%- for part in paginate.parts -%}
+        <li class="valor-pagination__item">
+          {%- if part.is_link -%}
+            <a class="valor-pagination__page" href="{{ part.url }}" aria-label="{{ 'accessibility.page' | t: number: part.title }}">{{ part.title }}</a>
+          {%- elsif part.title == paginate.current_page -%}
+            <span class="valor-pagination__page valor-pagination__page--current" aria-current="page" aria-label="{{ 'accessibility.current_page' | t: number: part.title }}">{{ part.title }}</span>
+          {%- else -%}
+            <span class="valor-pagination__page valor-pagination__page--gap" aria-hidden="true">{{ part.title }}</span>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ol>
+
+    {%- if paginate.next -%}
+      <a class="valor-pagination__link valor-pagination__link--next" href="{{ paginate.next.url }}" aria-label="{{ 'accessibility.next_page' | t }}">
+        <span>{{ 'general.pagination.next' | t }}</span>
+        <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </a>
+    {%- else -%}
+      <span class="valor-pagination__link valor-pagination__link--next valor-pagination__link--disabled" aria-hidden="true">
+        <span>{{ 'general.pagination.next' | t }}</span>
+        <svg aria-hidden="true" focusable="false" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </span>
+    {%- endif -%}
+  </nav>
+{%- endif -%}

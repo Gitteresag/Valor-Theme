@@ -1,0 +1,18 @@
+extends:
+  - theme-check:recommended
+
+ignore:
+  - node_modules/**
+  - dist/**
+  - .git/**
+
+# Policy templates expose the `policy` object at runtime, but Theme Check
+# does not infer that context from the section file.
+UndefinedObject:
+  ignore:
+    - sections/main-policy.liquid
+
+# Localization classes are shared between header snippets and footer markup.
+ValidScopedCSSClass:
+  ignore:
+    - sections/footer.liquid

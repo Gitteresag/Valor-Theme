@@ -1,0 +1,378 @@
+{% layout none %}
+
+{%- comment -%}
+  Gift card template.
+
+  Standalone page rendered when a customer opens the gift-card link
+  emailed by Shopify. Uses {% layout none %} so the theme's header,
+  footer, and chrome are skipped — this page is meant to be standalone:
+  printable, redeemable in-store via QR, and usable at checkout via
+  the gift-card code.
+
+  Layout: centered card on the page (printable card-like presentation)
+  with the shop name, balance, instructions, the gift-card code, the
+  QR code, and action buttons (copy code, visit store, optionally add
+  to Apple Wallet, optionally print).
+
+  https://shopify.dev/docs/storefronts/themes/architecture/templates/gift-card
+{%- endcomment -%}
+
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="{{ settings.colors_background_1 | default: '#ffffff' }}">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+    {%- endif -%}
+
+    {%- assign formatted_balance = gift_card.balance | money_without_trailing_zeros | strip_html -%}
+    <title>{{ 'gift_cards.issued.title' | t: value: formatted_balance, shop: shop.name }}</title>
+    <meta name="description" content="{{ 'gift_cards.issued.subtext' | t }}">
+
+    {{ content_for_header }}
+
+    {%- render 'css-variables' -%}
+    {{ 'critical.css' | asset_url | stylesheet_tag }}
+
+    <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer></script>
+
+    <style>
+      :root { color-scheme: light; }
+
+      body {
+        margin: 0;
+        background-color: color-mix(in srgb, var(--color-foreground) 4%, var(--color-background));
+        color: var(--color-foreground);
+        font-family: var(--font-body--family);
+        font-size: var(--font-size-body-base);
+        line-height: 1.5;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: clamp(1rem, 4vw, 3rem);
+        box-sizing: border-box;
+      }
+
+      .valor-gift-card {
+        width: 100%;
+        max-width: 32rem;
+        background-color: var(--color-background);
+        border: 1px solid var(--valor-border-strong, var(--color-foreground));
+        padding: clamp(1.75rem, 5vw, 3rem);
+        text-align: center;
+        box-sizing: border-box;
+      }
+
+      .valor-gift-card__shop-name {
+        margin: 0 0 0.5rem;
+        font-family: var(--font-heading--family);
+        font-style: var(--font-heading--style);
+        font-weight: var(--font-heading--weight);
+        font-size: var(--font-size-body-sm);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+      }
+
+      .valor-gift-card__balance {
+        margin: 0 0 0.5rem;
+        font-family: var(--font-heading--family);
+        font-style: var(--font-heading--style);
+        font-weight: var(--font-heading--weight);
+        font-size: var(--font-size-heading-xl);
+        line-height: 1.1;
+        letter-spacing: 0;
+      }
+
+      .valor-gift-card__status {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        margin: 0 0 1rem;
+        border: 1px solid var(--valor-color-error);
+        color: var(--valor-color-error);
+        font-size: var(--font-size-body-xs);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .valor-gift-card__expires {
+        margin: 0 0 1.5rem;
+        font-size: var(--font-size-body-sm);
+        color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
+      }
+
+      .valor-gift-card__hero {
+        margin: 1rem 0 1.5rem;
+      }
+      .valor-gift-card__hero-image {
+        width: 100%;
+        max-width: 18rem;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .valor-gift-card__instructions {
+        margin: 0 0 1.5rem;
+        font-size: var(--font-size-body-sm);
+        color: color-mix(in srgb, var(--color-foreground) 85%, transparent);
+      }
+
+      .valor-gift-card__code {
+        margin: 0 0 1.5rem;
+        padding: 0.875rem 1rem;
+        border: 1px dashed var(--valor-border-strong, var(--color-foreground));
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: clamp(1rem, 4vw, 1.25rem);
+        letter-spacing: 0.1em;
+        word-break: break-all;
+      }
+
+      .valor-gift-card__qr-wrap {
+        display: flex;
+        justify-content: center;
+        margin: 0 0 1.5rem;
+      }
+      .valor-gift-card__qr {
+        padding: 0.5rem;
+        background-color: #fff;
+        border: 1px solid var(--valor-border-default);
+      }
+
+      .valor-gift-card__apple-wallet {
+        display: inline-block;
+        margin: 0 0 1.25rem;
+      }
+      .valor-gift-card__apple-wallet img {
+        display: block;
+        width: 120px;
+        height: auto;
+      }
+
+      .valor-gift-card__buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+        margin: 0;
+      }
+      @media (min-width: 480px) {
+        .valor-gift-card__buttons {
+          flex-direction: row;
+          justify-content: center;
+        }
+      }
+
+      .valor-gift-card__button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        background-color: var(--color-button-bg, var(--color-foreground));
+        color: var(--color-button-text, var(--color-background));
+        text-decoration: none;
+        border: var(--style-button-border-width, 1.5px) solid var(--color-button-border, var(--color-foreground));
+        font-family: var(--font-body--family);
+        font-size: var(--font-size-body-sm);
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      }
+      .valor-gift-card__button:hover {
+        opacity: var(--button-hover-opacity, 0.85);
+        background-color: var(--color-button-hover-bg, var(--color-button-bg, var(--color-foreground)));
+        color: var(--color-button-hover-text, var(--color-button-text, var(--color-background)));
+        border-color: var(--color-button-hover-border, var(--color-button-border, var(--color-foreground)));
+      }
+      .valor-gift-card__button--secondary {
+        background-color: transparent;
+        color: var(--color-button-outline-text, var(--color-foreground));
+        border-color: var(--color-button-outline-border, var(--color-foreground));
+      }
+      .valor-gift-card__button--secondary:hover {
+        opacity: var(--button-hover-opacity, 0.85);
+        background-color: var(--color-button-outline-hover-bg, var(--color-foreground));
+        color: var(--color-button-outline-hover-text, var(--color-background));
+        border-color: var(--color-button-outline-hover-border, var(--color-button-outline-hover-bg, var(--color-foreground)));
+      }
+
+      .valor-gift-card__copy-success {
+        display: block;
+        margin: 0.875rem 0 0;
+        font-size: var(--font-size-body-sm);
+        color: var(--valor-color-success);
+        min-height: 1.25em;
+      }
+
+      .valor-gift-card__a11y {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* Print styles — strip body bg, hide actions, fit on A4. */
+      @media print {
+        body {
+          background: #fff;
+          padding: 1.5cm;
+          align-items: flex-start;
+        }
+        .valor-gift-card {
+          border: none;
+          padding: 0;
+        }
+        .valor-gift-card__no-print {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="valor-gift-card">
+      <p class="valor-gift-card__shop-name">{{ shop.name }}</p>
+
+      <h1 class="valor-gift-card__balance">
+        {%- if shop.currency == cart.currency.iso_code -%}
+          {{ gift_card.balance | money }}
+        {%- else -%}
+          {{ gift_card.balance | money_with_currency }}
+        {%- endif -%}
+      </h1>
+
+      {%- if gift_card.enabled == false -%}
+        <p class="valor-gift-card__status">{{ 'gift_cards.issued.disabled' | t }}</p>
+      {%- elsif gift_card.expired -%}
+        <p class="valor-gift-card__status">{{ 'gift_cards.issued.expired' | t }}</p>
+      {%- elsif gift_card.expires_on -%}
+        {%- assign expires_on = gift_card.expires_on | date: '%B %e, %Y' -%}
+        <p class="valor-gift-card__expires">
+          {{ 'gift_cards.issued.expiration_date' | t: expires_on: expires_on }}
+        </p>
+      {%- endif -%}
+
+      <div class="valor-gift-card__hero">
+        {%- if settings.logo != blank -%}
+          {%- assign logo_alt = settings.logo.alt | default: shop.name | escape -%}
+          {{ settings.logo | image_url: width: 600 | image_tag:
+            class: 'valor-gift-card__hero-image',
+            alt: logo_alt,
+            loading: 'eager'
+          }}
+        {%- else -%}
+          <img
+            class="valor-gift-card__hero-image"
+            src="{{ 'gift-card/card.svg' | shopify_asset_url }}"
+            alt=""
+            width="380"
+            height="253"
+            loading="eager"
+          >
+        {%- endif -%}
+      </div>
+
+      <p class="valor-gift-card__instructions">
+        {{ 'gift_cards.issued.how_to_use_gift_card' | t }}
+      </p>
+
+      <p id="GiftCardCode" class="valor-gift-card__code">
+        {{- gift_card.code | format_code -}}
+      </p>
+
+      <div class="valor-gift-card__qr-wrap">
+        <div
+          class="valor-gift-card__qr"
+          data-identifier="{{ gift_card.qr_identifier }}"
+          aria-label="{{ 'gift_cards.issued.qr_image_alt' | t }}"
+        ></div>
+      </div>
+
+      {%- if gift_card.pass_url -%}
+        <a href="{{ gift_card.pass_url }}" class="valor-gift-card__apple-wallet valor-gift-card__no-print">
+          <img
+            src="{{ 'gift-card/add-to-apple-wallet.svg' | shopify_asset_url }}"
+            width="120"
+            height="40"
+            alt="{{ 'gift_cards.issued.add_to_apple_wallet' | t }}"
+            loading="lazy"
+          >
+        </a>
+      {%- endif -%}
+
+      <div class="valor-gift-card__buttons valor-gift-card__no-print">
+        <button
+          type="button"
+          class="valor-gift-card__button"
+          id="GiftCardCopyButton"
+        >
+          {{ 'gift_cards.issued.copy_code' | t }}
+        </button>
+        <a
+          href="{{ shop.url }}"
+          class="valor-gift-card__button valor-gift-card__button--secondary"
+          target="_blank"
+          rel="noopener"
+          aria-describedby="ValorGiftCardA11yNewWindow"
+        >
+          {{ 'gift_cards.issued.shop_link' | t }}
+        </a>
+        <button
+          type="button"
+          class="valor-gift-card__button valor-gift-card__button--secondary"
+          onclick="window.print();"
+        >
+          {{ 'gift_cards.issued.print' | t }}
+        </button>
+      </div>
+
+      <span class="valor-gift-card__copy-success" id="GiftCardCopySuccess" role="status"></span>
+
+      <span hidden id="ValorGiftCardA11yNewWindow">{{ 'accessibility.link_messages.new_window' | t }}</span>
+    </main>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Render the QR code into the .valor-gift-card__qr container.
+        // The QRCode library is loaded via vendor/qrcode.js earlier in
+        // the document and exposes a global QRCode constructor.
+        var qrContainer = document.querySelector('.valor-gift-card__qr');
+        if (qrContainer && typeof QRCode === 'function') {
+          new QRCode(qrContainer, {
+            text: qrContainer.dataset.identifier,
+            width: 96,
+            height: 96,
+            imageAltText: {{ 'gift_cards.issued.qr_image_alt' | t | json }}
+          });
+        }
+
+        // Wire up the copy-to-clipboard button. Uses the Clipboard API
+        // and falls back silently if the API is unavailable (older
+        // browsers, insecure context). The success message clears
+        // itself after a short delay so subsequent clicks re-trigger.
+        var copyBtn = document.getElementById('GiftCardCopyButton');
+        var codeEl  = document.getElementById('GiftCardCode');
+        var msgEl   = document.getElementById('GiftCardCopySuccess');
+        if (copyBtn && codeEl && msgEl && navigator.clipboard) {
+          copyBtn.addEventListener('click', function () {
+            navigator.clipboard.writeText(codeEl.innerText.trim()).then(function () {
+              msgEl.textContent = {{ 'gift_cards.issued.copy_code_success' | t | json }};
+              window.setTimeout(function () { msgEl.textContent = ''; }, 3000);
+            });
+          });
+        }
+      });
+    </script>
+  </body>
+</html>

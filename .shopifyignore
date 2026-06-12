@@ -1,0 +1,10 @@
+.git/**
+node_modules/**
+dist/**
+*.zip
+package.json
+package-lock.json
+.prettierrc
+.prettierignore
+.theme-check.yml
+README.md

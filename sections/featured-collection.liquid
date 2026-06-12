@@ -1,0 +1,315 @@
+{{ 'product-card.css' | asset_url | stylesheet_tag }}
+{{ 'featured-collection.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign products_to_show = section.settings.products_to_show
+  assign columns_desktop = section.settings.columns_desktop
+  assign columns_mobile = section.settings.columns_mobile
+  assign collection = collections[section.settings.collection]
+-%}
+<section
+  class="valor-featured-collection{% if section.settings.swipe_on_mobile %} valor-featured-collection--mobile-full-bleed{% endif %}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px; --valor-grid-gap: {{ section.settings.column_gap }}px; --valor-grid-gap-mobile: {{ section.settings.column_gap_mobile }}px; --valor-mobile-card-width: {{ section.settings.mobile_card_width }}%;"
+>
+  <div class="valor-featured-collection__inner{% if section.settings.full_width %} valor-featured-collection__inner--full-width{% endif %}">
+    {%- if section.settings.title != blank or section.settings.show_view_all -%}
+      <header class="valor-featured-collection__header valor-featured-collection__header--align-{{ section.settings.heading_alignment }}">
+        {%- if section.settings.title != blank -%}
+          <h2 class="valor-featured-collection__title valor-heading valor-heading--{{ section.settings.heading_size }}">
+            {{ section.settings.title }}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.show_view_all and collection != blank -%}
+          <a
+            href="{{ collection.url }}"
+            class="valor-featured-collection__view-all valor-featured-collection__view-all--desktop"
+          >
+            {{ 'sections.featured_collection.view_all' | t | default: 'View all' }}
+            <span aria-hidden="true">→</span>
+          </a>
+        {%- endif -%}
+      </header>
+    {%- endif -%}
+
+    <div
+      class="valor-featured-collection__grid valor-featured-collection__grid--cols-{{ columns_desktop }} valor-featured-collection__grid--mobile-{{ columns_mobile }}{% if section.settings.swipe_on_mobile %} valor-featured-collection__grid--swipe-mobile{% endif %}"
+    >
+      {%- if collection != blank and collection.products.size > 0 -%}
+        {%- for product in collection.products limit: products_to_show -%}
+          {%- render 'product-card',
+            product: product,
+            image_ratio: section.settings.image_ratio,
+            show_secondary_image: section.settings.show_secondary_image,
+            show_vendor: section.settings.show_vendor,
+            show_price: true
+          -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- comment -%} Onboarding placeholders when no collection picked {%- endcomment -%}
+        {%- for i in (1..products_to_show) -%}
+          <article class="valor-card valor-card--ratio-{{ section.settings.image_ratio }} valor-card--placeholder">
+            <div class="valor-card__media">
+              <div class="valor-card__placeholder">
+                {%- assign idx = i | modulo: 4 | plus: 1 -%}
+                {{ 'product-' | append: idx | placeholder_svg_tag: 'valor-card__placeholder-svg' }}
+              </div>
+            </div>
+            <div class="valor-card__info">
+              <h3 class="valor-card__title">{{ 'sections.featured_collection.example_product' | t | default: 'Example product title' }}</h3>
+              <div class="valor-card__price">
+                <span class="valor-card__price-current">$19.99</span>
+              </div>
+            </div>
+          </article>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.show_view_all and collection != blank -%}
+      <div class="valor-featured-collection__view-all-mobile">
+        <a href="{{ collection.url }}" class="valor-button valor-button--{{ section.settings.view_all_style }}">
+          {{ 'sections.featured_collection.view_all' | t | default: 'View all' }}
+        </a>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+
+{% schema %}
+
+{
+  "name": "Featured collection",
+  "tag": "section",
+  "class": "valor-section-featured-collection",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Heading",
+      "default": "Featured products"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Number of products",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show \"View all\" link",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "view_all_style",
+      "label": "\"View all\" button style (mobile)",
+      "options": [
+        {
+          "value": "primary",
+          "label": "Solid"
+        },
+        {
+          "value": "secondary",
+          "label": "Outline"
+        }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Product cards"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Image ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "Adapt to image"
+        },
+        {
+          "value": "portrait",
+          "label": "Portrait"
+        },
+        {
+          "value": "square",
+          "label": "Square"
+        },
+        {
+          "value": "landscape",
+          "label": "Landscape"
+        }
+      ],
+      "default": "portrait"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "label": "Swap image on hover",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        {
+          "value": "1",
+          "label": "1 column"
+        },
+        {
+          "value": "2",
+          "label": "2 columns"
+        }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "checkbox",
+      "id": "swipe_on_mobile",
+      "label": "Enable swipe on mobile",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_width",
+      "label": "Mobile swipe card width",
+      "info": "Controls the card width when swipe on mobile is enabled.",
+      "min": 50,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "column_gap",
+      "label": "Gap between cards",
+      "info": "Spacing between products in the grid. Set to 0 for an edge-to-edge look.",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "column_gap_mobile",
+      "label": "Gap between cards on mobile",
+      "info": "Spacing between products on mobile. Also applies to swipe-on-mobile layout.",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collection"
+    }
+  ]
+}
+
+{% endschema %}

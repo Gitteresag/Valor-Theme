@@ -1,0 +1,183 @@
+{% comment %}
+  Renders a single cart line item.
+
+  Accepts:
+  - item: {LineItem} The cart line item
+  - line_index: {Integer} 1-based line index (forloop.index)
+  - section_id: {String} The parent section id, used to build unique input ids
+  - show_vendor: {Boolean} Whether to display the product vendor
+
+  Used by:
+  - sections/main-cart.liquid (initial render and AJAX re-render)
+{% endcomment %}
+
+{%- liquid
+  assign quantity_id = 'CartQuantity-' | append: section_id | append: '-' | append: line_index
+  assign quantity_aria_label = 'cart.quantity_label' | t
+  assign image_alt = item.image.alt | default: item.product.title | default: item.title | escape
+
+  assign has_meta = false
+  if item.product.has_only_default_variant == false
+    assign has_meta = true
+  endif
+  if item.selling_plan_allocation
+    assign has_meta = true
+  endif
+  if item.properties.size > 0
+    for property in item.properties
+      assign first_char = property.first | slice: 0
+      if property.last != blank and first_char != '_'
+        assign has_meta = true
+        break
+      endif
+    endfor
+  endif
+
+  assign show_line_vendor = false
+  if show_vendor and item.product.vendor != blank
+    assign show_line_vendor = true
+  endif
+-%}
+
+<li
+  class="valor-cart-item"
+  data-line="{{ line_index }}"
+  data-key="{{ item.key }}"
+  data-cart-item
+>
+  <a
+    href="{{ item.url }}"
+    class="valor-cart-item__media"
+    aria-hidden="true"
+    tabindex="-1"
+  >
+    {%- if item.image -%}
+      {{
+        item.image
+        | image_url: width: 240
+        | image_tag:
+          width: 120,
+          height: 120,
+          loading: 'lazy',
+          alt: image_alt,
+          class: 'valor-cart-item__image'
+      }}
+    {%- endif -%}
+  </a>
+
+  <div class="valor-cart-item__details">
+    <div class="valor-cart-item__header">
+      <a href="{{ item.url }}" class="valor-cart-item__title">
+        {{- item.product.title | escape -}}
+      </a>
+      <div class="valor-cart-item__price-block">
+        {%- if item.original_line_price != item.final_line_price -%}
+          <span class="valor-cart-item__compare-price">
+            <s>{{ item.original_line_price | money }}</s>
+          </span>
+        {%- endif -%}
+        <span class="valor-cart-item__price{% if item.original_line_price != item.final_line_price %} valor-cart-item__price--sale{% endif %}">
+          {{ item.final_line_price | money }}
+        </span>
+        {%- render 'product-unit-price', line_item: item, class_name: 'valor-cart-item__unit-price' -%}
+      </div>
+    </div>
+
+    {%- if show_line_vendor -%}
+      <p class="valor-cart-item__vendor">
+        {{- item.product.vendor | escape -}}
+      </p>
+    {%- endif -%}
+
+    {%- if has_meta -%}
+      <dl class="valor-cart-item__meta">
+        {%- if item.product.has_only_default_variant == false -%}
+          {%- for option in item.options_with_values -%}
+            <dt class="visually-hidden">{{ option.name | escape }}</dt>
+            <dd class="valor-cart-item__meta-item">
+              {{- option.name | escape }}: {{ option.value | escape -}}
+            </dd>
+          {%- endfor -%}
+        {%- endif -%}
+
+        {%- if item.selling_plan_allocation -%}
+          <dt class="visually-hidden">{{ 'cart.selling_plan' | t | default: 'Subscription' }}</dt>
+          <dd class="valor-cart-item__meta-item valor-cart-item__selling-plan">
+            {{- item.selling_plan_allocation.selling_plan.name | escape -}}
+          </dd>
+        {%- endif -%}
+
+        {%- for property in item.properties -%}
+          {%- assign first_char = property.first | slice: 0 -%}
+          {%- if property.last != blank and first_char != '_' -%}
+            <dt class="visually-hidden">{{ property.first | escape }}</dt>
+            <dd class="valor-cart-item__meta-item">
+              {%- if property.last contains '/uploads/' -%}
+                {{ property.first | escape }}:
+                <a href="{{ property.last }}" target="_blank" rel="noopener noreferrer">
+                  {{- property.last | split: '/' | last | escape -}}
+                </a>
+              {%- else -%}
+                {{- property.first | escape }}: {{ property.last | escape -}}
+              {%- endif -%}
+            </dd>
+          {%- endif -%}
+        {%- endfor -%}
+      </dl>
+    {%- endif -%}
+
+    {%- if item.line_level_discount_allocations.size > 0 -%}
+      <ul
+        class="valor-cart-item__discounts"
+        aria-label="{{ 'cart.discounts' | t }}"
+      >
+        {%- for discount in item.line_level_discount_allocations -%}
+          <li class="valor-cart-item__discount">
+            <span class="valor-cart-item__discount-icon" aria-hidden="true">−</span>
+            {{ discount.discount_application.title }}
+            <span class="valor-cart-item__discount-amount">
+              (−{{ discount.amount | money }})
+            </span>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    <div class="valor-cart-item__controls">
+      {%- render 'quantity-input',
+        id: quantity_id,
+        name: 'updates[]',
+        value: item.quantity,
+        min: 0,
+        data_min: item.variant.quantity_rule.min,
+        max: item.variant.quantity_rule.max,
+        step: item.variant.quantity_rule.increment,
+        data_line: line_index,
+        data_key: item.key,
+        data_variant_id: item.variant.id,
+        aria_label: quantity_aria_label,
+        classes: 'valor-cart-item__quantity'
+      -%}
+
+      <button
+        type="button"
+        class="valor-cart-item__remove"
+        aria-label="{{ 'cart.remove' | t }}: {{ item.product.title | escape }}"
+        data-line-remove
+        data-line="{{ line_index }}"
+      >
+        {{ 'cart.remove' | t }}
+      </button>
+    </div>
+
+    <div
+      id="LineItemError-{{ section_id }}-{{ line_index }}"
+      class="valor-cart-item__error"
+      role="alert"
+      data-line-error
+      data-line="{{ line_index }}"
+    >
+      <small></small>
+    </div>
+  </div>
+</li>

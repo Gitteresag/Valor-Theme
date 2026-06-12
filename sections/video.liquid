@@ -1,0 +1,751 @@
+{%- comment -%}
+  Video section.
+
+  Supports:
+    - Shopify-hosted video (uploaded via theme editor)
+    - External video URL (YouTube, Vimeo, or any direct MP4/WebM/MOV URL)
+
+  Layout:
+    - Heading above the video (style follows Dawn convention)
+    - Video plays inline, optional play/pause toggle button
+    - Optional cover image shown until first play (only when play button on)
+    - Width: Small / Medium / Large / Full width
+    - Mobile can override to full width independently
+{%- endcomment -%}
+
+{%- liquid
+  assign shopify_video = section.settings.video
+  assign external_url = section.settings.video_url
+  assign mobile_shopify_video = section.settings.mobile_video
+  assign mobile_external_url = section.settings.mobile_video_url
+
+  # Detect whether a separate mobile video is configured
+  assign has_mobile_video = false
+  if mobile_shopify_video != blank or mobile_external_url != blank
+    assign has_mobile_video = true
+  endif
+
+  # Pre-compute boolean values for video_tag filter arguments.
+  # Liquid filter arguments must be plain values, not comparison expressions.
+  assign autoplay_video = false
+  if section.settings.show_play_button == false
+    assign autoplay_video = true
+  endif
+
+  assign video_muted = section.settings.mute_audio
+  if autoplay_video
+    assign video_muted = true
+  endif
+
+  # Pre-compute alt text for cover image (filter chains in argument values
+  # are fragile — especially default with multiple fallbacks).
+  assign cover_alt = section.settings.video_alt
+  if cover_alt == blank
+    assign cover_alt = section.settings.cover_image.alt
+  endif
+  if cover_alt == blank
+    assign cover_alt = section.settings.heading
+  endif
+  assign cover_alt = cover_alt | escape
+
+  assign mobile_cover_alt = section.settings.video_alt
+  if mobile_cover_alt == blank
+    assign mobile_cover_alt = section.settings.mobile_cover_image.alt
+  endif
+  if mobile_cover_alt == blank
+    assign mobile_cover_alt = section.settings.heading
+  endif
+  assign mobile_cover_alt = mobile_cover_alt | escape
+
+  # Detect external video provider (desktop)
+  assign provider = ''
+  if external_url != blank
+    assign url_str = external_url | downcase
+    if url_str contains 'youtube.com' or url_str contains 'youtu.be'
+      assign provider = 'youtube'
+    elsif url_str contains 'vimeo.com'
+      assign provider = 'vimeo'
+    else
+      assign provider = 'direct'
+    endif
+  endif
+
+  # Detect external video provider (mobile)
+  assign mobile_provider = ''
+  if mobile_external_url != blank
+    assign mobile_url_str = mobile_external_url | downcase
+    if mobile_url_str contains 'youtube.com' or mobile_url_str contains 'youtu.be'
+      assign mobile_provider = 'youtube'
+    elsif mobile_url_str contains 'vimeo.com'
+      assign mobile_provider = 'vimeo'
+    else
+      assign mobile_provider = 'direct'
+    endif
+  endif
+
+  # Resolve YouTube video id (desktop)
+  if provider == 'youtube'
+    assign yt_id = ''
+    if external_url contains 'youtu.be/'
+      assign yt_id = external_url | split: 'youtu.be/' | last | split: '?' | first | split: '&' | first
+    elsif external_url contains 'watch?v='
+      assign yt_id = external_url | split: 'watch?v=' | last | split: '&' | first
+    elsif external_url contains '/embed/'
+      assign yt_id = external_url | split: '/embed/' | last | split: '?' | first | split: '&' | first
+    endif
+  endif
+
+  # Resolve YouTube video id (mobile)
+  if mobile_provider == 'youtube'
+    assign mobile_yt_id = ''
+    if mobile_external_url contains 'youtu.be/'
+      assign mobile_yt_id = mobile_external_url | split: 'youtu.be/' | last | split: '?' | first | split: '&' | first
+    elsif mobile_external_url contains 'watch?v='
+      assign mobile_yt_id = mobile_external_url | split: 'watch?v=' | last | split: '&' | first
+    elsif mobile_external_url contains '/embed/'
+      assign mobile_yt_id = mobile_external_url | split: '/embed/' | last | split: '?' | first | split: '&' | first
+    endif
+  endif
+
+  # Resolve Vimeo video id (numeric)
+  if provider == 'vimeo'
+    assign vimeo_id = external_url | split: 'vimeo.com/' | last | split: '?' | first | split: '/' | first
+  endif
+
+  if mobile_provider == 'vimeo'
+    assign mobile_vimeo_id = mobile_external_url | split: 'vimeo.com/' | last | split: '?' | first | split: '/' | first
+  endif
+
+  # Use cover image only when play button is enabled.
+  assign use_cover = false
+  if section.settings.show_play_button and section.settings.cover_image != blank
+    assign use_cover = true
+  endif
+
+  assign use_mobile_cover = false
+  if section.settings.show_play_button and section.settings.mobile_cover_image != blank
+    assign use_mobile_cover = true
+  endif
+
+  # Width modifier
+  assign width = section.settings.width
+-%}
+
+<div
+  class="valor-video valor-video--{{ width }}{% if section.settings.full_width_mobile %} valor-video--full-mobile{% endif %}{% if has_mobile_video %} valor-video--has-mobile{% endif %}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="valor-video__inner">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="valor-video__heading valor-heading valor-heading--{{ section.settings.heading_size }} valor-video__heading--align-{{ section.settings.heading_alignment }}">
+        {{ section.settings.heading | escape }}
+      </h2>
+    {%- endif -%}
+
+    <div
+      is="valor-video"
+      class="valor-video__frame valor-video__frame--desktop"
+      data-show-play-button="{{ section.settings.show_play_button }}"
+      data-loop="{{ section.settings.loop }}"
+      data-mute="{{ section.settings.mute_audio }}"
+      data-provider="{{ provider }}"
+    >
+      {%- if use_cover -%}
+        <div class="valor-video__cover" data-video-cover>
+          {{ section.settings.cover_image | image_url: width: 1500 | image_tag:
+            widths: '400, 600, 800, 1100, 1500, 2000',
+            sizes: '100vw',
+            class: 'valor-video__cover-img',
+            alt: cover_alt,
+            loading: 'lazy'
+          }}
+          <button
+            type="button"
+            class="valor-video__play"
+            data-video-play
+            aria-label="{{ 'video.play' | t | default: 'Play video' }}"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+        </div>
+      {%- endif -%}
+
+      <div class="valor-video__media" data-video-media{% if use_cover %} hidden{% endif %}>
+        {%- if shopify_video != blank -%}
+          {{ shopify_video | video_tag:
+            class: 'valor-video__el',
+            controls: false,
+            muted: video_muted,
+            autoplay: autoplay_video,
+            loop: section.settings.loop,
+            playsinline: true,
+            preload: 'metadata',
+            image_size: '1500x'
+          }}
+        {%- elsif provider == 'youtube' and yt_id != blank -%}
+          {%- liquid
+            assign yt_params = 'rel=0&modestbranding=1&playsinline=1&enablejsapi=1'
+            if section.settings.show_play_button == false
+              assign yt_params = yt_params | append: '&autoplay=1&mute=1&controls=0'
+              if section.settings.loop
+                assign yt_params = yt_params | append: '&loop=1&playlist=' | append: yt_id
+              endif
+            endif
+          -%}
+          <iframe
+            class="valor-video__el valor-video__el--iframe"
+            src="https://www.youtube.com/embed/{{ yt_id }}?{{ yt_params }}"
+            title="{{ section.settings.video_alt | default: section.settings.heading | escape }}"
+            frameborder="0"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+            data-yt-iframe
+          ></iframe>
+        {%- elsif provider == 'vimeo' and vimeo_id != blank -%}
+          {%- liquid
+            assign vimeo_params = 'dnt=1&playsinline=1'
+            if section.settings.show_play_button == false
+              assign vimeo_params = vimeo_params | append: '&autoplay=1&muted=1&background=1'
+              if section.settings.loop
+                assign vimeo_params = vimeo_params | append: '&loop=1'
+              endif
+            endif
+          -%}
+          <iframe
+            class="valor-video__el valor-video__el--iframe"
+            src="https://player.vimeo.com/video/{{ vimeo_id }}?{{ vimeo_params }}"
+            title="{{ section.settings.video_alt | default: section.settings.heading | escape }}"
+            frameborder="0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        {%- elsif provider == 'direct' -%}
+          <video
+            class="valor-video__el"
+            src="{{ external_url }}"
+            {% unless section.settings.show_play_button %}autoplay muted{% endunless %}
+            {% if section.settings.loop %}loop{% endif %}
+            playsinline
+            preload="metadata"
+            {% if section.settings.show_play_button %}controls{% endif %}
+          >
+          </video>
+        {%- else -%}
+          <div class="valor-video__placeholder">
+            {{ 'lifestyle-1' | placeholder_svg_tag: 'valor-video__placeholder-svg' }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.show_play_button and use_cover == false and shopify_video != blank -%}
+        {%- comment -%}
+          Shopify-hosted video without a cover image: still allow toggling
+          play/pause via an overlay button (no autoplay). Hidden once the
+          video starts and reappears on pause.
+        {%- endcomment -%}
+        <button
+          type="button"
+          class="valor-video__play valor-video__play--overlay"
+          data-video-toggle
+          aria-label="{{ 'video.play' | t | default: 'Play video' }}"
+        >
+          <svg class="valor-video__play-icon valor-video__play-icon--play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <svg class="valor-video__play-icon valor-video__play-icon--pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+            <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
+          </svg>
+        </button>
+      {%- endif -%}
+    </div>
+
+    {%- if has_mobile_video -%}
+      <div
+        is="valor-video"
+        class="valor-video__frame valor-video__frame--mobile valor-video__frame--aspect-{{ section.settings.mobile_aspect }}"
+        data-show-play-button="{{ section.settings.show_play_button }}"
+        data-loop="{{ section.settings.loop }}"
+        data-mute="{{ section.settings.mute_audio }}"
+        data-provider="{{ mobile_provider }}"
+      >
+        {%- if use_mobile_cover -%}
+          <div class="valor-video__cover" data-video-cover>
+            {{ section.settings.mobile_cover_image | image_url: width: 1100 | image_tag:
+              widths: '400, 600, 800, 1100, 1500',
+              sizes: '100vw',
+              class: 'valor-video__cover-img',
+              alt: mobile_cover_alt,
+              loading: 'lazy'
+            }}
+            <button
+              type="button"
+              class="valor-video__play"
+              data-video-play
+              aria-label="{{ 'video.play' | t | default: 'Play video' }}"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+        {%- endif -%}
+
+        <div class="valor-video__media" data-video-media{% if use_mobile_cover %} hidden{% endif %}>
+          {%- if mobile_shopify_video != blank -%}
+            {{ mobile_shopify_video | video_tag:
+              class: 'valor-video__el',
+              controls: false,
+              muted: video_muted,
+              autoplay: autoplay_video,
+              loop: section.settings.loop,
+              playsinline: true,
+              preload: 'metadata',
+              image_size: '1100x'
+            }}
+          {%- elsif mobile_provider == 'youtube' and mobile_yt_id != blank -%}
+            {%- liquid
+              assign m_yt_params = 'rel=0&modestbranding=1&playsinline=1&enablejsapi=1'
+              if section.settings.show_play_button == false
+                assign m_yt_params = m_yt_params | append: '&autoplay=1&mute=1&controls=0'
+                if section.settings.loop
+                  assign m_yt_params = m_yt_params | append: '&loop=1&playlist=' | append: mobile_yt_id
+                endif
+              endif
+            -%}
+            <iframe
+              class="valor-video__el valor-video__el--iframe"
+              src="https://www.youtube.com/embed/{{ mobile_yt_id }}?{{ m_yt_params }}"
+              title="{{ cover_alt }}"
+              frameborder="0"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          {%- elsif mobile_provider == 'vimeo' and mobile_vimeo_id != blank -%}
+            {%- liquid
+              assign m_vimeo_params = 'dnt=1&playsinline=1'
+              if section.settings.show_play_button == false
+                assign m_vimeo_params = m_vimeo_params | append: '&autoplay=1&muted=1&background=1'
+                if section.settings.loop
+                  assign m_vimeo_params = m_vimeo_params | append: '&loop=1'
+                endif
+              endif
+            -%}
+            <iframe
+              class="valor-video__el valor-video__el--iframe"
+              src="https://player.vimeo.com/video/{{ mobile_vimeo_id }}?{{ m_vimeo_params }}"
+              title="{{ cover_alt }}"
+              frameborder="0"
+              allow="autoplay; fullscreen; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
+          {%- elsif mobile_provider == 'direct' -%}
+            <video
+              class="valor-video__el"
+              src="{{ mobile_external_url }}"
+              {% unless section.settings.show_play_button %}autoplay muted{% endunless %}
+              {% if section.settings.loop %}loop{% endif %}
+              playsinline
+              preload="metadata"
+              {% if section.settings.show_play_button %}controls{% endif %}
+            >
+            </video>
+          {%- endif -%}
+        </div>
+
+        {%- if section.settings.show_play_button and use_mobile_cover == false and mobile_shopify_video != blank -%}
+          <button
+            type="button"
+            class="valor-video__play valor-video__play--overlay"
+            data-video-toggle
+            aria-label="{{ 'video.play' | t | default: 'Play video' }}"
+          >
+            <svg class="valor-video__play-icon valor-video__play-icon--play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg class="valor-video__play-icon valor-video__play-icon--pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M6 5h4v14H6zM14 5h4v14h-4z"/>
+            </svg>
+          </button>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .valor-video {
+    padding-top: var(--valor-section-padding-top, 56px);
+    padding-bottom: var(--valor-section-padding-bottom, 56px);
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    overflow-x: hidden;
+  }
+
+  .valor-video__inner {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 4vw, 3rem);
+    box-sizing: border-box;
+  }
+  .valor-video--small .valor-video__inner { max-width: 50rem; }
+  .valor-video--medium .valor-video__inner { max-width: 65rem; }
+  .valor-video--large .valor-video__inner { max-width: 80rem; }
+  .valor-video--full .valor-video__inner {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* Heading above the video — section-specific margin keeps the
+     video frame breathing room. Font properties (family, weight,
+     line-height, letter-spacing, size) come from .valor-heading. */
+  .valor-video__heading {
+    margin: 0 0 1.25rem 0;
+  }
+  /* Heading alignment — left is default for editorial flow, center pairs
+     well with full-width video sections. Inherits from text-align so it
+     works regardless of width modifier. */
+  .valor-video__heading--align-left { text-align: left; }
+  .valor-video__heading--align-center { text-align: center; }
+  .valor-video__heading--align-right { text-align: right; }
+
+  /* Video frame — 16:9 by default, full-bleed image fills it */
+  .valor-video__frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background-color: color-mix(in srgb, var(--color-foreground) 6%, transparent);
+    overflow: hidden;
+  }
+
+  /* Mobile aspect-ratio variants for the mobile frame */
+  .valor-video__frame--aspect-9-16 { aspect-ratio: 9 / 16; }
+  .valor-video__frame--aspect-4-5 { aspect-ratio: 4 / 5; }
+  .valor-video__frame--aspect-1-1 { aspect-ratio: 1 / 1; }
+  .valor-video__frame--aspect-16-9 { aspect-ratio: 16 / 9; }
+
+  /* Hide the mobile frame on desktop, hide the desktop frame on mobile —
+     but only when a separate mobile video is configured. Otherwise the
+     desktop frame is shown on every viewport (no mobile video set). */
+  .valor-video__frame--mobile { display: none; }
+  @media (max-width: 749px) {
+    .valor-video--has-mobile .valor-video__frame--desktop { display: none; }
+    .valor-video--has-mobile .valor-video__frame--mobile { display: block; }
+  }
+
+  .valor-video__media,
+  .valor-video__cover {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .valor-video__media[hidden] { display: none; }
+
+  .valor-video__el,
+  .valor-video__el--iframe,
+  .valor-video__cover-img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    border: 0;
+  }
+
+  .valor-video__placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .valor-video__placeholder-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.4;
+  }
+
+  /* Play button — sits over cover image (or video when no cover) */
+  .valor-video__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.92);
+    color: #111;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.15s ease, transform 0.15s ease;
+  }
+  .valor-video__play svg {
+    width: 30px;
+    height: 30px;
+  }
+  /* Play icon offset slightly right so it appears optically centred */
+  .valor-video__play .valor-video__play-icon--play,
+  .valor-video__cover .valor-video__play svg:not(.valor-video__play-icon--pause) {
+    margin-left: 4px;
+  }
+  @media (hover: hover) {
+    .valor-video__play:hover {
+      background: #fff;
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+  }
+  .valor-video__play:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 4px;
+  }
+
+  /* Toggle button on a Shopify-hosted video (no cover) — fades when paused */
+  .valor-video__play--overlay {
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+  }
+  .valor-video__play--overlay:hover {
+    background: rgba(0, 0, 0, 0.75);
+  }
+  .valor-video__play-icon { display: inline-block; }
+  .valor-video__play-icon--pause { display: none; }
+  .valor-video__frame[data-playing='true'] .valor-video__play-icon--play { display: none; }
+  .valor-video__frame[data-playing='true'] .valor-video__play-icon--pause { display: inline-block; }
+  /* Auto-hide the toggle while playing; reappear on hover/focus */
+  .valor-video__frame[data-playing='true'] .valor-video__play--overlay {
+    opacity: 0;
+    transition: opacity 0.3s ease 1s;
+  }
+  @media (hover: hover) {
+    .valor-video__frame[data-playing='true']:hover .valor-video__play--overlay {
+      opacity: 1;
+      transition-delay: 0s;
+    }
+  }
+  .valor-video__frame[data-playing='true'] .valor-video__play--overlay:focus-visible {
+    opacity: 1;
+  }
+
+  /* Mobile full-width override — escape the theme-shell grid */
+  @media (max-width: 749px) {
+    .shopify-section > .valor-video--full-mobile {
+      grid-column: 1 / -1;
+    }
+    .valor-video--full-mobile .valor-video__inner {
+      padding: 0;
+      max-width: none;
+    }
+    .valor-video--full-mobile .valor-video__heading {
+      padding: 0 clamp(1rem, 4vw, 3rem);
+    }
+    .valor-video__play {
+      width: 60px;
+      height: 60px;
+    }
+    .valor-video__play svg {
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  /* Full-width on desktop — escape the theme-shell grid both viewports */
+  .shopify-section > .valor-video--full {
+    grid-column: 1 / -1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .valor-video__play,
+    .valor-video__play--overlay {
+      transition: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Video",
+  "tag": "section",
+  "class": "valor-section-video",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Video"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Video source"
+    },
+    {
+      "type": "video",
+      "id": "video",
+      "label": "Shopify-hosted video",
+      "info": "Upload a video file. Maximum file size 1 GB and 10 minutes long. For best performance keep files under 50 MB."
+    },
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "External video URL",
+      "info": "Used when no Shopify-hosted video is selected. Supports YouTube, Vimeo, or a direct video file URL (.mp4, .webm, .mov)."
+    },
+    {
+      "type": "text",
+      "id": "video_alt",
+      "label": "Video alt text",
+      "info": "Describes the video for screen reader users."
+    },
+    {
+      "type": "header",
+      "content": "Mobile video (optional)",
+      "info": "If set, this video plays on mobile instead of the one above. Useful for vertical videos."
+    },
+    {
+      "type": "video",
+      "id": "mobile_video",
+      "label": "Shopify-hosted video (mobile)",
+      "info": "Upload a separate vertical video for mobile devices."
+    },
+    {
+      "type": "url",
+      "id": "mobile_video_url",
+      "label": "External video URL (mobile)",
+      "info": "Used when no Shopify-hosted mobile video is selected."
+    },
+    {
+      "type": "image_picker",
+      "id": "mobile_cover_image",
+      "label": "Mobile cover image"
+    },
+    {
+      "type": "select",
+      "id": "mobile_aspect",
+      "label": "Mobile aspect ratio",
+      "options": [
+        { "value": "9-16", "label": "Vertical (9:16)" },
+        { "value": "4-5", "label": "Portrait (4:5)" },
+        { "value": "1-1", "label": "Square (1:1)" },
+        { "value": "16-9", "label": "Landscape (16:9)" }
+      ],
+      "default": "9-16"
+    },
+    {
+      "type": "header",
+      "content": "Playback"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_play_button",
+      "label": "Show play button",
+      "default": true,
+      "info": "When off, the video plays automatically (muted) on page load. When on, viewers click the play button to start. Note: browsers always require autoplay videos to be muted."
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": "Loop video",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "mute_audio",
+      "label": "Mute audio",
+      "default": false,
+      "info": "Forces audio off even when the viewer presses play. Autoplay videos are always muted regardless of this setting."
+    },
+    {
+      "type": "image_picker",
+      "id": "cover_image",
+      "label": "Cover image",
+      "info": "Shown until the viewer presses play. Only used when 'Show play button' is enabled."
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "width",
+      "label": "Width (desktop)",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "checkbox",
+      "id": "full_width_mobile",
+      "label": "Full width on mobile",
+      "default": false,
+      "info": "Stretches the video edge to edge on mobile devices."
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video"
+    }
+  ]
+}
+{% endschema %}

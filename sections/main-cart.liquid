@@ -1,0 +1,917 @@
+{% comment %}
+  Main cart section.
+
+  Renders the /cart page with a two-column layout:
+  - Left column: cart line items (image, title, variant, properties,
+    discounts, quantity controls, remove button, inline error)
+  - Right column: order summary with merchant-configurable blocks
+    (discount code, shipping note, cart note, trust badges, apps)
+
+  Cart mutations (quantity change, remove, discount apply, note update)
+  use Shopify's Ajax Cart API with bundled section rendering, so the
+  items list, summary totals, and header cart icon stay in sync after
+  every change. The section dispatches valor:cart:updated events so
+  other surfaces (cart drawer, in-cart product labels) can listen and
+  update without re-fetching the cart.
+
+  Critical checkout flow (subtotal, checkout button, accelerated
+  checkout, continue shopping) is hard-coded so a misconfigured
+  block list cannot break the cart. Merchants can add, remove, and
+  reorder the merchant blocks in between.
+
+  All Liquid output uses translatable cart.* locale keys.
+{% endcomment %}
+
+{{ 'cart-page.css' | asset_url | stylesheet_tag }}
+{{ 'product-card.css' | asset_url | stylesheet_tag }}
+{{ 'featured-collection.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'cart-page.js' | asset_url }}" defer="defer"></script>
+
+{%- liquid
+  assign heading_size_class = 'valor-heading--' | append: section.settings.heading_size
+
+  assign cart_heading = section.settings.heading
+  if cart_heading == blank
+    assign cart_heading = 'cart.title' | t
+  endif
+
+  assign cart_is_empty = false
+  if cart.item_count == 0
+    assign cart_is_empty = true
+  endif
+
+  assign continue_url = settings.continue_shopping_collection.url
+  if continue_url == blank
+    assign continue_url = routes.all_products_collection_url
+  endif
+
+  assign show_vendor = section.settings.show_vendor
+
+  comment
+    Collect customer-applied discount code titles for the active-codes
+    list. Three sources, in priority order:
+
+      1. cart.cart_level_discount_applications  (shows as money in totals)
+      2. cart.items[].line_level_discount_allocations  (per-product money)
+      3. cart.discount_codes  (catches shipping-only codes that don't
+         affect subtotal — they appear here but not in 1/2)
+
+    Sources 1+2 form `visible_code_titles` — codes whose effect the
+    customer can see immediately as a money amount. Source 3 adds the
+    shipping codes on top; we set `has_shipping_discount` so the UI
+    can show a "applied at checkout" notice.
+
+    Automatic discounts (type 'automatic') and product compare-at sale
+    prices are excluded — those are not customer-removable.
+
+    The same logic is mirrored in cart-page.js getApplicableDiscountCodes()
+    so AJAX cart responses re-render the list identically.
+  endcomment
+  assign visible_code_titles = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
+  for cart_item in cart.items
+    for allocation in cart_item.line_level_discount_allocations
+      if allocation.discount_application.type == 'discount_code'
+        assign line_codes = cart_item.line_level_discount_allocations | map: 'discount_application' | map: 'title'
+        assign visible_code_titles = visible_code_titles | concat: line_codes
+        break
+      endif
+    endfor
+  endfor
+  assign visible_code_titles = visible_code_titles | uniq
+
+  assign all_applicable_codes = cart.discount_codes | map: 'code'
+
+  assign code_discount_titles = visible_code_titles | concat: all_applicable_codes | uniq
+
+  assign has_shipping_discount = false
+  for code in all_applicable_codes
+    unless visible_code_titles contains code
+      assign has_shipping_discount = true
+      break
+    endunless
+  endfor
+-%}
+
+<valor-cart-page
+  class="valor-cart valor-section valor-cart--heading-align-{{ section.settings.heading_alignment }} valor-cart--summary-align-{{ section.settings.summary_text_alignment }}{% if cart_is_empty %} valor-cart--empty{% endif %}"
+  style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
+  data-section-id="{{ section.id }}"
+  data-section-type="main-cart"
+  data-strings-item-removed="{{ 'cart.item_removed' | t | escape }}"
+  data-strings-item-updated="{{ 'cart.item_updated' | t | escape }}"
+  data-strings-error-generic="{{ 'cart.error_generic' | t | escape }}"
+  data-strings-discount-added="{{ 'cart.discount_added' | t | escape }}"
+  data-strings-discount-applied="{{ 'cart.discount_applied' | t | escape }}"
+  data-strings-discount-removed="{{ 'cart.discount_removed' | t | escape }}"
+  data-strings-discount-invalid="{{ 'cart.discount_invalid' | t | escape }}"
+  data-strings-shipping-notice="{{ 'cart.shipping_discount_notice' | t | escape }}"
+  data-strings-remove-discount="{{ 'cart.remove_discount' | t | escape }}"
+  data-strings-note-updated="{{ 'cart.note_updated' | t | escape }}"
+>
+  <div
+    id="ValorCartLiveRegion"
+    class="visually-hidden"
+    role="status"
+    aria-live="polite"
+    data-cart-live-region
+  ></div>
+
+  <div class="valor-cart__container page-width">
+    <header class="valor-cart__header">
+      <h1 class="valor-heading {{ heading_size_class }} valor-cart__heading">
+        {{ cart_heading | escape }}
+      </h1>
+    </header>
+
+    {%- if cart_is_empty -%}
+      <div class="valor-cart__empty" data-cart-empty>
+        <p class="valor-cart__empty-text">
+          {{ 'cart.empty' | t }}
+        </p>
+
+        <a
+          href="{{ continue_url }}"
+          class="valor-button valor-button--primary valor-cart__empty-cta"
+        >
+          {{ 'cart.continue_shopping' | t }}
+        </a>
+
+        {%- if shop.customer_accounts_enabled and customer == null -%}
+          <div class="valor-cart__empty-login">
+            <p class="valor-cart__empty-login-title">{{ 'cart.login_title' | t }}</p>
+            <p class="valor-cart__empty-login-text">
+              {{ 'cart.login_text_html' | t: link: routes.account_login_url }}
+            </p>
+          </div>
+        {%- endif -%}
+      </div>
+
+    {%- else -%}
+      <form
+        action="{{ routes.cart_url }}"
+        method="post"
+        id="cart"
+        class="valor-cart__form"
+        data-cart-form
+        novalidate
+      >
+        <div class="valor-cart__layout">
+          <div class="valor-cart__items-column" data-cart-items-wrapper>
+            <valor-cart-items class="valor-cart-items">
+              <ul class="valor-cart-items__list" role="list">
+                {%- for item in cart.items -%}
+                  {%- render 'cart-line-item',
+                    item: item,
+                    line_index: forloop.index,
+                    section_id: section.id,
+                    show_vendor: show_vendor
+                  -%}
+                {%- endfor -%}
+              </ul>
+            </valor-cart-items>
+          </div>
+
+          <aside
+            class="valor-cart__summary"
+            data-cart-summary
+            aria-labelledby="CartSummaryHeading-{{ section.id }}"
+          >
+            <h2
+              id="CartSummaryHeading-{{ section.id }}"
+              class="visually-hidden"
+            >
+              {{ 'cart.summary_heading' | t }}
+            </h2>
+
+            <div class="valor-cart__summary-inner">
+              {%- comment -%}
+                Totals: itemized subtotal + per-discount lines + final total
+                when at least one cart-level discount is applied. Otherwise
+                a single subtotal row equal to cart.total_price.
+              {%- endcomment -%}
+              <div class="valor-cart__totals" data-cart-totals>
+                {%- if cart.cart_level_discount_applications.size > 0 -%}
+                  <div class="valor-cart__totals-row">
+                    <span class="valor-cart__totals-label">{{ 'cart.subtotal' | t }}</span>
+                    <span class="valor-cart__totals-value">{{ cart.items_subtotal_price | money_with_currency }}</span>
+                  </div>
+
+                  <ul class="valor-cart__discounts-list" aria-label="{{ 'cart.discounts' | t }}">
+                    {%- for discount in cart.cart_level_discount_applications -%}
+                      {%- assign is_code = false -%}
+                      {%- if code_discount_titles contains discount.title -%}
+                        {%- assign is_code = true -%}
+                      {%- endif -%}
+                      <li
+                        class="valor-cart__discount-row{% if is_code %} valor-cart__discount-row--code{% endif %}"
+                        data-discount-title="{{ discount.title | escape }}"
+                      >
+                        <span class="valor-cart__discount-label">
+                          <span class="valor-cart__discount-icon" aria-hidden="true">−</span>
+                          <span class="valor-cart__discount-title">{{ discount.title | escape }}</span>
+                        </span>
+                        <span class="valor-cart__discount-amount">−{{ discount.total_allocated_amount | money }}</span>
+                      </li>
+                    {%- endfor -%}
+                  </ul>
+
+                  <div class="valor-cart__totals-row valor-cart__totals-row--total">
+                    <span class="valor-cart__totals-label">{{ 'cart.total' | t }}</span>
+                    <span class="valor-cart__totals-value">{{ cart.total_price | money_with_currency }}</span>
+                  </div>
+                {%- else -%}
+                  <div class="valor-cart__totals-row">
+                    <span class="valor-cart__totals-label">{{ 'cart.subtotal' | t }}</span>
+                    <span class="valor-cart__totals-value">{{ cart.total_price | money_with_currency }}</span>
+                  </div>
+                {%- endif -%}
+              </div>
+
+              {%- comment -%}
+                Merchant-configurable blocks. Order is whatever the
+                merchant set in the theme editor; the schema declares
+                only one of each (limit: 1) plus unlimited @app blocks.
+              {%- endcomment -%}
+              {%- if section.blocks.size > 0 -%}
+                <div class="valor-cart__blocks">
+                  {%- for block in section.blocks -%}
+                    {%- case block.type -%}
+                      {%- when '@app' -%}
+                        <div class="valor-cart__block valor-cart__block--app" {{ block.shopify_attributes }}>
+                          {%- render block -%}
+                        </div>
+
+                      {%- when 'discount_code' -%}
+                        <div class="valor-cart__block valor-cart__block--discount" {{ block.shopify_attributes }}>
+                          <div class="valor-cart__discount-form" data-discount-form>
+                            <label
+                              for="ValorCartDiscount-{{ section.id }}"
+                              class="visually-hidden"
+                            >
+                              {{ 'cart.discount_label' | t }}
+                            </label>
+                            <div class="valor-cart__discount-form-row">
+                              <input
+                                id="ValorCartDiscount-{{ section.id }}"
+                                type="text"
+                                class="valor-cart__discount-input"
+                                placeholder="{{ 'cart.discount_placeholder' | t }}"
+                                autocomplete="off"
+                                autocorrect="off"
+                                autocapitalize="characters"
+                                spellcheck="false"
+                                data-discount-input
+                              >
+                              <button
+                                type="button"
+                                class="valor-cart__discount-apply"
+                                data-discount-apply
+                              >
+                                {{ 'cart.discount_apply' | t }}
+                              </button>
+                            </div>
+                            <p
+                              class="valor-cart__discount-message"
+                              data-discount-message
+                              aria-live="polite"
+                            ></p>
+
+                            {%- comment -%}
+                              Active customer-applied discount codes,
+                              listed with remove buttons. The titles
+                              are collected at the top of this section
+                              from cart.cart_level_discount_applications
+                              and cart.items[].line_level_discount_allocations
+                              filtered by type == 'discount_code', so
+                              both order-subtotal codes and codes that
+                              target specific products appear here.
+
+                              The same logic is mirrored in cart-page.js
+                              getApplicableDiscountCodes() so AJAX cart
+                              responses re-render this list identically.
+                              Automatic discounts and product compare-at
+                              sale prices are excluded — those are not
+                              customer-removable.
+                            {%- endcomment -%}
+                            <ul
+                              class="valor-cart__active-discounts"
+                              aria-label="{{ 'cart.active_discounts' | t }}"
+                              data-active-discounts
+                              data-remove-label="{{ 'cart.remove_discount' | t | escape }}"
+                              {% if code_discount_titles.size == 0 %}hidden{% endif %}
+                            >
+                              {%- for code in code_discount_titles -%}
+                                <li class="valor-cart__active-discount" data-discount-code="{{ code | escape }}">
+                                  <span class="valor-cart__discount-label">
+                                    <span class="valor-cart__discount-icon" aria-hidden="true">−</span>
+                                    <span class="valor-cart__discount-title">{{ code | escape }}</span>
+                                  </span>
+                                  <button
+                                    type="button"
+                                    class="valor-cart__discount-remove"
+                                    aria-label="{{ 'cart.remove_discount' | t }}: {{ code | escape }}"
+                                    data-discount-remove
+                                    data-discount-code="{{ code | escape }}"
+                                  >
+                                    <span aria-hidden="true">×</span>
+                                  </button>
+                                </li>
+                              {%- endfor -%}
+                            </ul>
+                            {%- if has_shipping_discount -%}
+                              <p class="valor-cart__shipping-discount-notice" data-shipping-discount-notice>
+                                {{ 'cart.shipping_discount_notice' | t }}
+                              </p>
+                            {%- endif -%}
+                          </div>
+                        </div>
+
+                      {%- when 'shipping_note' -%}
+                        {%- if block.settings.note != blank -%}
+                          <div class="valor-cart__block valor-cart__block--shipping-note rte" {{ block.shopify_attributes }}>
+                            {{ block.settings.note }}
+                          </div>
+                        {%- endif -%}
+
+                      {%- when 'cart_note' -%}
+                        {%- assign note_collapsed = block.settings.collapsed_by_default -%}
+                        {%- if note_collapsed and cart.note == blank -%}
+                          <details
+                            class="valor-cart__block valor-cart__block--note valor-cart__note"
+                            {{ block.shopify_attributes }}
+                          >
+                            <summary class="valor-cart__note-summary">
+                              <span class="valor-cart__note-summary-text">{{ 'cart.note_add' | t }}</span>
+                              <span class="valor-cart__note-chevron" aria-hidden="true">
+                                {{ 'icon-chevron-down.svg' | inline_asset_content }}
+                              </span>
+                            </summary>
+                            <label
+                              for="ValorCartNote-{{ section.id }}"
+                              class="visually-hidden"
+                            >
+                              {{ 'cart.note' | t }}
+                            </label>
+                            <textarea
+                              id="ValorCartNote-{{ section.id }}"
+                              class="valor-cart__note-input"
+                              name="note"
+                              form="cart"
+                              placeholder="{{ 'cart.note_placeholder' | t }}"
+                              data-cart-note
+                            >{{ cart.note }}</textarea>
+                          </details>
+                        {%- else -%}
+                          <div
+                            class="valor-cart__block valor-cart__block--note valor-cart__note valor-cart__note--expanded"
+                            {{ block.shopify_attributes }}
+                          >
+                            <label
+                              for="ValorCartNote-{{ section.id }}"
+                              class="valor-cart__note-label"
+                            >
+                              {{ 'cart.note' | t }}
+                            </label>
+                            <textarea
+                              id="ValorCartNote-{{ section.id }}"
+                              class="valor-cart__note-input"
+                              name="note"
+                              form="cart"
+                              placeholder="{{ 'cart.note_placeholder' | t }}"
+                              data-cart-note
+                            >{{ cart.note }}</textarea>
+                          </div>
+                        {%- endif -%}
+
+                      {%- when 'trust_badges' -%}
+                        <div class="valor-cart__block valor-cart__block--trust-badges" {{ block.shopify_attributes }}>
+                          {%- if block.settings.heading != blank -%}
+                            <h3 class="valor-cart__trust-badges-heading">
+                              {{ block.settings.heading | escape }}
+                            </h3>
+                          {%- endif -%}
+                          {%- if block.settings.content != blank -%}
+                            <div class="valor-cart__trust-badges-content rte">
+                              {{ block.settings.content }}
+                            </div>
+                          {%- endif -%}
+                        </div>
+                    {%- endcase -%}
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+
+              <p class="valor-cart__taxes-note">{{ 'cart.taxes_and_shipping_at_checkout' | t }}</p>
+
+              {%- comment -%}
+                Critical checkout flow: hard-coded so merchants cannot
+                accidentally remove it from the schema. Continue
+                shopping sits below additional checkout buttons.
+              {%- endcomment -%}
+              <div class="valor-cart__checkout-flow">
+                <button
+                  type="submit"
+                  name="checkout"
+                  class="valor-button valor-button--primary valor-cart__checkout-button"
+                  form="cart"
+                  data-cart-checkout
+                >
+                  {{ 'cart.checkout' | t }}
+                </button>
+
+                {%- if additional_checkout_buttons -%}
+                  <div class="valor-cart__additional-checkout-buttons">
+                    {{ content_for_additional_checkout_buttons }}
+                  </div>
+                {%- endif -%}
+
+                <a
+                  href="{{ continue_url }}"
+                  class="valor-cart__continue-shopping"
+                >
+                  {{ 'cart.continue_shopping' | t }}
+                </a>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </form>
+    {%- endif -%}
+  </div>
+</valor-cart-page>
+
+{%- comment -%}
+  Empty-cart product recommendations.
+
+  Rendered OUTSIDE <valor-cart-page> so that it sits as a direct child
+  of the .shopify-section grid. This is critical because:
+
+    1. The Skeleton base assigns grid-column: 2 to direct children of
+       .shopify-section, so this block aligns to the same content
+       column as featured-collection / related-products on other pages
+       — flush with the page edges, not nested inside the cart's
+       .page-width container which would create double padding.
+
+    2. The .valor-featured-collection--mobile-full-bleed class targets
+       direct children of .shopify-section to break out to the full
+       viewport width on mobile (for swipe-on-mobile). That selector
+       only works if this block is at the root of the section.
+
+  Markup itself is identical to featured-collection.liquid and
+  related-products.liquid. Setting names mirror featured-collection
+  1:1, prefixed with empty_recommendations_ to namespace them within
+  this section.
+{%- endcomment -%}
+{%- if cart_is_empty and section.settings.show_empty_recommendations -%}
+  {%- liquid
+    assign recs_collection = collections[section.settings.empty_recommendations_collection]
+    assign recs_products_to_show = section.settings.empty_recommendations_products_to_show | default: 4
+    assign recs_columns_desktop = section.settings.empty_recommendations_columns_desktop | default: 4
+    assign recs_columns_mobile = section.settings.empty_recommendations_columns_mobile | default: '2'
+    assign recs_image_ratio = section.settings.empty_recommendations_image_ratio | default: 'square'
+    assign recs_show_secondary_image = section.settings.empty_recommendations_show_secondary_image
+    assign recs_show_vendor = section.settings.empty_recommendations_show_vendor
+    assign recs_show_view_all = section.settings.empty_recommendations_show_view_all
+    assign recs_view_all_style = section.settings.empty_recommendations_view_all_style | default: 'secondary'
+    assign recs_full_width = section.settings.empty_recommendations_full_width
+    assign recs_swipe_on_mobile = section.settings.empty_recommendations_swipe_on_mobile
+    assign recs_mobile_card_width = section.settings.empty_recommendations_mobile_card_width | default: 70
+    assign recs_column_gap = section.settings.empty_recommendations_column_gap | default: 16
+    assign recs_column_gap_mobile = section.settings.empty_recommendations_column_gap_mobile | default: 12
+    assign recs_padding_top = section.settings.empty_recommendations_padding_top | default: 40
+    assign recs_padding_bottom = section.settings.empty_recommendations_padding_bottom | default: 24
+    assign recs_heading = section.settings.empty_recommendations_heading
+    assign recs_heading_size = section.settings.empty_recommendations_heading_size | default: 'medium'
+    assign recs_heading_alignment = section.settings.empty_recommendations_heading_alignment | default: 'center'
+
+    assign recs_products = recs_collection.products
+    assign recs_view_all_url = recs_collection.url
+    if recs_products == blank or recs_products.size == 0
+      assign recs_products = collections.all.products
+      assign recs_view_all_url = routes.all_products_collection_url
+    endif
+  -%}
+
+  {%- if recs_products.size > 0 -%}
+    <div
+      class="valor-featured-collection valor-cart__recommendations{% if recs_swipe_on_mobile %} valor-featured-collection--mobile-full-bleed{% endif %}"
+      style="--valor-section-padding-top: {{ recs_padding_top }}px; --valor-section-padding-bottom: {{ recs_padding_bottom }}px; --valor-grid-gap: {{ recs_column_gap }}px; --valor-grid-gap-mobile: {{ recs_column_gap_mobile }}px; --valor-mobile-card-width: {{ recs_mobile_card_width }}%;"
+    >
+      <div class="valor-featured-collection__inner{% if recs_full_width %} valor-featured-collection__inner--full-width{% endif %}">
+        {%- if recs_heading != blank or recs_show_view_all -%}
+          <header class="valor-featured-collection__header valor-featured-collection__header--align-{{ recs_heading_alignment }}">
+            {%- if recs_heading != blank -%}
+              <h2 class="valor-featured-collection__title valor-heading valor-heading--{{ recs_heading_size }}">
+                {{ recs_heading }}
+              </h2>
+            {%- endif -%}
+
+            {%- if recs_show_view_all and recs_view_all_url != blank -%}
+              <a
+                href="{{ recs_view_all_url }}"
+                class="valor-featured-collection__view-all valor-featured-collection__view-all--desktop"
+              >
+                {{ 'sections.featured_collection.view_all' | t | default: 'View all' }}
+                <span aria-hidden="true">→</span>
+              </a>
+            {%- endif -%}
+          </header>
+        {%- endif -%}
+
+        <div
+          class="valor-featured-collection__grid valor-featured-collection__grid--cols-{{ recs_columns_desktop }} valor-featured-collection__grid--mobile-{{ recs_columns_mobile }}{% if recs_swipe_on_mobile %} valor-featured-collection__grid--swipe-mobile{% endif %}"
+        >
+          {%- for product in recs_products limit: recs_products_to_show -%}
+            {%- render 'product-card',
+              product: product,
+              image_ratio: recs_image_ratio,
+              show_secondary_image: recs_show_secondary_image,
+              show_vendor: recs_show_vendor,
+              show_price: true
+            -%}
+          {%- endfor -%}
+        </div>
+
+        {%- if recs_show_view_all and recs_view_all_url != blank -%}
+          <div class="valor-featured-collection__view-all-mobile">
+            <a href="{{ recs_view_all_url }}" class="valor-button valor-button--{{ recs_view_all_style }}">
+              {{ 'sections.featured_collection.view_all' | t | default: 'View all' }}
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Cart page",
+  "tag": "section",
+  "class": "valor-section-wrapper valor-section-wrapper--cart",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shopping cart"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Heading size",
+      "options": [
+        {
+          "value": "small",
+          "label": "Small"
+        },
+        {
+          "value": "medium",
+          "label": "Medium"
+        },
+        {
+          "value": "large",
+          "label": "Large"
+        }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "summary_text_alignment",
+      "label": "Summary block text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Empty cart recommendations"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_empty_recommendations",
+      "label": "Show product recommendations when cart is empty",
+      "default": true
+    },
+    {
+      "type": "inline_richtext",
+      "id": "empty_recommendations_heading",
+      "label": "Heading",
+      "default": "You may also like"
+    },
+    {
+      "type": "select",
+      "id": "empty_recommendations_heading_size",
+      "label": "Heading size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "empty_recommendations_heading_alignment",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "collection",
+      "id": "empty_recommendations_collection",
+      "label": "Collection",
+      "info": "Leave blank to show featured products from all available products."
+    },
+    {
+      "type": "range",
+      "id": "empty_recommendations_products_to_show",
+      "label": "Number of products",
+      "min": 2,
+      "max": 12,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "empty_recommendations_show_view_all",
+      "label": "Show \"View all\" link",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "empty_recommendations_view_all_style",
+      "label": "\"View all\" button style (mobile)",
+      "options": [
+        { "value": "primary", "label": "Solid" },
+        { "value": "secondary", "label": "Outline" }
+      ],
+      "default": "secondary"
+    },
+    {
+      "type": "checkbox",
+      "id": "empty_recommendations_full_width",
+      "label": "Full width",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Empty cart recommendations — Product cards"
+    },
+    {
+      "type": "select",
+      "id": "empty_recommendations_image_ratio",
+      "label": "Image ratio",
+      "options": [
+        { "value": "adapt", "label": "Adapt to image" },
+        { "value": "portrait", "label": "Portrait" },
+        { "value": "square", "label": "Square" },
+        { "value": "landscape", "label": "Landscape" }
+      ],
+      "default": "square"
+    },
+    {
+      "type": "checkbox",
+      "id": "empty_recommendations_show_secondary_image",
+      "label": "Swap image on hover",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "empty_recommendations_show_vendor",
+      "label": "Show vendor",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Empty cart recommendations — Layout"
+    },
+    {
+      "type": "range",
+      "id": "empty_recommendations_columns_desktop",
+      "label": "Columns on desktop",
+      "min": 2,
+      "max": 5,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "select",
+      "id": "empty_recommendations_columns_mobile",
+      "label": "Columns on mobile",
+      "options": [
+        { "value": "1", "label": "1 column" },
+        { "value": "2", "label": "2 columns" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "checkbox",
+      "id": "empty_recommendations_swipe_on_mobile",
+      "label": "Enable swipe on mobile",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "empty_recommendations_mobile_card_width",
+      "label": "Mobile swipe card width",
+      "info": "Controls the card width when swipe on mobile is enabled.",
+      "min": 50,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "default": 70
+    },
+    {
+      "type": "range",
+      "id": "empty_recommendations_column_gap",
+      "label": "Gap between cards",
+      "info": "Spacing between products in the grid. Set to 0 for an edge-to-edge look.",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "empty_recommendations_column_gap_mobile",
+      "label": "Gap between cards on mobile",
+      "info": "Spacing between products on mobile. Also applies to swipe-on-mobile layout.",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Empty cart recommendations — Spacing"
+    },
+    {
+      "type": "range",
+      "id": "empty_recommendations_padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "empty_recommendations_padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    },
+    {
+      "type": "discount_code",
+      "name": "Discount code",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Show a discount code field in the order summary."
+        }
+      ]
+    },
+    {
+      "type": "shipping_note",
+      "name": "Shipping note",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "richtext",
+          "id": "note",
+          "label": "Note",
+          "default": "<p>Shipping & taxes calculated at checkout</p>"
+        }
+      ]
+    },
+    {
+      "type": "cart_note",
+      "name": "Order note",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "collapsed_by_default",
+          "label": "Collapsed by default",
+          "default": true
+        }
+      ]
+    },
+    {
+      "type": "trust_badges",
+      "name": "Trust badges",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Secure checkout"
+        },
+        {
+          "type": "richtext",
+          "id": "content",
+          "label": "Content",
+          "default": "<p>Visa · Mastercard · PayPal · Apple Pay</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cart",
+      "blocks": [
+        {
+          "type": "discount_code"
+        },
+        {
+          "type": "shipping_note"
+        },
+        {
+          "type": "cart_note"
+        },
+        {
+          "type": "trust_badges"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

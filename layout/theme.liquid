@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}" class="{% if request.page_type == 'index' %}valor-page-index{% endif %}">
+  <head>
+    {% # Inlined CSS Variables %}
+    {% render 'css-variables' %}
+
+    {% # Load and preload the critical CSS before any optional font preload %}
+    {{ 'critical.css' | asset_url | stylesheet_tag: preload: true }}
+
+    {% comment %}
+      Keep resource hints focused: critical.css is already preloaded above and,
+      when needed, only the base body font is preloaded for first paint.
+      Additional font variants load through @font-face with font-display: swap.
+    {% endcomment %}
+    {% unless settings.type_body_font.system? %}
+      {{ settings.type_body_font | font_url | preload_tag: as: 'font', crossorigin: 'anonymous' }}
+    {% endunless %}
+
+    {%- if settings.enable_back_to_top -%}
+      {{ 'back-to-top.css' | asset_url | stylesheet_tag }}
+    {%- endif -%}
+
+    {%- if settings.enable_predictive_search -%}
+      {{ 'component-predictive-search.css' | asset_url | stylesheet_tag }}
+    {%- endif -%}
+
+
+    {{ 'product-media-gallery.css' | asset_url | stylesheet_tag }}
+    {{ 'lightbox.css' | asset_url | stylesheet_tag }}
+
+    {% # Social, title, etc. %}
+    {% render 'meta-tags' %}
+
+    {{ content_for_header }}
+  </head>
+
+  <body>
+    <a class="skip-to-content-link" href="#MainContent">
+      {{ 'accessibility.skip_to_content' | t }}
+    </a>
+
+    {% sections 'header-group' %}
+
+    <main id="MainContent" role="main">
+      {{ content_for_layout }}
+    </main>
+
+    {% sections 'footer-group' %}
+
+    {%- if settings.enable_cart_drawer -%}
+      {% section 'cart-drawer' %}
+    {%- endif -%}
+
+    {%- if settings.enable_back_to_top -%}
+      {%- render 'back-to-top' -%}
+      <script src="{{ 'back-to-top.js' | asset_url }}" defer></script>
+    {%- endif -%}
+
+    {%- if settings.enable_predictive_search -%}
+      <script>
+        window.routes = window.routes || {};
+        window.routes.predictive_search_url = {{ routes.predictive_search_url | json }};
+      </script>
+      <script src="{{ 'predictive-search.js' | asset_url }}" defer></script>
+    {%- endif -%}
+
+
+    {%- if request.page_type == 'index' -%}
+      <script>
+        (function () {
+          requestAnimationFrame(function () {
+            if (!document.querySelector('#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger')) {
+              document.documentElement.classList.add('valor-transparent-header-ready');
+            }
+          });
+        })();
+      </script>
+    {%- endif -%}
+
+    {%- render 'lightbox' -%}
+    <script src="{{ 'lightbox.js' | asset_url }}" defer></script>
+    <script src="{{ 'product-media-gallery.js' | asset_url }}" defer></script>
+    <script src="{{ 'quantity-input.js' | asset_url }}" defer></script>
+    <script src="{{ 'video.js' | asset_url }}" defer></script>
+  </body>
+</html>
