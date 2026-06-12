@@ -52,7 +52,7 @@
 }
 /* Soft neutral backdrop behind contained images so the letterboxed area
    doesn't read as "broken layout". Stays subtle on both light and dark
-   colour schemes. */
+   color schemes. */
 .valor-product-media--fit-contain .valor-product-media__main-item {
   background-color: color-mix(in srgb, var(--color-foreground) 4%, var(--color-background));
 }

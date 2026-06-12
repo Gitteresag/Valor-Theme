@@ -622,7 +622,7 @@ class ValorProductInfo extends HTMLElement {
       self._popupHandlers.push([trigger, "click", onTrigger]);
 
       // Backdrop click: the dialog element itself is now a full-viewport
-      // flex container with a visually centred inner card. A click that
+      // flex container with a visually centered inner card. A click that
       // bubbles up to the dialog (e.target === dialog) means the user
       // clicked outside the inner card — i.e. the backdrop area. Clicks
       // on the inner card or its children stop short of the dialog

@@ -4,7 +4,7 @@
   This is an upsell block ("Pairs well with") shown near the buy
   buttons. It uses Shopify's Product Recommendations API with
   intent=complementary, which returns products the merchant has
-  manually associated via the Shopify Search & Discovery app.
+  manually associated via the Shopify Search and Discovery app.
 
   Distinct from related-products section:
     - related-products: section at the bottom of the page,
@@ -32,7 +32,7 @@
     Theme Editor, no data         → A short helper appears so the
                                     merchant can see and configure
                                     the block, with a hint about
-                                    Search & Discovery.
+                                    Search and Discovery.
 
   Accepts:
     block       {Block}    required — for shopify_attributes and settings
@@ -84,7 +84,7 @@
           {{
             'sections.main_product.complementary_empty_editor'
             | t
-            | default: 'Complementary products will appear here once they are set up in the Shopify Search & Discovery app.'
+            | default: 'Complementary products will appear here once they are set up in the Shopify Search and Discovery app.'
           }}
         </p>
       </div>

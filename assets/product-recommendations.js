@@ -24,7 +24,7 @@
        customer never sees a placeholder grid, and the page reflows
        around the absent block cleanly.
      - In Theme Editor we DO fetch, so merchants who have just set
-       up complementary products in Search & Discovery see them
+       up complementary products in Search and Discovery see them
        immediately without reloading the storefront. The helper
        paragraph from the server-rendered empty state gets replaced
        by the fetched cards on success; on empty result, the helper

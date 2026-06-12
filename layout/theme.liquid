@@ -1,5 +1,9 @@
 <!doctype html>
-<html lang="{{ request.locale.iso_code }}" class="{% if request.page_type == 'index' %}valor-page-index{% endif %}">
+<html
+  lang="{{ request.locale.iso_code }}"
+  class="{% if request.page_type == 'index' %}valor-page-index{% endif %}"
+  data-valor-theme="valor"
+>
   <head>
     {% # Inlined CSS Variables %}
     {% render 'css-variables' %}

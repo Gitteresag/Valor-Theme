@@ -192,7 +192,7 @@
    the right.
 
    Rather than removing the full-bleed effect from featured-collection
-   (which works correctly on the homepage), we scope this fix specifically
+   (which works correctly on the home page), we scope this rule specifically
    to .valor-related-products. Trade-off: related-products on mobile loses
    the edge-to-edge bleed and sits inside the regular page padding, but
    the rest of the product page layout stays intact.

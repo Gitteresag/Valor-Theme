@@ -103,8 +103,8 @@
 }
 
 /* === Inventory ===
-   A small coloured dot signals state at-a-glance. Colours intentionally
-   muted so they don't clash with merchant-chosen colour palettes. */
+   A small colored dot signals state at-a-glance. Colors intentionally
+   muted so they don't clash with merchant-chosen color palettes. */
 .valor-mp__inventory {
   margin: 0;
   font-size: 0.875rem;
@@ -319,7 +319,7 @@
     border-color: color-mix(in srgb, var(--color-foreground) 75%, transparent);
   }
 }
-/* Selected: heavier ring with a small inner gap so the swatch colour
+/* Selected: heavier ring with a small inner gap so the swatch color
    stays readable against the focus ring. */
 .valor-mp__option-input:checked + .valor-mp__option-swatch {
   border-color: var(--color-background);
@@ -543,7 +543,7 @@
 
 /* === Rating ===
    Two stacked rows of stars: bottom row is empty (muted outline),
-   top row is filled (foreground colour) clipped to a width set by
+   top row is filled (foreground color) clipped to a width set by
    --valor-rating-percent. This handles fractional ratings (e.g. 4.3)
    without rendering different SVGs per value, and degrades gracefully
    on browsers that don't support custom properties (showing 5 muted
@@ -729,7 +729,7 @@
    margin:auto centring of <dialog> (which is fragile when combined
    with width: 100% + max-width — Chromium and Safari can render the
    dialog flush to the top-left corner), we treat the <dialog> itself
-   as a full-viewport flex container and centre an inner card inside
+   as a full-viewport flex container and center an inner card inside
    it. This is the same pattern as snippets/lightbox.liquid uses, so
    the two share a consistent, reliable approach. */
 .valor-mp__popup-dialog {

@@ -141,7 +141,7 @@
       "suggestions": "Suggestions",
       "products": "Products",
       "collections": "Collections",
-      "pages_and_articles": "Pages & articles",
+      "pages_and_articles": "Pages and articles",
       "view_all_for_html": "View all results for <strong>{{ terms }}</strong>",
       "no_results_html": "No results found for <strong>\"{{ terms }}\"</strong>.",
       "results_with_count": {
@@ -222,7 +222,7 @@
       "send_on": "Send on",
       "send_on_label": "Send on (optional)",
       "max_characters": "{{ max_chars }} characters maximum",
-      "error_heading": "Please fix the recipient information.",
+      "error_heading": "Please correct the recipient information.",
       "expanded": "Gift recipient fields expanded.",
       "collapsed": "Gift recipient fields collapsed."
     }
@@ -260,7 +260,7 @@
     "main_product": {
       "collapsible_empty_editor": "Add row content or select a page to show this collapsible row on the product page.",
       "popup_empty_editor": "Add modal content or select a page to show this pop-up link on the product page.",
-      "complementary_empty_editor": "Complementary products will appear here once they are set up in the Shopify Search & Discovery app."
+      "complementary_empty_editor": "Complementary products will appear here once they are set up in the Shopify Search and Discovery app."
     },
     "slideshow": {
       "aria_label": "Slideshow",
@@ -302,7 +302,7 @@
         "send": "Send",
         "title": "Contact form",
         "post_success": "Thanks for getting in touch — we'll reply as soon as we can.",
-        "error_heading": "Please fix the following:"
+        "error_heading": "Please correct the following:"
       }
     },
     "search": {

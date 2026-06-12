@@ -76,7 +76,13 @@ class ValorLightbox extends HTMLDialogElement {
 
   render() {
     var img = this.images[this.index];
-    if (!img || !this.imgEl) return;
+    if (!img || !img.src || !this.viewportEl) return;
+    if (!this.imgEl) {
+      this.imgEl = document.createElement("img");
+      this.imgEl.className = "valor-lightbox__image";
+      this.imgEl.setAttribute("data-lightbox-image", "");
+      this.viewportEl.appendChild(this.imgEl);
+    }
     this.imgEl.src = img.src;
     this.imgEl.alt = img.alt || "";
     this.imgEl.removeAttribute("width");

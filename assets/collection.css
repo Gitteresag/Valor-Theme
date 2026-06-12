@@ -165,8 +165,8 @@
 }
 
 /* Mobile toolbar layout:
-   - Product count centred on its own row
-   - Single "Filter and sort" button below it, full width, centred
+   - Product count centered on its own row
+   - Single "Filter and sort" button below it, full width, centered
    - Desktop sort wrapper hidden — sort moves into the drawer
    - Filter button hidden on desktop (sidebar is always visible) */
 @media (max-width: 749.98px) {

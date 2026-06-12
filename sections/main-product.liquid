@@ -287,10 +287,8 @@
 
        For media-right, the grid-template-columns are simply reversed —
        this gives the media column the same width as in media-left, just
-       on the other side. (Earlier we used `order: 2` on the media child,
-       but that only swaps the visual order without swapping the column
-       widths, so a "small media on the right" ended up rendered in the
-       wide column. Reversing the columns is the correct fix.) */
+       on the other side. Reversing the column definitions keeps the
+       selected media width paired with the selected media side. */
     .valor-mp--media-left.valor-mp--media-small .valor-mp__inner {
       grid-template-columns: minmax(0, 0.35fr) minmax(0, 0.65fr);
     }
@@ -328,9 +326,9 @@
      section's padding.
 
      Theme shell wraps every section in a CSS grid where children are
-     constrained to the centre column (.shopify-section > * { grid-column: 2 }).
+     constrained to the center column (.shopify-section > * { grid-column: 2 }).
      A negative margin alone can only compensate the section's own padding,
-     not the grid's centre column — so we first promote the section to
+     not the grid's center column, so we first promote the section to
      span the full grid (grid-column: 1 / -1), then apply the classic
      full-bleed trick (width: 100vw + margin-left: calc(50% - 50vw)) to
      the main image element itself. Same approach as featured-product. */
@@ -518,7 +516,7 @@
           ],
           "default": "pills",
           "label": "Picker style",
-          "info": "Swatches use the native colour or image swatches set in Shopify (Products → Options → Swatches). Falls back to pills automatically if any value is missing swatch data."
+          "info": "Swatches use the native color or image swatches set in Shopify (Products > Options > Swatches). Falls back to pills automatically if any value is missing swatch data."
         },
         {
           "type": "select",

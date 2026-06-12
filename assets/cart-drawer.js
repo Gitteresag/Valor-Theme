@@ -440,8 +440,8 @@
         /* Per-line quantity change. Uses bundled section rendering:
            one POST to /cart/change.js with sections=cart-drawer returns
            the cart object inline AND the freshly rendered drawer HTML
-           in a single round trip. The legacy three-fetch refresh()
-           path is the fallback when the response doesn't carry usable
+           in a single round trip. The three-fetch refresh()
+           path remains the fallback when the response doesn't carry usable
            section HTML. */
         changeLine(line, quantity) {
           var self = this;
@@ -472,7 +472,7 @@
                   return;
                 }
               }
-              // Fallback: section markup missing → re-render the legacy way
+              // Fallback: section markup is missing, so re-render the drawer.
               return self.refresh();
             })
             .catch(function (err) {

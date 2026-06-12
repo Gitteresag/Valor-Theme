@@ -59,10 +59,7 @@
   </button>
 
   <div class="valor-lightbox__viewport" data-lightbox-viewport>
-    {% # theme-check-disable ImgWidthAndHeight %}
-    {% # Populated by lightbox.js, which sets width/height from the loaded image %}
-    <img class="valor-lightbox__image" data-lightbox-image alt="">
-    {% # theme-check-enable ImgWidthAndHeight %}
+    {% # Populated by lightbox.js only when an image is opened. %}
   </div>
 
   <button
