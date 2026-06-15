@@ -35,9 +35,8 @@
   assign current_variant = product.selected_or_first_available_variant
   assign product_form_id = 'product-form-' | append: section.id
 
-  # Resolve gallery overrides: section-level 'default' falls back to the
-  # theme-wide setting so merchants can configure a global preference and
-  # then opt in/out per product page. Same pattern as featured-product.
+  # Resolve gallery overrides. Legacy 'default' values are mapped to the
+  # direct section default so older saved product templates keep rendering.
   assign enable_lightbox = settings.gallery_enable_lightbox
   if section.settings.enable_lightbox == 'on'
     assign enable_lightbox = true
@@ -59,9 +58,9 @@
     assign show_arrows = false
   endif
 
-  assign mobile_indicator = settings.gallery_mobile_indicator | default: 'counter'
-  if section.settings.mobile_indicator != 'default'
-    assign mobile_indicator = section.settings.mobile_indicator
+  assign mobile_indicator = section.settings.mobile_indicator | default: 'counter'
+  if mobile_indicator == 'default'
+    assign mobile_indicator = 'counter'
   endif
   assign desktop_gallery_layout = section.settings.desktop_gallery_layout | default: 'single'
 
@@ -1089,11 +1088,10 @@
       "type": "select",
       "id": "mobile_indicator",
       "options": [
-        { "value": "default", "label": "Use theme default" },
         { "value": "counter", "label": "Counter" },
         { "value": "progress", "label": "t:sections.main_product.settings.mobile_indicator.options.progress" }
       ],
-      "default": "default",
+      "default": "counter",
       "label": "t:sections.main_product.settings.mobile_indicator.label"
     },
     {

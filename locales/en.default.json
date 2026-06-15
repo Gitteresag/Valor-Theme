@@ -285,7 +285,7 @@
     },
     "slideshow": {
       "aria_label": "Slideshow",
-      "dots_label": "Choose slide",
+      "slides_label": "Slideshow slides",
       "go_to_slide": "Go to slide {{ number }}",
       "placeholder_heading": "Add slideshow slides"
     },

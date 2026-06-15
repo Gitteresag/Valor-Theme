@@ -45,8 +45,7 @@
   assign active_media_index = 0
 -%}
 
-<div
-  is="valor-product-media"
+<valor-product-media
   class="valor-product-media valor-product-media--{{ aspect }} valor-product-media--fit-{{ media_fit }} valor-product-media--desktop-layout-{{ desktop_layout }} valor-product-media--mobile-indicator-{{ mobile_indicator }}{% unless enable_lightbox %} valor-product-media--no-lightbox{% endunless %}"
   data-section-id="{{ section_id }}"
   data-lightbox-enabled="{{ enable_lightbox }}"
@@ -322,4 +321,4 @@
       </div>
     </div>
   {%- endif -%}
-</div>
+</valor-product-media>

@@ -257,14 +257,12 @@
         "content_gap_mobile": {
           "label": "Mobile text spacing from image"
         },
-        "dots_gap_desktop": {
-          "label": "Desktop dots spacing"
-        },
-        "dots_gap_mobile": {
-          "label": "Mobile dots spacing"
-        },
-        "show_dots": {
-          "label": "Show dots"
+        "indicator": {
+          "label": "Slide indicator",
+          "info": "Choose a counter or line indicators for this slideshow. The indicator appears on desktop and mobile.",
+          "options": {
+            "progress": "Line indicators"
+          }
         },
         "autoplay": {
           "label": "Auto-rotate slides"

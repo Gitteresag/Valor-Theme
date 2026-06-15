@@ -1,5 +1,5 @@
 /**
- * <div is="valor-product-media">
+ * <valor-product-media>
  *
  * Handles the product gallery:
  *   - Thumbnail switching (when shown)
@@ -13,7 +13,7 @@
  *     detail: { mediaId: '...' }
  *   }));
  */
-class ValorProductMedia extends HTMLDivElement {
+class ValorProductMedia extends HTMLElement {
   constructor() {
     super();
     this._handleThumbClick = this.onThumbClick.bind(this);
@@ -293,5 +293,5 @@ class ValorProductMedia extends HTMLDivElement {
 }
 
 if (!customElements.get("valor-product-media")) {
-  customElements.define("valor-product-media", ValorProductMedia, { extends: "div" });
+  customElements.define("valor-product-media", ValorProductMedia);
 }

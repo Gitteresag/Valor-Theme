@@ -9,8 +9,10 @@
       this.initialized = true;
 
       this.viewport = this.querySelector("[data-slideshow-viewport]");
+      this.track = this.querySelector("[data-slideshow-track]");
       this.slides = Array.prototype.slice.call(this.querySelectorAll("[data-slide]"));
-      this.dots = Array.prototype.slice.call(this.querySelectorAll("[data-slide-dot]"));
+      this.buttons = Array.prototype.slice.call(this.querySelectorAll("[data-slide-button]"));
+      this.counters = Array.prototype.slice.call(this.querySelectorAll("[data-slide-counter]"));
       this.autoplay = this.dataset.autoplay === "true";
       this.interval = Math.max(parseInt(this.dataset.interval, 10) || 5000, 3000);
       this.pauseOnHover = this.dataset.pauseOnHover !== "false";
@@ -53,12 +55,12 @@
     bindEvents() {
       var signal = this.abortController.signal;
 
-      this.dots.forEach(
-        function (dot) {
-          dot.addEventListener(
+      this.buttons.forEach(
+        function (button) {
+          button.addEventListener(
             "click",
             function () {
-              this.show(Number(dot.dataset.slideDot));
+              this.show(Number(button.dataset.slideIndex));
               this.restartAutoplay();
             }.bind(this),
             { signal: signal },
@@ -68,6 +70,7 @@
 
       this.viewport.addEventListener("scroll", this.onScroll, { passive: true, signal: signal });
       window.addEventListener("resize", this.onResize, { signal: signal });
+      window.addEventListener("load", this.onResize, { signal: signal });
       document.addEventListener("visibilitychange", this.onVisibilityChange, { signal: signal });
       this.addEventListener("keydown", this.onKeydown, { signal: signal });
       this.addEventListener("focusin", this.stopAutoplay, { signal: signal });
@@ -124,16 +127,19 @@
       return (index + this.slides.length) % this.slides.length;
     }
 
+    getSlideOffset(slide) {
+      if (!slide) return 0;
+      var base = this.track || this.slides[0];
+      return slide.offsetLeft - base.offsetLeft;
+    }
+
     scrollToSlide(index, instant) {
       var slide = this.slides[index];
       if (!slide || !this.viewport) return;
 
-      var left = slide.offsetLeft - this.slides[0].offsetLeft;
-      var useInstantScroll = instant || this.reducedMotionQuery.matches;
-
       this.viewport.scrollTo({
-        left: left,
-        behavior: useInstantScroll ? "auto" : "smooth",
+        left: this.getSlideOffset(slide),
+        behavior: instant || this.reducedMotionQuery.matches ? "auto" : "smooth",
       });
     }
 
@@ -151,19 +157,19 @@
       if (!this.viewport || this.slides.length < 2) return 0;
 
       var viewportLeft = this.viewport.scrollLeft;
-      var firstOffset = this.slides[0].offsetLeft;
       var closestIndex = 0;
       var closestDistance = Infinity;
 
-      this.slides.forEach(function (slide, index) {
-        var slideLeft = slide.offsetLeft - firstOffset;
-        var distance = Math.abs(slideLeft - viewportLeft);
+      this.slides.forEach(
+        function (slide, index) {
+          var distance = Math.abs(this.getSlideOffset(slide) - viewportLeft);
 
-        if (distance < closestDistance) {
-          closestDistance = distance;
-          closestIndex = index;
-        }
-      });
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = index;
+          }
+        }.bind(this),
+      );
 
       return closestIndex;
     }
@@ -186,15 +192,14 @@
         });
       });
 
-      this.dots.forEach(function (dot, dotIndex) {
-        var isActive = dotIndex === index;
-        dot.setAttribute("aria-pressed", isActive ? "true" : "false");
+      this.counters.forEach(function (counter) {
+        counter.textContent = index + 1 + " / " + this.slides.length;
+      }, this);
 
-        if (isActive) {
-          dot.setAttribute("aria-current", "true");
-        } else {
-          dot.removeAttribute("aria-current");
-        }
+      this.buttons.forEach(function (button) {
+        var isActive = Number(button.dataset.slideIndex) === index;
+        button.setAttribute("aria-current", isActive ? "true" : "false");
+        button.setAttribute("aria-pressed", isActive ? "true" : "false");
       });
     }
 

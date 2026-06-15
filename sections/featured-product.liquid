@@ -6,7 +6,8 @@
   assign current_variant = product.selected_or_first_available_variant
   assign product_form_id = 'fp-form-' | append: section.id
 
-  # Resolve gallery overrides: 'default' falls back to theme settings.
+  # Resolve gallery overrides. Legacy 'default' values are mapped to the
+  # direct section default so older saved featured-product sections keep rendering.
   assign enable_lightbox = settings.gallery_enable_lightbox
   if section.settings.enable_lightbox == 'on'
     assign enable_lightbox = true
@@ -28,9 +29,9 @@
     assign show_arrows = false
   endif
 
-  assign mobile_indicator = settings.gallery_mobile_indicator | default: 'counter'
-  if section.settings.mobile_indicator != 'default'
-    assign mobile_indicator = section.settings.mobile_indicator
+  assign mobile_indicator = section.settings.mobile_indicator | default: 'counter'
+  if mobile_indicator == 'default'
+    assign mobile_indicator = 'counter'
   endif
 
   assign gallery_priority = false
@@ -1142,11 +1143,10 @@
       "id": "mobile_indicator",
       "label": "Mobile gallery indicator",
       "options": [
-        { "value": "default", "label": "Use theme default" },
         { "value": "counter", "label": "Counter" },
         { "value": "progress", "label": "Progress line" }
       ],
-      "default": "default"
+      "default": "counter"
     },
     {
       "type": "header",
