@@ -7,6 +7,14 @@
   data-end-time="{{ section.settings.end_time | escape }}"
   data-timezone-offset="{{ section.settings.timezone_offset | escape }}"
   data-expired-behavior="{{ section.settings.expired_behavior }}"
+  data-summary-template="{{ 'sections.countdown_timer.summary' | t: time: '__TIME__' | escape }}"
+  data-summary-under-minute="{{ 'sections.countdown_timer.under_minute' | t | escape }}"
+  data-day-one="{{ 'sections.countdown_timer.day.one' | t | escape }}"
+  data-day-other="{{ 'sections.countdown_timer.day.other' | t | escape }}"
+  data-hour-one="{{ 'sections.countdown_timer.hour.one' | t | escape }}"
+  data-hour-other="{{ 'sections.countdown_timer.hour.other' | t | escape }}"
+  data-minute-one="{{ 'sections.countdown_timer.minute.one' | t | escape }}"
+  data-minute-other="{{ 'sections.countdown_timer.minute.other' | t | escape }}"
   {% if section.settings.end_date == blank
     and section.settings.expired_behavior == 'hide'
     and request.design_mode == false
@@ -38,7 +46,7 @@
       {%- if section.settings.end_date == blank and request.design_mode -%}
         <p class="valor-countdown__editor-info">Set an end date to start the countdown.</p>
       {%- endif -%}
-      <div class="valor-countdown__values" data-countdown-values aria-live="polite">
+      <div class="valor-countdown__values" data-countdown-values aria-hidden="true">
         <span class="valor-countdown__unit">
           <span class="valor-countdown__number" data-countdown-days>00</span>
           <span class="valor-countdown__label">Days</span>
@@ -56,6 +64,7 @@
           <span class="valor-countdown__label">Seconds</span>
         </span>
       </div>
+      <p class="valor-countdown__summary visually-hidden" data-countdown-summary aria-live="polite"></p>
       <p class="valor-countdown__expired" data-countdown-expired hidden>
         {{ section.settings.expired_message | escape }}
       </p>

@@ -325,6 +325,7 @@
           </button>
         </div>
       </div>
+      <div class="valor-mp__sticky-atc-error" data-sticky-cart-error role="alert" hidden></div>
     </div>
   {%- endif -%}
 </section>
@@ -546,6 +547,17 @@
   }
   .valor-mp__sticky-atc-button {
     min-width: 10rem;
+  }
+  .valor-mp__sticky-atc-error {
+    width: min(100%, 75rem);
+    margin: 0.75rem auto 0;
+    padding: 0.65rem 0.8rem;
+    border-left: 3px solid var(--valor-color-error);
+    background-color: color-mix(in srgb, var(--valor-color-error) 8%, transparent);
+    color: var(--valor-color-error);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    border-radius: 0 var(--style-border-radius-inputs, 4px) var(--style-border-radius-inputs, 4px) 0;
   }
   @media (max-width: 749px) {
     .valor-mp__sticky-atc {

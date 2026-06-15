@@ -9,6 +9,8 @@ class ValorCountdownTimer extends HTMLElement {
     this.secondsEl = this.querySelector("[data-countdown-seconds]");
     this.expiredEl = this.querySelector("[data-countdown-expired]");
     this.timerEl = this.querySelector("[data-countdown-values]");
+    this.summaryEl = this.querySelector("[data-countdown-summary]");
+    this.lastSummaryText = "";
     this.targetDate = this.parseTargetDate();
 
     if (!this.targetDate) {
@@ -55,11 +57,34 @@ class ValorCountdownTimer extends HTMLElement {
     this.setValue(this.hoursEl, hours);
     this.setValue(this.minutesEl, minutes);
     this.setValue(this.secondsEl, seconds);
+    this.updateSummary(days, hours, minutes);
   }
 
   setValue(element, value) {
     if (!element) return;
     element.textContent = String(value).padStart(2, "0");
+  }
+
+  updateSummary(days, hours, minutes) {
+    if (!this.summaryEl) return;
+
+    const parts = [];
+    if (days > 0) parts.push(days + " " + this.pluralize(days, "day"));
+    if (hours > 0) parts.push(hours + " " + this.pluralize(hours, "hour"));
+    if (days === 0 && minutes > 0) parts.push(minutes + " " + this.pluralize(minutes, "minute"));
+
+    const timeText = parts.length ? parts.join(", ") : this.dataset.summaryUnderMinute || "under 1 minute";
+    const template = this.dataset.summaryTemplate || "Promotion ends in __TIME__.";
+    const text = template.replace("__TIME__", timeText);
+
+    if (text === this.lastSummaryText) return;
+    this.lastSummaryText = text;
+    this.summaryEl.textContent = text;
+  }
+
+  pluralize(value, unit) {
+    const suffix = value === 1 ? "One" : "Other";
+    return this.dataset[unit + suffix] || unit;
   }
 
   handleExpired() {
@@ -74,6 +99,7 @@ class ValorCountdownTimer extends HTMLElement {
     }
 
     if (this.timerEl) this.timerEl.hidden = true;
+    if (this.summaryEl) this.summaryEl.textContent = "";
     if (this.expiredEl) this.expiredEl.hidden = false;
   }
 }

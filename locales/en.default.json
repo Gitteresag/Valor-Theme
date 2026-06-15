@@ -243,6 +243,22 @@
     "error": "Could not load pickup availability."
   },
   "sections": {
+    "countdown_timer": {
+      "summary": "Promotion ends in {{ time }}.",
+      "under_minute": "under 1 minute",
+      "day": {
+        "one": "day",
+        "other": "days"
+      },
+      "hour": {
+        "one": "hour",
+        "other": "hours"
+      },
+      "minute": {
+        "one": "minute",
+        "other": "minutes"
+      }
+    },
     "featured_collection": {
       "view_all": "View all",
       "example_product": "Example product title"
@@ -269,8 +285,6 @@
     },
     "slideshow": {
       "aria_label": "Slideshow",
-      "previous_slide": "Previous slide",
-      "next_slide": "Next slide",
       "dots_label": "Choose slide",
       "go_to_slide": "Go to slide {{ number }}",
       "placeholder_heading": "Add slideshow slides"

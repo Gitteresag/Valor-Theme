@@ -263,9 +263,6 @@
         "dots_gap_mobile": {
           "label": "Mobile dots spacing"
         },
-        "show_arrows": {
-          "label": "Show arrows"
-        },
         "show_dots": {
           "label": "Show dots"
         },

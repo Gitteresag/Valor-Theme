@@ -815,11 +815,19 @@
 
     event.preventDefault();
 
+    var submitBtn = event.submitter || form.querySelector('[type="submit"]');
+    var stickyAtc = submitBtn && submitBtn.closest ? submitBtn.closest("[data-sticky-atc]") : null;
+    var stickyErrorEl = stickyAtc ? stickyAtc.querySelector("[data-sticky-cart-error]") : null;
+
     // Clear any previous error from a prior submit
     var errorEl = form.querySelector("[data-cart-error]");
     if (errorEl) {
       errorEl.textContent = "";
       errorEl.hidden = true;
+    }
+    if (stickyErrorEl) {
+      stickyErrorEl.textContent = "";
+      stickyErrorEl.hidden = true;
     }
 
     var formData = new FormData(form);
@@ -828,7 +836,6 @@
     formData.append("sections", SECTION_ID);
     formData.append("sections_url", window.location.pathname);
 
-    var submitBtn = form.querySelector('[type="submit"]');
     if (submitBtn) submitBtn.setAttribute("aria-busy", "true");
 
     fetch(cartUrl("cart/add.js"), {
@@ -854,7 +861,12 @@
           if (errorEl) {
             errorEl.textContent = msg;
             errorEl.hidden = false;
-          } else {
+          }
+          if (stickyErrorEl) {
+            stickyErrorEl.textContent = msg;
+            stickyErrorEl.hidden = false;
+          }
+          if (!errorEl && !stickyErrorEl) {
             // No inline target — log only. The customer stays on the
             // page with no visible change, which is unfortunate but
             // better than reloading into Shopify's default error page.
