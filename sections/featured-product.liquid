@@ -161,6 +161,8 @@
                   section_id: section.id,
                   class_prefix: 'valor-fp',
                   picker_style: variant_style,
+                  swatch_shape: section.settings.swatch_shape,
+                  swatch_size: section.settings.swatch_size,
                   size_option_style: section.settings.size_option_style
                 -%}
 
@@ -577,6 +579,75 @@
     cursor: not-allowed;
   }
 
+  /* Swatches */
+  .valor-fp__option-values--swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.625rem;
+  }
+  .valor-fp__option-swatch {
+    position: relative;
+    display: inline-block;
+    width: var(--valor-swatch-size);
+    height: var(--valor-swatch-size);
+    border-radius: 50%;
+    border: 1.5px solid var(--valor-border-strong);
+    background-color: var(--valor-swatch-color, transparent);
+    background-image: var(--valor-swatch-image, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+  .valor-fp__option-values--swatches-circle {
+    --valor-swatch-size: 36px;
+  }
+  .valor-fp__option-values--swatches-circle .valor-fp__option-swatch {
+    border-radius: 50%;
+  }
+  .valor-fp__option-values--swatches-square {
+    --valor-swatch-size: 36px;
+  }
+  .valor-fp__option-values--swatches-square .valor-fp__option-swatch {
+    border-radius: var(--style-border-radius-inputs, 4px);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .valor-fp__option-swatch:hover {
+      border-color: color-mix(in srgb, var(--color-foreground) 75%, transparent);
+    }
+  }
+  .valor-fp__option-input:checked + .valor-fp__option-swatch {
+    border-color: var(--color-background);
+    box-shadow: 0 0 0 2px var(--color-foreground);
+  }
+  .valor-fp__option-input:focus-visible + .valor-fp__option-swatch {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 3px;
+  }
+  .valor-fp__option-swatch[data-disabled='true'] {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+  .valor-fp__option-swatch[data-disabled='true']::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      to bottom right,
+      transparent calc(50% - 1px),
+      var(--color-foreground) calc(50% - 1px),
+      var(--color-foreground) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+    pointer-events: none;
+  }
+
   /* Dropdown */
   .valor-fp__option-select {
     width: 100%;
@@ -735,7 +806,8 @@
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .valor-fp__option-pill,
-    .valor-fp__option-size-text {
+    .valor-fp__option-size-text,
+    .valor-fp__option-swatch {
       transition: none;
     }
   }
@@ -1158,10 +1230,11 @@
       "label": "Variant style",
       "options": [
         { "value": "pills", "label": "Buttons (pills)" },
-        { "value": "dropdown", "label": "Dropdown" }
+        { "value": "dropdown", "label": "Dropdown" },
+        { "value": "swatches", "label": "Swatches" }
       ],
       "default": "pills",
-      "info": "Pills look premium but use more space; dropdown is compact."
+      "info": "Swatches use native color or image swatches set in Shopify and fall back to pills if a value is missing swatch data."
     },
     {
       "type": "select",
@@ -1173,6 +1246,28 @@
       ],
       "default": "default",
       "info": "Minimal text applies only to size-named options. Other options keep the selected variant style."
+    },
+    {
+      "type": "select",
+      "id": "swatch_shape",
+      "label": "Swatch shape",
+      "options": [
+        { "value": "circle", "label": "Circle" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "circle",
+      "info": "Applies when Variant style is set to Swatches."
+    },
+    {
+      "type": "range",
+      "id": "swatch_size",
+      "label": "Swatch size",
+      "min": 20,
+      "max": 64,
+      "step": 2,
+      "unit": "px",
+      "default": 36,
+      "info": "Applies to both circle and square swatches."
     },
     {
       "type": "header",

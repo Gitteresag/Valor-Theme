@@ -78,10 +78,15 @@
           {%- liquid
             assign mega_menu_block = blank
             assign link_title_normalized = link.title | strip | downcase
+            assign link_url_normalized = link.url | strip
             for block in section.blocks
               if block.type == 'mega_menu'
+                assign target_url_normalized = block.settings.menu_item_link | strip
                 assign target_title_normalized = block.settings.menu_item_title | strip | downcase
-                if target_title_normalized != blank and target_title_normalized == link_title_normalized
+                if target_url_normalized != blank and target_url_normalized == link_url_normalized
+                  assign mega_menu_block = block
+                  break
+                elsif target_url_normalized == blank and target_title_normalized != blank and target_title_normalized == link_title_normalized
                   assign mega_menu_block = block
                   break
                 endif
@@ -89,15 +94,25 @@
             endfor
             assign has_mega_menu = false
             assign has_mega_promo = false
-            if mega_menu_block != blank and link.links.size > 0
-              assign has_mega_menu = true
+            assign has_mega_links = false
+            assign mega_menu_links = link.links
+            if mega_menu_block != blank
+              if mega_menu_block.settings.mega_menu != blank
+                assign mega_menu_links = mega_menu_block.settings.mega_menu.links
+              endif
+              if mega_menu_links.size > 0
+                assign has_mega_links = true
+              endif
               if mega_menu_block.settings.promo_image != blank or mega_menu_block.settings.promo_heading != blank or mega_menu_block.settings.promo_text != blank or mega_menu_block.settings.promo_badge != blank or mega_menu_block.settings.promo_product != blank or mega_menu_block.settings.promo_collection != blank
                 assign has_mega_promo = true
+              endif
+              if has_mega_links or has_mega_promo
+                assign has_mega_menu = true
               endif
             endif
           -%}
           <li class="valor-header__menu-item{% if has_mega_menu %} valor-header__menu-item--mega{% endif %}">
-            {%- if link.links.size > 0 -%}
+            {%- if link.links.size > 0 or has_mega_menu -%}
               <a href="{{ link.url }}" class="valor-header__menu-link valor-header__menu-link--has-submenu">
                 <span>{{ link.title }}</span>
                 <span class="valor-header__menu-chevron" aria-hidden="true">
@@ -107,27 +122,29 @@
               {%- if has_mega_menu -%}
                 <div class="valor-header__mega">
                   <div class="valor-header__mega-inner{% unless has_mega_promo %} valor-header__mega-inner--links-only{% endunless %}">
-                    <div class="valor-header__mega-links">
-                      <a href="{{ link.url }}" class="valor-header__mega-view-all">
-                        {{ 'header.view_all' | t: title: link.title }}
-                      </a>
-                      <ul class="valor-header__mega-list">
-                        {% for child in link.links %}
-                          <li class="valor-header__mega-column">
-                            <a href="{{ child.url }}" class="valor-header__mega-heading">{{ child.title }}</a>
-                            {%- if child.links.size > 0 -%}
-                              <ul class="valor-header__mega-sublist">
-                                {% for grandchild in child.links %}
-                                  <li>
-                                    <a href="{{ grandchild.url }}">{{ grandchild.title }}</a>
-                                  </li>
-                                {% endfor %}
-                              </ul>
-                            {%- endif -%}
-                          </li>
-                        {% endfor %}
-                      </ul>
-                    </div>
+                    {%- if has_mega_links -%}
+                      <div class="valor-header__mega-links">
+                        <a href="{{ link.url }}" class="valor-header__mega-view-all">
+                          {{ 'header.view_all' | t: title: link.title }}
+                        </a>
+                        <ul class="valor-header__mega-list">
+                          {% for child in mega_menu_links %}
+                            <li class="valor-header__mega-column">
+                              <a href="{{ child.url }}" class="valor-header__mega-heading">{{ child.title }}</a>
+                              {%- if child.links.size > 0 -%}
+                                <ul class="valor-header__mega-sublist">
+                                  {% for grandchild in child.links %}
+                                    <li>
+                                      <a href="{{ grandchild.url }}">{{ grandchild.title }}</a>
+                                    </li>
+                                  {% endfor %}
+                                </ul>
+                              {%- endif -%}
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    {%- endif -%}
                     {%- if has_mega_promo -%}
                       {%- render 'header-menu-promo',
                         block: mega_menu_block,
@@ -273,23 +290,36 @@
         {%- liquid
           assign mega_menu_block = blank
           assign link_title_normalized = link.title | strip | downcase
+          assign link_url_normalized = link.url | strip
           for block in section.blocks
             if block.type == 'mega_menu'
+              assign target_url_normalized = block.settings.menu_item_link | strip
               assign target_title_normalized = block.settings.menu_item_title | strip | downcase
-              if target_title_normalized != blank and target_title_normalized == link_title_normalized
+              if target_url_normalized != blank and target_url_normalized == link_url_normalized
+                assign mega_menu_block = block
+                break
+              elsif target_url_normalized == blank and target_title_normalized != blank and target_title_normalized == link_title_normalized
                 assign mega_menu_block = block
                 break
               endif
             endif
           endfor
           assign has_mega_promo = false
+          assign has_mega_links = false
+          assign mega_menu_links = link.links
           if mega_menu_block != blank
+            if mega_menu_block.settings.mega_menu != blank
+              assign mega_menu_links = mega_menu_block.settings.mega_menu.links
+            endif
+            if mega_menu_links.size > 0
+              assign has_mega_links = true
+            endif
             if mega_menu_block.settings.promo_image != blank or mega_menu_block.settings.promo_heading != blank or mega_menu_block.settings.promo_text != blank or mega_menu_block.settings.promo_badge != blank or mega_menu_block.settings.promo_product != blank or mega_menu_block.settings.promo_collection != blank
               assign has_mega_promo = true
             endif
           endif
         -%}
-        {%- if link.links.size > 0 -%}
+        {%- if link.links.size > 0 or has_mega_links or has_mega_promo -%}
           <details class="valor-mobile-drawer__group">
             <summary class="valor-mobile-drawer__summary">
               <span>{{ link.title }}</span>
@@ -299,9 +329,11 @@
             </summary>
             <div class="valor-mobile-drawer__sublist">
               <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
-              {% for child in link.links %}
-                <a href="{{ child.url }}">{{ child.title }}</a>
-              {% endfor %}
+              {%- if has_mega_links -%}
+                {% for child in mega_menu_links %}
+                  <a href="{{ child.url }}">{{ child.title }}</a>
+                {% endfor %}
+              {%- endif -%}
               {%- if has_mega_promo -%}
                 {%- render 'header-menu-promo',
                   block: mega_menu_block,
@@ -1722,7 +1754,7 @@
        The first homepage image banner is the only section that may activate
        this state. The full-width Shopify section wrapper owns the visual
        background so there is only one surface to animate. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header {
       position: absolute;
       top: var(--valor-announcement-height, 0px);
@@ -1734,7 +1766,7 @@
       border-bottom: 0;
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header
       > valor-sticky-header {
       display: block;
@@ -1745,7 +1777,7 @@
 
     /* Soft full-bleed top shadow for image readability. It lives behind the
        header content and fades out when the pinned header becomes solid. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header
       > valor-sticky-header::before {
       content: '';
@@ -1769,7 +1801,7 @@
       transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header {
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger) .valor-header {
       position: relative;
       z-index: 1;
       background: transparent;
@@ -1779,9 +1811,9 @@
 
     /* Inherit the wrapper color so links, buttons and SVG icons change in
        one pass with the header instead of each element animating separately. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header a,
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header button,
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger) .valor-header svg {
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger) .valor-header a,
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger) .valor-header button,
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger) .valor-header svg {
       color: inherit;
     }
 
@@ -1789,7 +1821,7 @@
        Do not switch between absolute and fixed while scrolling. In pinned
        mode the header is fixed from the beginning and one full-width wrapper
        background slides from transparent to solid via background-position. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned {
       position: fixed;
       top: var(--valor-announcement-height, 0px);
@@ -1813,7 +1845,7 @@
     /* Solid-state divider. Use a pseudo-element instead of border so the
        transparent top state remains completely clean and no layout height
        changes occur when the header becomes solid. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned::after {
       content: '';
       position: absolute;
@@ -1828,12 +1860,12 @@
       transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid::after {
       opacity: 1;
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned
       .valor-header {
       background: transparent;
@@ -1842,19 +1874,19 @@
     }
 
     html:not(.valor-transparent-header-ready)
-      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned,
     html:not(.valor-transparent-header-ready)
-      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned::after,
     html:not(.valor-transparent-header-ready)
-      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header
       > valor-sticky-header::before {
       transition: none;
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid {
       top: 0;
       color: var(--color-foreground);
@@ -1865,18 +1897,18 @@
       z-index: 2000;
     }
 
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid
       > valor-sticky-header::before {
       opacity: 0;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
         .valor-section-header.valor-section-header--transparent-pinned {
         transition: none;
       }
-      body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+      body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
         .valor-section-header
         > valor-sticky-header::before {
         transition: none;
@@ -1886,25 +1918,25 @@
     /* Logo swap — only applies when --has-transparent-logo modifier is
        on <header>, which is set in Liquid only if settings.transparent_logo
        is non-blank. Top/transparent state: show transparent logo. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-header--has-transparent-logo
       .valor-header__logo-wrapper--default {
       display: none;
     }
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-header--has-transparent-logo
       .valor-header__logo-wrapper--transparent {
       display: inline-block;
     }
 
     /* Solid pinned state: restore normal logo. */
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid
       .valor-header--has-transparent-logo
       .valor-header__logo-wrapper--default {
       display: inline-block;
     }
-    body:has(#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger)
+    body:has(#MainContent > .shopify-section:first-child .valor-transparent-header-trigger)
       .valor-section-header.valor-section-header--transparent-pinned.valor-section-header--transparent-solid
       .valor-header--has-transparent-logo
       .valor-header__logo-wrapper--transparent {
@@ -1971,7 +2003,7 @@
           }
 
           this.transparentHero = document.querySelector(
-            '#MainContent > .shopify-section:first-child .valor-hero--transparent-header-trigger',
+            '#MainContent > .shopify-section:first-child .valor-transparent-header-trigger',
           );
           this.hasTransparentHeader = !!this.transparentHero;
 
@@ -2277,10 +2309,22 @@
       "name": "Mega menu",
       "settings": [
         {
+          "type": "url",
+          "id": "menu_item_link",
+          "label": "Top-level menu item link",
+          "info": "Choose the same destination as the header menu item that should open this mega menu."
+        },
+        {
           "type": "text",
           "id": "menu_item_title",
-          "label": "Menu item title",
-          "info": "Must exactly match a top-level menu item title."
+          "label": "Top-level menu item title",
+          "info": "Fallback for older configurations. Used only when top-level menu item link is empty."
+        },
+        {
+          "type": "link_list",
+          "id": "mega_menu",
+          "label": "Mega menu links",
+          "info": "Choose the menu to show inside the mega menu. If empty, the top-level item's child links are used."
         },
         {
           "type": "header",
@@ -2289,7 +2333,8 @@
         {
           "type": "image_picker",
           "id": "promo_image",
-          "label": "Promo image"
+          "label": "Promo image",
+          "info": "Recommended: 4:3 image, at least 1400 x 1050 px. Keep the focal point centered because the mobile drawer uses a wider crop."
         },
         {
           "type": "text",

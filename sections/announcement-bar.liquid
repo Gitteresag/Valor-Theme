@@ -178,7 +178,7 @@
   }
 
   /* Transparent homepage header support.
-     When the first homepage image banner uses the transparent header, the
+     When the first homepage media section uses the transparent header, the
      announcement bar becomes part of the same fixed header stack instead of
      remaining in normal page flow. This prevents the transparent header from
      sitting below a bar that has already scrolled away. The visual transition
@@ -188,7 +188,7 @@
     body:has(
         #MainContent
           > .shopify-section:first-child
-          .valor-hero--transparent-header-trigger[data-transparent-header-behavior='always']
+          .valor-transparent-header-trigger[data-transparent-header-behavior='always']
       )
       .valor-announcement-bar {
       position: fixed;
@@ -219,7 +219,7 @@
       body:has(
         #MainContent
           > .shopify-section:first-child
-          .valor-hero--transparent-header-trigger[data-transparent-header-behavior='always']
+          .valor-transparent-header-trigger[data-transparent-header-behavior='always']
       )
       .valor-announcement-bar {
       transition:
@@ -234,7 +234,7 @@
     body:has(
         #MainContent
           > .shopify-section:first-child
-          .valor-hero--transparent-header-trigger[data-transparent-header-behavior='always']
+          .valor-transparent-header-trigger[data-transparent-header-behavior='always']
       )
       .valor-announcement-bar--separator {
       border-bottom-color: rgba(255, 255, 255, 0.22);
@@ -371,7 +371,7 @@
     },
     {
       "type": "paragraph",
-      "content": "When a homepage banner uses the transparent header, the announcement bar automatically becomes transparent and fixed above the header. The separator line stays subtle in transparent mode and returns to the normal divider color when the header becomes solid."
+      "content": "When a homepage hero section uses the transparent header, the announcement bar automatically becomes transparent and fixed above the header. The separator line stays subtle in transparent mode and returns to the normal divider color when the header becomes solid."
     },
     {
       "type": "header",

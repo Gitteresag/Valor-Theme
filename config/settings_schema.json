@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Valor",
-    "theme_version": "1.4.0",
+    "theme_version": "1.4.1",
     "theme_author": "Valor",
     "theme_documentation_url": "https://valortheme.com",
     "theme_support_url": "https://valortheme.com"
@@ -336,6 +336,71 @@
     "settings": [
       {
         "type": "header",
+        "content": "t:labels.buttons_header",
+        "info": "t:labels.buttons_header_info"
+      },
+      {
+        "type": "color",
+        "id": "button_background_color",
+        "label": "t:labels.button_background"
+      },
+      {
+        "type": "color",
+        "id": "button_text_color",
+        "label": "t:labels.button_text"
+      },
+      {
+        "type": "color",
+        "id": "button_border_color",
+        "label": "t:labels.button_border"
+      },
+      {
+        "type": "color",
+        "id": "button_hover_background_color",
+        "label": "t:labels.button_hover_background"
+      },
+      {
+        "type": "color",
+        "id": "button_hover_text_color",
+        "label": "t:labels.button_hover_text"
+      },
+      {
+        "type": "color",
+        "id": "button_hover_border_color",
+        "label": "t:labels.button_hover_border"
+      },
+      {
+        "type": "color",
+        "id": "button_outline_text_color",
+        "label": "t:labels.button_outline_text"
+      },
+      {
+        "type": "color",
+        "id": "button_outline_hover_text_color",
+        "label": "t:labels.button_outline_hover_text"
+      },
+      {
+        "type": "range",
+        "id": "button_border_width",
+        "min": 0,
+        "max": 8,
+        "step": 0.5,
+        "unit": "px",
+        "label": "t:labels.button_border_width",
+        "default": 1.5
+      },
+      {
+        "type": "range",
+        "id": "button_corner_radius",
+        "min": 0,
+        "max": 40,
+        "step": 1,
+        "unit": "px",
+        "label": "t:labels.button_corner_radius",
+        "default": 4
+      },
+      {
+        "type": "header",
         "content": "Back to top"
       },
       {
@@ -407,66 +472,6 @@
         "step": 1,
         "unit": "px",
         "label": "t:labels.input_corner_radius",
-        "default": 4
-      },
-      {
-        "type": "header",
-        "content": "t:labels.buttons_header",
-        "info": "t:labels.buttons_header_info"
-      },
-      {
-        "type": "color",
-        "id": "button_background_color",
-        "label": "t:labels.button_background"
-      },
-      {
-        "type": "color",
-        "id": "button_text_color",
-        "label": "t:labels.button_text"
-      },
-      {
-        "type": "color",
-        "id": "button_border_color",
-        "label": "t:labels.button_border"
-      },
-      {
-        "type": "color",
-        "id": "button_outline_text_color",
-        "label": "t:labels.button_outline_text"
-      },
-      {
-        "type": "color",
-        "id": "button_hover_background_color",
-        "label": "t:labels.button_hover_background"
-      },
-      {
-        "type": "color",
-        "id": "button_hover_text_color",
-        "label": "t:labels.button_hover_text"
-      },
-      {
-        "type": "color",
-        "id": "button_outline_hover_text_color",
-        "label": "t:labels.button_outline_hover_text"
-      },
-      {
-        "type": "range",
-        "id": "button_border_width",
-        "min": 0,
-        "max": 8,
-        "step": 0.5,
-        "unit": "px",
-        "label": "t:labels.button_border_width",
-        "default": 1.5
-      },
-      {
-        "type": "range",
-        "id": "button_corner_radius",
-        "min": 0,
-        "max": 40,
-        "step": 1,
-        "unit": "px",
-        "label": "t:labels.button_corner_radius",
         "default": 4
       }
     ]

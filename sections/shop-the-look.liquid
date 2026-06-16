@@ -1,5 +1,16 @@
 {%- liquid
   assign section_image = section.settings.image
+  assign section_mobile_image = section.settings.mobile_image
+  assign content_alignment = section.settings.content_alignment | default: 'left'
+  assign heading_size = section.settings.heading_size | default: 'medium'
+  if heading_size == 'h1'
+    assign heading_size = 'large'
+  elsif heading_size == 'h2'
+    assign heading_size = 'medium'
+  endif
+  if section_image == blank and section_mobile_image != blank
+    assign section_image = section_mobile_image
+  endif
   assign section_priority = false
   if section.location == 'template' and section.index == 1
     assign section_priority = true
@@ -13,7 +24,7 @@
 -%}
 
 <section
-  class="valor-stl valor-stl--layout-{{ section.settings.layout }} valor-stl--image-{{ section.settings.image_width }}"
+  class="valor-stl valor-stl--layout-{{ section.settings.layout }} valor-stl--image-{{ section.settings.image_width }} valor-stl--align-{{ content_alignment }}"
   style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
 >
   <div class="valor-stl__inner">
@@ -22,9 +33,12 @@
         <p class="valor-stl__eyebrow">{{ section.settings.eyebrow | escape }}</p>
       {%- endif -%}
       {%- if section.settings.heading != blank -%}
-        <h2 class="valor-stl__heading valor-heading valor-heading--{{ section.settings.heading_size }}">
+        <h2 class="valor-stl__heading valor-heading valor-heading--{{ heading_size }}">
           {{ section.settings.heading }}
         </h2>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <div class="valor-stl__subheading rte">{{ section.settings.subheading }}</div>
       {%- endif -%}
       {%- if section.settings.text != blank -%}
         <div class="valor-stl__text rte">{{ section.settings.text }}</div>
@@ -34,19 +48,30 @@
     <div class="valor-stl__look">
       <div class="valor-stl__image-wrap">
         {%- if section_image != blank -%}
-          <img
-            class="valor-stl__image"
-            srcset="{{ section_image | image_url: width: 500 }} 500w, {{ section_image | image_url: width: 750 }} 750w, {{ section_image | image_url: width: 1100 }} 1100w, {{ section_image | image_url: width: 1500 }} 1500w, {{ section_image | image_url: width: 2000 }} 2000w"
-            src="{{ section_image | image_url: width: 1100 }}"
-            sizes="(min-width: 990px) 60vw, 100vw"
-            alt="{{ section_image.alt | escape }}"
-            width="{{ section_image.width }}"
-            height="{{ section_image.height }}"
-            loading="{{ image_loading }}"
-            {%- if image_fetchpriority == 'high' %}
-              fetchpriority="high"
-            {% endif -%}
-          >
+          <picture class="valor-stl__picture">
+            {%- if section_mobile_image != blank -%}
+              <source
+                media="(max-width: 749px)"
+                srcset="{{ section_mobile_image | image_url: width: 450 }} 450w, {{ section_mobile_image | image_url: width: 750 }} 750w, {{ section_mobile_image | image_url: width: 1100 }} 1100w"
+                sizes="100vw"
+                width="{{ section_mobile_image.width }}"
+                height="{{ section_mobile_image.height }}"
+              >
+            {%- endif -%}
+            <img
+              class="valor-stl__image"
+              srcset="{{ section_image | image_url: width: 500 }} 500w, {{ section_image | image_url: width: 750 }} 750w, {{ section_image | image_url: width: 1100 }} 1100w, {{ section_image | image_url: width: 1500 }} 1500w, {{ section_image | image_url: width: 2000 }} 2000w"
+              src="{{ section_image | image_url: width: 1100 }}"
+              sizes="(min-width: 990px) 60vw, 100vw"
+              alt="{{ section_image.alt | escape }}"
+              width="{{ section_image.width }}"
+              height="{{ section_image.height }}"
+              loading="{{ image_loading }}"
+              {%- if image_fetchpriority == 'high' %}
+                fetchpriority="high"
+              {% endif -%}
+            >
+          </picture>
         {%- else -%}
           <div class="valor-stl__placeholder">
             {{ 'lifestyle-2' | placeholder_svg_tag: 'valor-stl__placeholder-svg' }}
@@ -147,10 +172,26 @@
     gap: clamp(2rem, 5vw, 4rem);
   }
   .valor-stl__content {
+    width: 100%;
     max-width: 42rem;
     display: flex;
     flex-direction: column;
     gap: 0.85rem;
+  }
+  .valor-stl--align-left .valor-stl__content {
+    text-align: left;
+    align-items: flex-start;
+    margin-inline: 0 auto;
+  }
+  .valor-stl--align-center .valor-stl__content {
+    text-align: center;
+    align-items: center;
+    margin-inline: auto;
+  }
+  .valor-stl--align-right .valor-stl__content {
+    text-align: right;
+    align-items: flex-end;
+    margin-inline: auto 0;
   }
   .valor-stl__eyebrow {
     margin: 0;
@@ -161,6 +202,17 @@
   }
   .valor-stl__heading {
     margin: 0;
+  }
+  .valor-stl__subheading {
+    font-size: 1rem;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--color-foreground) 86%, transparent);
+  }
+  .valor-stl__subheading > *:first-child {
+    margin-top: 0;
+  }
+  .valor-stl__subheading > *:last-child {
+    margin-bottom: 0;
   }
   .valor-stl__text {
     color: color-mix(in srgb, var(--color-foreground) 78%, transparent);
@@ -179,6 +231,9 @@
     position: relative;
     overflow: hidden;
     background: color-mix(in srgb, var(--color-foreground) 5%, transparent);
+  }
+  .valor-stl__picture {
+    display: block;
   }
   .valor-stl__image,
   .valor-stl__placeholder {
@@ -336,6 +391,11 @@
     },
     {
       "type": "richtext",
+      "id": "subheading",
+      "label": "t:sections.shop_the_look.settings.subheading.label"
+    },
+    {
+      "type": "richtext",
       "id": "text",
       "label": "t:sections.shop_the_look.settings.text.label",
       "default": "<p>Connect lifestyle imagery with the products featured in it.</p>"
@@ -345,12 +405,30 @@
       "id": "heading_size",
       "label": "t:sections.shop_the_look.settings.heading_size.label",
       "options": [
-        { "value": "h1", "label": "t:sections.shop_the_look.settings.heading_size.options.large" },
-        { "value": "h2", "label": "t:sections.shop_the_look.settings.heading_size.options.medium" }
+        { "value": "small", "label": "t:sections.shop_the_look.settings.heading_size.options.small" },
+        { "value": "medium", "label": "t:sections.shop_the_look.settings.heading_size.options.medium" },
+        { "value": "large", "label": "t:sections.shop_the_look.settings.heading_size.options.large" }
       ],
-      "default": "h2"
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "content_alignment",
+      "label": "t:sections.shop_the_look.settings.content_alignment.label",
+      "options": [
+        { "value": "left", "label": "t:sections.shop_the_look.settings.content_alignment.options.left" },
+        { "value": "center", "label": "t:sections.shop_the_look.settings.content_alignment.options.center" },
+        { "value": "right", "label": "t:sections.shop_the_look.settings.content_alignment.options.right" }
+      ],
+      "default": "left"
     },
     { "type": "image_picker", "id": "image", "label": "t:sections.shop_the_look.settings.image.label" },
+    {
+      "type": "image_picker",
+      "id": "mobile_image",
+      "label": "t:sections.shop_the_look.settings.mobile_image.label",
+      "info": "t:sections.shop_the_look.settings.mobile_image.info"
+    },
     {
       "type": "select",
       "id": "layout",

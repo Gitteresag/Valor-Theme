@@ -25,36 +25,14 @@
   endif
 -%}
 <section
-  class="valor-hero valor-hero--{{ image_height }}{% if section.settings.show_text_below %} valor-hero--text-below-mobile{% endif %}{% if section.settings.full_width_desktop or use_transparent_header_trigger %} valor-hero--full-desktop{% endif %}{% if section.settings.full_width_mobile or use_transparent_header_trigger %} valor-hero--full-mobile{% endif %}{% if use_transparent_header_trigger %} valor-hero--transparent-header-trigger{% endif %}"
+  class="valor-hero valor-hero--{{ image_height }}{% if section.settings.show_text_below %} valor-hero--text-below-mobile{% endif %}{% if section.settings.full_width_desktop or use_transparent_header_trigger %} valor-hero--full-desktop{% endif %}{% if section.settings.full_width_mobile or use_transparent_header_trigger %} valor-hero--full-mobile{% endif %}{% if use_transparent_header_trigger %} valor-transparent-header-trigger{% endif %}"
   style="--valor-hero-overlay: {{ section.settings.image_overlay_opacity | times: 0.01 }};"
   {% if use_transparent_header_trigger %}
     data-transparent-header-behavior="{{ section.settings.transparent_header_behavior | default: 'always' }}"
   {% endif %}
 >
   {%- if use_transparent_header_trigger -%}
-    <script>
-      (function () {
-        var root = document.documentElement;
-        var header = document.querySelector('.valor-section-header');
-
-        root.classList.add('valor-transparent-header-active');
-
-        if (!header) return;
-
-        header.classList.remove('valor-section-header--sticky', 'valor-section-header--transparent-solid');
-
-        {% if section.settings.transparent_header_behavior == 'none' %}
-          header.classList.remove('valor-section-header--transparent-pinned', 'valor-section-header--animate');
-          root.classList.add('valor-transparent-header-ready');
-        {% else %}
-          header.classList.add('valor-section-header--transparent-pinned');
-          requestAnimationFrame(function () {
-            header.classList.add('valor-section-header--animate');
-            root.classList.add('valor-transparent-header-ready');
-          });
-        {% endif %}
-      })();
-    </script>
+    {% render 'transparent-header-trigger', transparent_header_behavior: section.settings.transparent_header_behavior %}
   {%- endif -%}
   <div class="valor-hero__media">
     {%- if desktop_image != blank -%}
@@ -122,12 +100,21 @@
           {%- when 'heading' -%}
             <h2
               class="valor-hero__heading valor-hero__heading--{{ block.settings.heading_size }}"
+              {% if block.settings.heading_color != blank %}
+                style="--valor-hero-heading-color: {{ block.settings.heading_color }};"
+              {% endif %}
               {{ block.shopify_attributes }}
             >
               {{ block.settings.heading }}
             </h2>
           {%- when 'subheading' -%}
-            <div class="valor-hero__subheading rte" {{ block.shopify_attributes }}>
+            <div
+              class="valor-hero__subheading rte"
+              {% if block.settings.subheading_color != blank %}
+                style="--valor-hero-subheading-color: {{ block.settings.subheading_color }};"
+              {% endif %}
+              {{ block.shopify_attributes }}
+            >
               {{ block.settings.subheading }}
             </div>
           {%- when 'buttons' -%}
@@ -357,6 +344,7 @@
   /* Heading sizes */
   .valor-hero__heading {
     margin: 0 0 1rem;
+    color: var(--valor-hero-heading-color, currentColor);
     font-family: var(--font-heading--family);
     font-style: var(--font-heading--style);
     font-weight: var(--font-heading--weight);
@@ -374,6 +362,7 @@
   }
 
   .valor-hero__subheading {
+    color: var(--valor-hero-subheading-color, currentColor);
     font-size: clamp(1rem, 1.5vw, 1.125rem);
     line-height: 1.5;
     margin: 0 0 1.75rem;
@@ -654,19 +643,24 @@
           "label": "Heading size",
           "options": [
             {
-              "value": "h0",
-              "label": "Extra large"
+              "value": "h2",
+              "label": "Medium"
             },
             {
               "value": "h1",
               "label": "Large"
             },
             {
-              "value": "h2",
-              "label": "Medium"
+              "value": "h0",
+              "label": "Extra large"
             }
           ],
           "default": "h1"
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Heading color"
         }
       ]
     },
@@ -680,6 +674,11 @@
           "id": "subheading",
           "label": "Subheading",
           "default": "<p>Tell your brand's story through images.</p>"
+        },
+        {
+          "type": "color",
+          "id": "subheading_color",
+          "label": "Subheading color"
         }
       ]
     },

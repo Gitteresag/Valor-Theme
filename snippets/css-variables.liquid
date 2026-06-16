@@ -12,6 +12,55 @@
   assign heading_font_bold = heading_font | font_modify: 'weight', 'bold' | default: heading_font
   assign heading_font_italic = heading_font | font_modify: 'style', 'italic' | default: heading_font
   assign heading_font_bold_italic = heading_font_bold | font_modify: 'style', 'italic' | default: heading_font_bold
+
+  assign button_bg_normalized = settings.button_background_color | downcase | strip | remove: ' '
+  assign button_text_normalized = settings.button_text_color | downcase | strip | remove: ' '
+  assign button_border_normalized = settings.button_border_color | downcase | strip | remove: ' '
+  assign button_hover_bg_normalized = settings.button_hover_background_color | downcase | strip | remove: ' '
+  assign button_hover_text_normalized = settings.button_hover_text_color | downcase | strip | remove: ' '
+  assign button_hover_border_normalized = settings.button_hover_border_color | downcase | strip | remove: ' '
+  assign button_outline_text_normalized = settings.button_outline_text_color | downcase | strip | remove: ' '
+  assign button_outline_hover_text_normalized = settings.button_outline_hover_text_color | downcase | strip | remove: ' '
+
+  assign button_bg_is_set = false
+  if settings.button_background_color != blank and button_bg_normalized != 'transparent' and button_bg_normalized != 'rgba(0,0,0,0)'
+    assign button_bg_is_set = true
+  endif
+
+  assign button_text_is_set = false
+  if settings.button_text_color != blank and button_text_normalized != 'transparent' and button_text_normalized != 'rgba(0,0,0,0)'
+    assign button_text_is_set = true
+  endif
+
+  assign button_border_is_set = false
+  if settings.button_border_color != blank and button_border_normalized != 'transparent' and button_border_normalized != 'rgba(0,0,0,0)'
+    assign button_border_is_set = true
+  endif
+
+  assign button_hover_bg_is_set = false
+  if settings.button_hover_background_color != blank and button_hover_bg_normalized != 'transparent' and button_hover_bg_normalized != 'rgba(0,0,0,0)'
+    assign button_hover_bg_is_set = true
+  endif
+
+  assign button_hover_text_is_set = false
+  if settings.button_hover_text_color != blank and button_hover_text_normalized != 'transparent' and button_hover_text_normalized != 'rgba(0,0,0,0)'
+    assign button_hover_text_is_set = true
+  endif
+
+  assign button_hover_border_is_set = false
+  if settings.button_hover_border_color != blank and button_hover_border_normalized != 'transparent' and button_hover_border_normalized != 'rgba(0,0,0,0)'
+    assign button_hover_border_is_set = true
+  endif
+
+  assign button_outline_text_is_set = false
+  if settings.button_outline_text_color != blank and button_outline_text_normalized != 'transparent' and button_outline_text_normalized != 'rgba(0,0,0,0)'
+    assign button_outline_text_is_set = true
+  endif
+
+  assign button_outline_hover_text_is_set = false
+  if settings.button_outline_hover_text_color != blank and button_outline_hover_text_normalized != 'transparent' and button_outline_hover_text_normalized != 'rgba(0,0,0,0)'
+    assign button_outline_hover_text_is_set = true
+  endif
 -%}
 
 {% style %}
@@ -89,22 +138,23 @@
     --color-foreground: {{ settings.foreground_color }};
 
     /* Buttons — global button tokens used by every CTA-style button.
-       Empty color settings fall back to the foreground/background pair,
-       preserving the original look until a merchant customizes them.
+       Explicit button color settings always win. Blank or transparent
+       background settings stay transparent; text and border fall back only
+       to keep buttons readable when their own color setting is empty.
        Outline buttons get their own text tokens so their label color can
        differ from their border color. */
-    --color-button-bg:                     {{ settings.button_background_color | default: settings.foreground_color }};
-    --color-button-text:                   {{ settings.button_text_color | default: settings.background_color }};
-    --color-button-border:                 {{ settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
-    --color-button-hover-bg:               {{ settings.button_hover_background_color | default: settings.button_background_color | default: settings.foreground_color }};
-    --color-button-hover-text:             {{ settings.button_hover_text_color | default: settings.button_text_color | default: settings.background_color }};
-    --color-button-hover-border:           {{ settings.button_hover_background_color | default: settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
-    --color-button-outline-text:           {{ settings.button_outline_text_color | default: settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
-    --color-button-outline-border:         {{ settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
-    --color-button-outline-hover-bg:       {{ settings.button_hover_background_color | default: settings.button_background_color | default: settings.foreground_color }};
-    --color-button-outline-hover-text:     {{ settings.button_outline_hover_text_color | default: settings.button_hover_text_color | default: settings.background_color }};
-    --color-button-outline-hover-border:   {{ settings.button_hover_background_color | default: settings.button_border_color | default: settings.button_background_color | default: settings.foreground_color }};
-    {%- if settings.button_hover_background_color != blank or settings.button_hover_text_color != blank or settings.button_outline_hover_text_color != blank %}
+    --color-button-bg:                     {%- if button_bg_is_set -%}{{ settings.button_background_color }}{%- else -%}transparent{%- endif -%};
+    --color-button-text:                   {%- if button_text_is_set -%}{{ settings.button_text_color }}{%- elsif button_bg_is_set -%}{{ settings.background_color }}{%- else -%}{{ settings.foreground_color }}{%- endif -%};
+    --color-button-border:                 {%- if button_border_is_set -%}{{ settings.button_border_color }}{%- elsif button_bg_is_set -%}{{ settings.button_background_color }}{%- else -%}{{ settings.foreground_color }}{%- endif -%};
+    --color-button-hover-bg:               {%- if button_hover_bg_is_set -%}{{ settings.button_hover_background_color }}{%- elsif button_bg_is_set -%}{{ settings.button_background_color }}{%- else -%}transparent{%- endif -%};
+    --color-button-hover-text:             {%- if button_hover_text_is_set -%}{{ settings.button_hover_text_color }}{%- elsif button_text_is_set -%}{{ settings.button_text_color }}{%- elsif button_hover_bg_is_set or button_bg_is_set -%}{{ settings.background_color }}{%- else -%}{{ settings.foreground_color }}{%- endif -%};
+    --color-button-hover-border:           {%- if button_hover_border_is_set -%}{{ settings.button_hover_border_color }}{%- elsif button_hover_bg_is_set -%}{{ settings.button_hover_background_color }}{%- elsif button_border_is_set -%}{{ settings.button_border_color }}{%- elsif button_bg_is_set -%}{{ settings.button_background_color }}{%- else -%}{{ settings.foreground_color }}{%- endif -%};
+    --color-button-outline-text:           {%- if button_outline_text_is_set -%}{{ settings.button_outline_text_color }}{%- elsif button_border_is_set -%}{{ settings.button_border_color }}{%- elsif button_bg_is_set -%}{{ settings.button_background_color }}{%- else -%}{{ settings.foreground_color }}{%- endif -%};
+    --color-button-outline-border:         {%- if button_border_is_set -%}{{ settings.button_border_color }}{%- elsif button_bg_is_set -%}{{ settings.button_background_color }}{%- else -%}{{ settings.foreground_color }}{%- endif -%};
+    --color-button-outline-hover-bg:       {%- if button_hover_bg_is_set -%}{{ settings.button_hover_background_color }}{%- elsif button_bg_is_set -%}{{ settings.button_background_color }}{%- else -%}transparent{%- endif -%};
+    --color-button-outline-hover-text:     {%- if button_outline_hover_text_is_set -%}{{ settings.button_outline_hover_text_color }}{%- elsif button_hover_text_is_set -%}{{ settings.button_hover_text_color }}{%- elsif button_hover_bg_is_set or button_bg_is_set -%}{{ settings.background_color }}{%- else -%}{{ settings.foreground_color }}{%- endif -%};
+    --color-button-outline-hover-border:   {%- if button_hover_border_is_set -%}{{ settings.button_hover_border_color }}{%- elsif button_hover_bg_is_set -%}{{ settings.button_hover_background_color }}{%- elsif button_border_is_set -%}{{ settings.button_border_color }}{%- elsif button_bg_is_set -%}{{ settings.button_background_color }}{%- else -%}{{ settings.foreground_color }}{%- endif -%};
+    {%- if button_hover_bg_is_set or button_hover_text_is_set or button_hover_border_is_set or button_outline_hover_text_is_set %}
     --button-hover-opacity: 1;
     {%- else %}
     --button-hover-opacity: 0.85;

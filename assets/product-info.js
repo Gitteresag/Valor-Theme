@@ -33,6 +33,7 @@ class ValorProductInfo extends HTMLElement {
     super();
     this._handleChange = this.onChange.bind(this);
     this._handleCartEvent = this.onCartEvent.bind(this);
+    this._handleStickyScroll = this._syncStickyAddToCartVisibility.bind(this);
   }
 
   connectedCallback() {
@@ -131,8 +132,9 @@ class ValorProductInfo extends HTMLElement {
     }
 
     document.removeEventListener("valor:cart:updated", this._handleCartEvent);
+    window.removeEventListener("scroll", this._handleStickyScroll);
+    window.removeEventListener("resize", this._handleStickyScroll);
     if (this._stickyBuyObserver) this._stickyBuyObserver.disconnect();
-    if (this._stickyFooterObserver) this._stickyFooterObserver.disconnect();
     if (this._stickyHideTimer) clearTimeout(this._stickyHideTimer);
     this._unbindPopups();
     this._initialized = false;
@@ -186,39 +188,26 @@ class ValorProductInfo extends HTMLElement {
   }
 
   _bindStickyAddToCart() {
-    if (!this.stickyAtc || !this.addBtn || typeof IntersectionObserver === "undefined") return;
+    if (!this.stickyAtc || !this.addBtn) return;
 
-    const observedTarget = this.addBtn.closest(".valor-mp__buy") || this.addBtn;
-    this._stickyPastBuyButton = false;
-    this._stickyFooterVisible = false;
+    this._stickyObservedTarget = this.addBtn.closest(".valor-mp__buy") || this.addBtn;
+    window.addEventListener("scroll", this._handleStickyScroll, { passive: true });
+    window.addEventListener("resize", this._handleStickyScroll);
 
-    this._stickyBuyObserver = new IntersectionObserver((entries) => {
-      const entry = entries[0];
-      if (!entry) return;
-      const rect = entry.target.getBoundingClientRect();
-      this._stickyPastBuyButton = !entry.isIntersecting && rect.bottom <= 0;
-      this._syncStickyAddToCartVisibility();
-    });
-    this._stickyBuyObserver.observe(observedTarget);
-
-    const footer = document.querySelector("footer") || document.querySelector('[class*="footer"]');
-    if (footer) {
-      this._stickyFooterObserver = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          if (!entry) return;
-          this._stickyFooterVisible = entry.isIntersecting;
-          this._syncStickyAddToCartVisibility();
-        },
-        { rootMargin: "200px 0px 0px 0px" },
-      );
-      this._stickyFooterObserver.observe(footer);
+    if (typeof IntersectionObserver !== "undefined") {
+      this._stickyBuyObserver = new IntersectionObserver(() => {
+        this._syncStickyAddToCartVisibility();
+      });
+      this._stickyBuyObserver.observe(this._stickyObservedTarget);
     }
+
+    this._syncStickyAddToCartVisibility();
   }
 
   _syncStickyAddToCartVisibility() {
-    if (!this.stickyAtc) return;
-    const shouldShow = this._stickyPastBuyButton && !this._stickyFooterVisible;
+    if (!this.stickyAtc || !this._stickyObservedTarget) return;
+    const rect = this._stickyObservedTarget.getBoundingClientRect();
+    const shouldShow = rect.bottom <= 0;
     if (shouldShow) {
       this._showStickyAddToCart();
     } else {

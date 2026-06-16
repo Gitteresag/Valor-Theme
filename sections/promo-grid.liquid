@@ -1,5 +1,11 @@
 {%- liquid
   assign section_priority = false
+  assign heading_size = section.settings.heading_size | default: 'medium'
+  if heading_size == 'h1'
+    assign heading_size = 'large'
+  elsif heading_size == 'h2'
+    assign heading_size = 'medium'
+  endif
   if section.location == 'template' and section.index == 1
     assign section_priority = true
   endif
@@ -12,7 +18,7 @@
   {%- if section.settings.heading != blank or section.settings.text != blank -%}
     <div class="valor-promo-grid__header valor-promo-grid__header--{{ section.settings.heading_alignment }}">
       {%- if section.settings.heading != blank -%}
-        <h2 class="valor-promo-grid__heading valor-heading valor-heading--{{ section.settings.heading_size }}">
+        <h2 class="valor-promo-grid__heading valor-heading valor-heading--{{ heading_size }}">
           {{ section.settings.heading }}
         </h2>
       {%- endif -%}
@@ -333,10 +339,11 @@
       "id": "heading_size",
       "label": "t:sections.promo_grid.settings.heading_size.label",
       "options": [
-        { "value": "h1", "label": "t:sections.promo_grid.settings.heading_size.options.large" },
-        { "value": "h2", "label": "t:sections.promo_grid.settings.heading_size.options.medium" }
+        { "value": "small", "label": "t:sections.promo_grid.settings.heading_size.options.small" },
+        { "value": "medium", "label": "t:sections.promo_grid.settings.heading_size.options.medium" },
+        { "value": "large", "label": "t:sections.promo_grid.settings.heading_size.options.large" }
       ],
-      "default": "h2"
+      "default": "medium"
     },
     {
       "type": "select",

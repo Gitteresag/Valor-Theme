@@ -12,7 +12,6 @@
       this.track = this.querySelector("[data-slideshow-track]");
       this.slides = Array.prototype.slice.call(this.querySelectorAll("[data-slide]"));
       this.buttons = Array.prototype.slice.call(this.querySelectorAll("[data-slide-button]"));
-      this.counters = Array.prototype.slice.call(this.querySelectorAll("[data-slide-counter]"));
       this.autoplay = this.dataset.autoplay === "true";
       this.interval = Math.max(parseInt(this.dataset.interval, 10) || 5000, 3000);
       this.pauseOnHover = this.dataset.pauseOnHover !== "false";
@@ -22,12 +21,17 @@
         }),
         0,
       );
+      this.touchStartX = 0;
+      this.touchStartY = 0;
+      this.touchStartIndex = this.currentIndex;
       this.timer = null;
       this.scrollFrame = null;
       this.reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
       this.abortController = new AbortController();
 
       this.onScroll = this.onScroll.bind(this);
+      this.onTouchStart = this.onTouchStart.bind(this);
+      this.onTouchEnd = this.onTouchEnd.bind(this);
       this.onResize = this.onResize.bind(this);
       this.onKeydown = this.onKeydown.bind(this);
       this.onVisibilityChange = this.onVisibilityChange.bind(this);
@@ -69,6 +73,8 @@
       );
 
       this.viewport.addEventListener("scroll", this.onScroll, { passive: true, signal: signal });
+      this.viewport.addEventListener("touchstart", this.onTouchStart, { passive: true, signal: signal });
+      this.viewport.addEventListener("touchend", this.onTouchEnd, { passive: true, signal: signal });
       window.addEventListener("resize", this.onResize, { signal: signal });
       window.addEventListener("load", this.onResize, { signal: signal });
       document.addEventListener("visibilitychange", this.onVisibilityChange, { signal: signal });
@@ -101,6 +107,32 @@
       if (event.key === "ArrowRight") {
         event.preventDefault();
         this.next();
+      }
+    }
+
+    onTouchStart(event) {
+      if (this.slides.length < 2 || !event.changedTouches || !event.changedTouches.length) return;
+      this.touchStartX = event.changedTouches[0].clientX;
+      this.touchStartY = event.changedTouches[0].clientY;
+      this.touchStartIndex = this.currentIndex;
+    }
+
+    onTouchEnd(event) {
+      if (this.slides.length < 2 || !event.changedTouches || !event.changedTouches.length) return;
+
+      var touch = event.changedTouches[0];
+      var deltaX = touch.clientX - this.touchStartX;
+      var deltaY = touch.clientY - this.touchStartY;
+      var isHorizontalSwipe = Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25;
+
+      if (!isHorizontalSwipe) return;
+
+      if (this.touchStartIndex === this.slides.length - 1 && deltaX < 0) {
+        this.show(0);
+        this.restartAutoplay();
+      } else if (this.touchStartIndex === 0 && deltaX > 0) {
+        this.show(this.slides.length - 1);
+        this.restartAutoplay();
       }
     }
 
@@ -191,10 +223,6 @@
           }
         });
       });
-
-      this.counters.forEach(function (counter) {
-        counter.textContent = index + 1 + " / " + this.slides.length;
-      }, this);
 
       this.buttons.forEach(function (button) {
         var isActive = Number(button.dataset.slideIndex) === index;

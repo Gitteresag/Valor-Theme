@@ -1,0 +1,31 @@
+{% doc %}
+Renders the runtime hook for a homepage media section that can activate the transparent header.
+
+@param {string} transparent_header_behavior - Transparent header behavior.
+@example
+{% render 'transparent-header-trigger', transparent_header_behavior: section.settings.transparent_header_behavior %}
+{% enddoc %}
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var header = document.querySelector('.valor-section-header');
+
+    root.classList.add('valor-transparent-header-active');
+
+    if (!header) return;
+
+    header.classList.remove('valor-section-header--sticky', 'valor-section-header--transparent-solid');
+
+    {% if transparent_header_behavior == 'none' %}
+      header.classList.remove('valor-section-header--transparent-pinned', 'valor-section-header--animate');
+      root.classList.add('valor-transparent-header-ready');
+    {% else %}
+      header.classList.add('valor-section-header--transparent-pinned');
+      requestAnimationFrame(function () {
+        header.classList.add('valor-section-header--animate');
+        root.classList.add('valor-transparent-header-ready');
+      });
+    {% endif %}
+  })();
+</script>

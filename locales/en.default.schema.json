@@ -36,13 +36,14 @@
   "labels": {
     "alignment": "Alignment",
     "background": "Background",
-    "buttons_header": "Buttons",
-    "buttons_header_info": "Global button colors and shape. Leave a color empty to derive it from the background and foreground colors above.",
+    "buttons_header": "Button style",
+    "buttons_header_info": "Global button colors, border, and shape. Leave a color empty to derive it from the background and foreground colors above.",
     "button_background": "Button background",
     "button_text": "Button text",
     "button_border": "Button border",
     "button_hover_background": "Button background on hover",
     "button_hover_text": "Button text on hover",
+    "button_hover_border": "Button border on hover",
     "button_border_width": "Button border thickness",
     "button_corner_radius": "Button corner radius",
     "foreground": "Foreground",
@@ -230,6 +231,18 @@
         "full_width": {
           "label": "Full width"
         },
+        "enable_transparent_header": {
+          "label": "Use transparent header over this slideshow",
+          "info": "The header floats over the slideshow with white text. Only takes effect when this slideshow is the first section on the homepage. Falls back gracefully on older browsers."
+        },
+        "transparent_header_behavior": {
+          "label": "Transparent header behavior",
+          "info": "Overrides the normal sticky header setting for this homepage slideshow.",
+          "options": {
+            "none": "None",
+            "always": "Always pinned"
+          }
+        },
         "height_desktop": {
           "label": "Desktop height",
           "options": {
@@ -386,8 +399,9 @@
         "heading_size": {
           "label": "Heading size",
           "options": {
-            "large": "Large",
-            "medium": "Medium"
+            "small": "Small",
+            "medium": "Medium",
+            "large": "Large"
           }
         },
         "heading_alignment": {
@@ -511,12 +525,28 @@
         "heading_size": {
           "label": "Heading size",
           "options": {
-            "large": "Large",
-            "medium": "Medium"
+            "small": "Small",
+            "medium": "Medium",
+            "large": "Large"
+          }
+        },
+        "subheading": {
+          "label": "Subheading"
+        },
+        "content_alignment": {
+          "label": "Text alignment",
+          "options": {
+            "left": "Left",
+            "center": "Center",
+            "right": "Right"
           }
         },
         "image": {
-          "label": "Image"
+          "label": "Desktop image"
+        },
+        "mobile_image": {
+          "label": "Mobile image",
+          "info": "Optional. Falls back to desktop image if empty."
         },
         "layout": {
           "label": "Desktop layout",
