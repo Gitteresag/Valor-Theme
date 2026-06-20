@@ -1,5 +1,9 @@
 /**
- * <div is="valor-video">
+ * <valor-video> — autonomous custom element (was <div is="valor-video">).
+ *
+ * Autonomous (not a customized built-in) so it upgrades in Safari/WebKit,
+ * which never shipped `is=` elements — otherwise the play button would do
+ * nothing there. Mirrors Dawn's <deferred-media> autonomous-element pattern.
  *
  * Handles two play modes:
  *  1. Cover image visible → click play hides cover, reveals video, starts playback.
@@ -9,7 +13,7 @@
  * with autoplay=1 so the video starts immediately (avoids needing the
  * full provider SDK just to trigger play).
  */
-class ValorVideo extends HTMLDivElement {
+class ValorVideo extends HTMLElement {
   constructor() {
     super();
     this._handlePlayClick = this.onPlayClick.bind(this);
@@ -89,5 +93,5 @@ class ValorVideo extends HTMLDivElement {
 }
 
 if (!customElements.get("valor-video")) {
-  customElements.define("valor-video", ValorVideo, { extends: "div" });
+  customElements.define("valor-video", ValorVideo);
 }

@@ -30,11 +30,18 @@ class ValorCountdownTimer extends HTMLElement {
 
   parseTargetDate() {
     const date = (this.dataset.endDate || "").trim();
-    const time = (this.dataset.endTime || "23:59").trim();
-    const offset = (this.dataset.timezoneOffset || "+00:00").trim();
+    let time = (this.dataset.endTime || "23:59").trim();
+    let offset = (this.dataset.timezoneOffset || "+00:00").trim();
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
-    if (!/^\d{2}:\d{2}$/.test(time)) return null;
-    if (!/^[+-]\d{2}:\d{2}$/.test(offset)) return null;
+    // Accept single-digit hours (e.g. "9:00", "+2:00") by padding to the
+    // two-digit form the Date constructor needs, so a small merchant typo
+    // doesn't silently expire the timer on load.
+    const timeMatch = time.match(/^(\d{1,2}):(\d{2})$/);
+    if (!timeMatch) return null;
+    time = timeMatch[1].padStart(2, "0") + ":" + timeMatch[2];
+    const offsetMatch = offset.match(/^([+-])(\d{1,2}):(\d{2})$/);
+    if (!offsetMatch) return null;
+    offset = offsetMatch[1] + offsetMatch[2].padStart(2, "0") + ":" + offsetMatch[3];
 
     const target = new Date(`${date}T${time}:00${offset}`);
     return Number.isNaN(target.getTime()) ? null : target;

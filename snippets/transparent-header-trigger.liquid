@@ -9,6 +9,19 @@ Renders the runtime hook for a homepage media section that can activate the tran
 <script>
   (function () {
     var root = document.documentElement;
+    var current = document.currentScript;
+    var section = current ? current.closest('.shopify-section') : null;
+    var main = document.getElementById('MainContent');
+
+    // Only activate the transparent header when this trigger's section is the
+    // first section on the page. This mirrors the CSS `:has(:first-child …)`
+    // gate (and the valor-sticky-header component) so the script can't strip
+    // the header's sticky state / pin it transparent for a media section that
+    // isn't actually at the top of the homepage.
+    if (!section || !main || main.querySelector(':scope > .shopify-section') !== section) {
+      return;
+    }
+
     var header = document.querySelector('.valor-section-header');
 
     root.classList.add('valor-transparent-header-active');

@@ -36,7 +36,7 @@
             {%- endif -%}
           </li>
           {%- unless forloop.last and i == 2 -%}
-            <li class="valor-marquee__sep" aria-hidden="true">{{ separator }}</li>
+            <li class="valor-marquee__sep" aria-hidden="true">{{ separator | escape }}</li>
           {%- endunless -%}
         {%- endfor -%}
       </ul>

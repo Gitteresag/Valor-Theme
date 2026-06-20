@@ -1,4 +1,11 @@
 /* Back to top — global button rendered from theme.liquid */
+
+/* The autonomous custom element only wraps the real <button>; it should not
+   generate a box of its own (the inner button is position: fixed). */
+valor-back-to-top {
+  display: contents;
+}
+
 .valor-back-to-top {
   position: fixed;
   bottom: calc(1.25rem + env(safe-area-inset-bottom));

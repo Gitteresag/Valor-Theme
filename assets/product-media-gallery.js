@@ -73,6 +73,11 @@ class ValorProductMedia extends HTMLElement {
     }
 
     this.updateNavState();
+
+    // Per-color image grouping (opt-in, product page only). Active only when
+    // the root carries data-color-grouping; filters media to the selected color.
+    this.colorGrouping = this.dataset.colorGrouping === "true";
+    if (this.colorGrouping) this.initColorGrouping();
   }
 
   getActiveIndex() {
@@ -95,13 +100,19 @@ class ValorProductMedia extends HTMLElement {
     if (!this.lightboxEnabled) return;
     e.preventDefault();
     const btn = e.currentTarget;
-    const index = parseInt(btn.dataset.mediaIndex, 10) || 0;
-    this.openLightbox(index);
+    this.openLightbox(btn.dataset.mediaId);
   }
 
   onSetMedia(e) {
     const mediaId = e.detail && e.detail.mediaId;
-    if (mediaId) this.setActiveMedia(mediaId);
+    if (!mediaId) return;
+    if (this.colorGrouping) {
+      const target = this.mainItems.find((it) => String(it.dataset.mediaId) === String(mediaId));
+      // The variant's featured image isn't in the active color group; let the
+      // color filter pick the first visible image instead of blanking the main.
+      if (target && target.classList.contains("is-color-hidden")) return;
+    }
+    this.setActiveMedia(mediaId);
   }
 
   setActiveMedia(mediaId) {
@@ -147,11 +158,26 @@ class ValorProductMedia extends HTMLElement {
     if (item) this.setActiveMedia(item.dataset.mediaId);
   }
 
+  // Step within the currently visible items. With color grouping off, the
+  // visible set is every main item, so behavior is unchanged.
+  step(direction) {
+    const visible = this.colorGrouping ? this.getVisibleMainItems() : this.mainItems;
+    if (!visible.length) return;
+    const active = this.mainItems[this.getActiveIndex()];
+    let pos = visible.indexOf(active);
+    if (pos === -1) pos = 0;
+    let nextPos = pos + direction;
+    if (nextPos < 0) nextPos = visible.length - 1;
+    if (nextPos >= visible.length) nextPos = 0;
+    const target = visible[nextPos];
+    if (target) this.setActiveMedia(target.dataset.mediaId);
+  }
+
   next() {
-    this.setActiveByIndex(this.getActiveIndex() + 1);
+    this.step(1);
   }
   prev() {
-    this.setActiveByIndex(this.getActiveIndex() - 1);
+    this.step(-1);
   }
 
   onPrevClick(e) {
@@ -167,18 +193,23 @@ class ValorProductMedia extends HTMLElement {
   }
 
   updateNavState() {
-    const i = this.getActiveIndex();
+    // Count within the visible set so the counter/progress reflect the
+    // selected color when filtering; identical to before when grouping is off.
+    const items = this.colorGrouping ? this.getVisibleMainItems() : this.mainItems;
+    const activeItem = this.mainItems[this.getActiveIndex()];
+    const i = activeItem ? items.indexOf(activeItem) : -1;
+    const total = items.length;
     if (this.counterEl) {
-      if (i >= 0 && this.mainItems.length > 1) {
-        this.counterEl.textContent = i + 1 + " / " + this.mainItems.length;
+      if (i >= 0 && total > 1) {
+        this.counterEl.textContent = i + 1 + " / " + total;
         this.counterEl.removeAttribute("hidden");
       } else {
         this.counterEl.setAttribute("hidden", "");
       }
     }
 
-    if (this.progressEl && i >= 0 && this.mainItems.length > 1) {
-      const width = 100 / this.mainItems.length;
+    if (this.progressEl && i >= 0 && total > 1) {
+      const width = 100 / total;
       this.progressEl.dataset.activeIndex = String(i);
       this.progressEl.style.setProperty("--gallery-progress-width", width + "%");
       this.progressEl.style.setProperty("--gallery-progress-left", i * width + "%");
@@ -192,23 +223,25 @@ class ValorProductMedia extends HTMLElement {
       return;
     }
     e.preventDefault();
-    const clickedItem = e.currentTarget;
-    const clickedIndex = parseInt(clickedItem.dataset.mediaIndex, 10) || 0;
-
-    this.openLightbox(clickedIndex);
+    this.openLightbox(e.currentTarget.dataset.mediaId);
   }
 
-  openLightbox(clickedIndex) {
-    const images = this.mainItems.map((item) => ({
+  openLightbox(mediaId) {
+    // Show the currently visible set — the selected color when grouping is on,
+    // otherwise every image. Index is resolved from the clicked media id.
+    const source = this.colorGrouping ? this.getVisibleMainItems() : this.mainItems;
+    const images = source.map((item) => ({
       src: item.dataset.mediaSrc,
       srcset: item.dataset.mediaSrcset,
       sizes: "100vw",
       alt: item.dataset.mediaAlt || "",
     }));
+    let index = source.findIndex((item) => String(item.dataset.mediaId) === String(mediaId));
+    if (index < 0) index = 0;
 
     document.dispatchEvent(
       new CustomEvent("valor:lightbox:open", {
-        detail: { images: images, index: clickedIndex },
+        detail: { images: images, index: index },
       }),
     );
   }
@@ -282,12 +315,143 @@ class ValorProductMedia extends HTMLElement {
     if (this.thumbsNext) this.thumbsNext.hidden = atEnd;
   }
 
+  /* --- Per-color image grouping (opt-in) ----------------------------------
+     Groups media by the color found at the START of each image's alt text,
+     then shows only the selected color's images (plus "shared" images whose
+     alt doesn't start with a color). Self-wires to the color option control
+     in the same section, so it works with any picker style. Falls back to
+     showing everything when there's no color option or no tagged alts. */
+  initColorGrouping() {
+    const scope = this.closest(".valor-mp") || this.closest(".shopify-section") || document;
+    this.colorRadios = Array.from(scope.querySelectorAll("input[data-option-color]"));
+    this.colorSelect = scope.querySelector("select[data-option-color]");
+
+    let colorValues = [];
+    if (this.colorRadios.length) {
+      colorValues = this.colorRadios.map((r) => r.value);
+    } else if (this.colorSelect) {
+      colorValues = Array.from(this.colorSelect.options).map((o) => o.value);
+    }
+    if (!colorValues.length) {
+      this.colorGrouping = false;
+      return;
+    }
+
+    // Longest-first so e.g. "Sky Blue" wins over "Blue" on a prefix match.
+    this._colorList = colorValues
+      .map((v) => this._normColor(v))
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length);
+
+    this._colorByMediaId = {};
+    let matchedAny = false;
+    this.mainItems.forEach((item) => {
+      const alt = this._normColor(item.dataset.mediaAlt || "");
+      let color = null;
+      for (let i = 0; i < this._colorList.length; i++) {
+        const c = this._colorList[i];
+        if (alt === c || alt.indexOf(c + " ") === 0) {
+          color = c;
+          matchedAny = true;
+          break;
+        }
+      }
+      this._colorByMediaId[String(item.dataset.mediaId)] = color;
+    });
+
+    if (!matchedAny) {
+      // No image alt starts with a color → don't filter, never blank the gallery.
+      this.colorGrouping = false;
+      return;
+    }
+
+    this._handleColorChange = () => {
+      // On an explicit color change, jump to that color's first own image.
+      window.requestAnimationFrame(() => this.filterByColor(true));
+    };
+    this.colorRadios.forEach((r) => r.addEventListener("change", this._handleColorChange));
+    if (this.colorSelect) this.colorSelect.addEventListener("change", this._handleColorChange);
+
+    // Initial filter, deferred so it runs after product-info's own init.
+    // Keep the variant's featured image if it's already in the starting color.
+    window.requestAnimationFrame(() => this.filterByColor(false));
+  }
+
+  _normColor(value) {
+    return String(value || "")
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  getSelectedColor() {
+    if (this.colorRadios && this.colorRadios.length) {
+      const checked = this.colorRadios.find((r) => r.checked);
+      if (checked) return this._normColor(checked.value);
+    }
+    if (this.colorSelect) return this._normColor(this.colorSelect.value);
+    return null;
+  }
+
+  getVisibleMainItems() {
+    return this.mainItems.filter((item) => !item.classList.contains("is-color-hidden"));
+  }
+
+  filterByColor(forceColorFirst) {
+    if (!this.colorGrouping) return;
+    const selected = this.getSelectedColor();
+    if (selected == null) return;
+    const self = this;
+    const shouldShow = function (mediaId) {
+      const color = self._colorByMediaId[String(mediaId)];
+      return color == null || color === selected; // shared (null) shows for every color
+    };
+
+    this.mainItems.forEach((item) => {
+      item.classList.toggle("is-color-hidden", !shouldShow(item.dataset.mediaId));
+    });
+    this.thumbs.forEach((thumb) => {
+      thumb.classList.toggle("is-color-hidden", !shouldShow(thumb.dataset.thumbFor));
+    });
+    this.gridItems.forEach((grid) => {
+      grid.classList.toggle("is-color-hidden", !shouldShow(grid.dataset.mediaId));
+    });
+    this.progressButtons.forEach((button) => {
+      button.classList.toggle("is-color-hidden", !shouldShow(button.dataset.mediaId));
+    });
+
+    // Decide the active image. On an explicit color change jump to that color's
+    // first OWN image; on load keep the variant's featured image if still visible.
+    const activeItem = this.mainItems[this.getActiveIndex()];
+    const needsRepoint = forceColorFirst || !activeItem || activeItem.classList.contains("is-color-hidden");
+    if (needsRepoint) {
+      const firstOwn = this.mainItems.find(
+        (it) =>
+          !it.classList.contains("is-color-hidden") &&
+          this._colorByMediaId[String(it.dataset.mediaId)] === selected,
+      );
+      const target = firstOwn || this.getVisibleMainItems()[0];
+      if (target) {
+        this.setActiveMedia(target.dataset.mediaId);
+        return;
+      }
+    }
+    this.updateNavState();
+    this.updateThumbsNavState();
+  }
+
   disconnectedCallback() {
     if (this.thumbsTrack) {
       this.thumbsTrack.removeEventListener("scroll", this._handleThumbsScroll);
       window.removeEventListener("resize", this._handleResize);
       if (this.thumbsPrev) this.thumbsPrev.removeEventListener("click", this._handleThumbsPrev);
       if (this.thumbsNext) this.thumbsNext.removeEventListener("click", this._handleThumbsNext);
+    }
+    if (this._handleColorChange) {
+      if (this.colorRadios) {
+        this.colorRadios.forEach((r) => r.removeEventListener("change", this._handleColorChange));
+      }
+      if (this.colorSelect) this.colorSelect.removeEventListener("change", this._handleColorChange);
     }
   }
 }

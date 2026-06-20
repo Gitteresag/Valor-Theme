@@ -124,9 +124,11 @@
                   <div class="valor-header__mega-inner{% unless has_mega_promo %} valor-header__mega-inner--links-only{% endunless %}">
                     {%- if has_mega_links -%}
                       <div class="valor-header__mega-links">
-                        <a href="{{ link.url }}" class="valor-header__mega-view-all">
-                          {{ 'header.view_all' | t: title: link.title }}
-                        </a>
+                        {%- if section.settings.show_menu_view_all -%}
+                          <a href="{{ link.url }}" class="valor-header__mega-view-all">
+                            {{ 'header.view_all' | t: title: link.title }}
+                          </a>
+                        {%- endif -%}
                         <ul class="valor-header__mega-list">
                           {% for child in mega_menu_links %}
                             <li class="valor-header__mega-column">
@@ -156,9 +158,11 @@
                 </div>
               {%- else -%}
                 <ul class="valor-header__submenu">
-                  <li class="valor-header__submenu-view-all">
-                    <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
-                  </li>
+                  {%- if section.settings.show_menu_view_all -%}
+                    <li class="valor-header__submenu-view-all">
+                      <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
+                    </li>
+                  {%- endif -%}
                   {% for child in link.links %}
                     <li>
                       <a href="{{ child.url }}">{{ child.title }}</a>
@@ -328,8 +332,10 @@
               </span>
             </summary>
             <div class="valor-mobile-drawer__sublist">
-              <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
-              {%- if has_mega_links -%}
+              {%- if section.settings.show_menu_view_all -%}
+                <a href="{{ link.url }}">{{ 'header.view_all' | t: title: link.title }}</a>
+              {%- endif -%}
+              {%- if mega_menu_links.size > 0 -%}
                 {% for child in mega_menu_links %}
                   <a href="{{ child.url }}">{{ child.title }}</a>
                 {% endfor %}
@@ -397,6 +403,7 @@
       {%- if settings.social_linkedin_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
       {%- if settings.social_threads_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
       {%- if settings.social_snapchat_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
+      {%- if settings.social_whatsapp_url != blank -%}{%- assign has_social = true -%}{%- endif -%}
 
       {%- if has_social -%}
         <ul class="valor-mobile-drawer__social">
@@ -495,6 +502,18 @@
                 aria-label="Snapchat"
               >
                 {{- 'icon-snapchat.svg' | inline_asset_content -}}
+              </a>
+            </li>
+          {%- endif -%}
+          {%- if settings.social_whatsapp_url != blank -%}
+            <li>
+              <a
+                href="{{ settings.social_whatsapp_url }}"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+              >
+                {{- 'icon-whatsapp.svg' | inline_asset_content -}}
               </a>
             </li>
           {%- endif -%}
@@ -2245,6 +2264,13 @@
       "id": "menu",
       "label": "t:labels.menu",
       "default": "main-menu"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_menu_view_all",
+      "label": "Show \"View all\" link in menu dropdowns",
+      "info": "Adds an automatic \"View all [item]\" link at the top of each dropdown, pointing to the parent menu item's own URL. Off by default to match Shopify reference themes (Dawn, Horizon). If you want a \"View all\" entry, you can also add it manually as a nested link in your navigation.",
+      "default": false
     },
     {
       "type": "link_list",

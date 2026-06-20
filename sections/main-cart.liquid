@@ -69,15 +69,16 @@
     so AJAX cart responses re-render the list identically.
   endcomment
   assign visible_code_titles = cart.cart_level_discount_applications | where: 'type', 'discount_code' | map: 'title'
+  assign line_code_titles_str = ''
   for cart_item in cart.items
     for allocation in cart_item.line_level_discount_allocations
       if allocation.discount_application.type == 'discount_code'
-        assign line_codes = cart_item.line_level_discount_allocations | map: 'discount_application' | map: 'title'
-        assign visible_code_titles = visible_code_titles | concat: line_codes
-        break
+        assign line_code_titles_str = line_code_titles_str | append: allocation.discount_application.title | append: '~|~'
       endif
     endfor
   endfor
+  assign line_code_titles = line_code_titles_str | split: '~|~'
+  assign visible_code_titles = visible_code_titles | concat: line_code_titles
   assign visible_code_titles = visible_code_titles | uniq
 
   assign all_applicable_codes = cart.discount_codes | map: 'code'

@@ -1,5 +1,11 @@
 /**
- * <dialog is="valor-lightbox">
+ * <valor-lightbox> — autonomous custom element wrapping a native <dialog>.
+ *
+ * Autonomous (not a customized built-in `<dialog is="...">`) because Safari /
+ * WebKit never shipped customized built-in elements, so an `is=` dialog would
+ * never upgrade there and the lightbox would silently do nothing. Wrapping a
+ * real <dialog> keeps the native focus trap + ESC-to-close while working in
+ * every browser. Mirrors how Dawn/Horizon build modals as autonomous elements.
  *
  * Listens for `valor:lightbox:open` events:
  *   document.dispatchEvent(new CustomEvent('valor:lightbox:open', {
@@ -14,21 +20,22 @@
  *   - Body scroll lock while open
  *   - Respects prefers-reduced-motion
  */
-class ValorLightbox extends HTMLDialogElement {
+class ValorLightbox extends HTMLElement {
   constructor() {
     super();
     this.images = [];
     this.index = 0;
 
     this._handleOpen = this.openWith.bind(this);
-    this._handleClose = this.close.bind(this);
     this._handleClick = this.onClick.bind(this);
     this._handleKey = this.onKey.bind(this);
     this._handleTouchStart = this.onTouchStart.bind(this);
     this._handleTouchEnd = this.onTouchEnd.bind(this);
+    this._handleDialogClose = this.onClose.bind(this);
   }
 
   connectedCallback() {
+    this.dialog = this.querySelector("dialog");
     this.imgEl = this.querySelector("[data-lightbox-image]");
     this.counterEl = this.querySelector("[data-lightbox-counter]");
     this.prevBtn = this.querySelector("[data-lightbox-prev]");
@@ -36,36 +43,43 @@ class ValorLightbox extends HTMLDialogElement {
     this.viewportEl = this.querySelector("[data-lightbox-viewport]");
 
     document.addEventListener("valor:lightbox:open", this._handleOpen);
-    this.addEventListener("click", this._handleClick);
-    this.addEventListener("keydown", this._handleKey);
+    if (this.dialog) {
+      this.dialog.addEventListener("click", this._handleClick);
+      this.dialog.addEventListener("keydown", this._handleKey);
+      this.dialog.addEventListener("close", this._handleDialogClose);
+    }
     if (this.viewportEl) {
       this.viewportEl.addEventListener("touchstart", this._handleTouchStart, { passive: true });
       this.viewportEl.addEventListener("touchend", this._handleTouchEnd, { passive: true });
     }
-    this.addEventListener("close", this.onClose.bind(this));
 
     // Hook prev/next directly (in addition to general click handler)
     if (this.prevBtn) this.prevBtn.addEventListener("click", this.prev.bind(this));
     if (this.nextBtn) this.nextBtn.addEventListener("click", this.next.bind(this));
     var closeBtn = this.querySelector("[data-lightbox-close]");
-    if (closeBtn) closeBtn.addEventListener("click", this._handleClose);
+    if (closeBtn) closeBtn.addEventListener("click", this.closeDialog.bind(this));
   }
 
   disconnectedCallback() {
     document.removeEventListener("valor:lightbox:open", this._handleOpen);
   }
 
+  closeDialog() {
+    if (this.dialog && typeof this.dialog.close === "function") this.dialog.close();
+  }
+
   openWith(event) {
+    if (!this.dialog) return;
     var detail = event.detail || {};
     if (!detail.images || !detail.images.length) return;
     this.images = detail.images;
     this.index = Math.max(0, Math.min(detail.index || 0, this.images.length - 1));
-    this.setAttribute("data-single", this.images.length <= 1 ? "true" : "false");
+    this.dialog.setAttribute("data-single", this.images.length <= 1 ? "true" : "false");
     this.render();
-    if (typeof this.showModal === "function") {
-      this.showModal();
+    if (typeof this.dialog.showModal === "function") {
+      this.dialog.showModal();
     } else {
-      this.setAttribute("open", "");
+      this.dialog.setAttribute("open", "");
     }
     document.body.classList.add("valor-no-scroll");
   }
@@ -130,7 +144,7 @@ class ValorLightbox extends HTMLDialogElement {
   onClick(e) {
     // Click on the dialog backdrop itself (not on inner content) closes.
     // The dialog element receives the click when the backdrop is clicked.
-    if (e.target === this) this.close();
+    if (e.target === this.dialog) this.closeDialog();
   }
 
   onKey(e) {
@@ -166,7 +180,7 @@ class ValorLightbox extends HTMLDialogElement {
 }
 
 if (!customElements.get("valor-lightbox")) {
-  customElements.define("valor-lightbox", ValorLightbox, { extends: "dialog" });
+  customElements.define("valor-lightbox", ValorLightbox);
 }
 
 // Body scroll lock helper (CSS class — defined in lightbox.css indirectly via inline style)

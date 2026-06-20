@@ -43,7 +43,8 @@
   # same query, just without active filters).
   assign facet_clear_url = results.url
   if facet_clear_url == blank and results.terms
-    assign facet_clear_url = routes.search_url | append: '?q=' | append: results.terms
+    assign clear_terms = results.terms | url_encode
+    assign facet_clear_url = routes.search_url | append: '?q=' | append: clear_terms | append: '&options%5Bprefix%5D=last'
   endif
 -%}
 

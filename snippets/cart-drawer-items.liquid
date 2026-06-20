@@ -102,9 +102,13 @@
                 name="updates[{{ item.key }}]"
                 value="{{ item.quantity }}"
                 min="0"
+                step="{{ item.variant.quantity_rule.increment }}"
                 aria-label="{{ 'cart.quantity_label' | t }}"
                 data-qty-input
                 data-line="{{ forloop.index }}"
+                data-min="{{ item.variant.quantity_rule.min }}"
+                data-step="{{ item.variant.quantity_rule.increment }}"
+                {% if item.variant.quantity_rule.max != blank %}data-max="{{ item.variant.quantity_rule.max }}"{% endif %}
               >
               <button
                 type="button"

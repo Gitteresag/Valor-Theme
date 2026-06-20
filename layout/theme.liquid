@@ -54,6 +54,13 @@
       {% section 'cart-drawer' %}
     {%- endif -%}
 
+    {%- comment -%}
+      Add-to-cart AJAX is always loaded, decoupled from the drawer. When the
+      drawer is disabled it still intercepts add-to-cart, then navigates to the
+      cart page, matching Dawn/Horizon "page" cart mode.
+    {%- endcomment -%}
+    <script src="{{ 'cart-drawer.js' | asset_url }}" defer></script>
+
     {%- if settings.enable_back_to_top -%}
       {%- render 'back-to-top' -%}
       <script src="{{ 'back-to-top.js' | asset_url }}" defer></script>

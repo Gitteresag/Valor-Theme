@@ -925,34 +925,88 @@
           if (window.Shopify && Shopify.formatMoney) {
             return Shopify.formatMoney(cents, "{{ shop.money_format }}");
           }
-        } catch(e) {}
-        var v = (cents / 100).toFixed(2);
-        return '€' + v.replace('.', ',');
+        } catch (e) {}
+        // Self-contained fallback honouring the store's money format (any
+        // currency), used when Shopify.formatMoney isn't loaded. Previously
+        // this hardcoded a euro sign + comma decimals, which was wrong on
+        // non-EUR stores.
+        var format = {{ shop.money_format | json }};
+        function fmt(number, precision, thousands, decimal) {
+          if (precision == null) precision = 2;
+          thousands = thousands == null ? ',' : thousands;
+          decimal = decimal == null ? '.' : decimal;
+          if (isNaN(number) || number == null) number = 0;
+          number = (number / 100.0).toFixed(precision);
+          var parts = number.split('.');
+          var dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands);
+          var centsPart = parts[1] ? decimal + parts[1] : '';
+          return dollars + centsPart;
+        }
+        var match = format.match(/\{\{\s*(\w+)\s*\}\}/);
+        var placeholder = match ? match[1] : 'amount';
+        var value;
+        switch (placeholder) {
+          case 'amount_no_decimals': value = fmt(cents, 0); break;
+          case 'amount_with_comma_separator': value = fmt(cents, 2, '.', ','); break;
+          case 'amount_no_decimals_with_comma_separator': value = fmt(cents, 0, '.', ','); break;
+          case 'amount_with_space_separator': value = fmt(cents, 2, ' ', ','); break;
+          case 'amount_no_decimals_with_space_separator': value = fmt(cents, 0, ' ', ''); break;
+          case 'amount_with_apostrophe_separator': value = fmt(cents, 2, "'", '.'); break;
+          default: value = fmt(cents, 2);
+        }
+        return format.replace(/\{\{\s*\w+\s*\}\}/, value);
       }
 
       function updatePrice(variant) {
         var priceEl = document.querySelector('#shopify-section-' + sectionId + ' .valor-fp__price');
         if (!priceEl || !variant) return;
         var current = priceEl.querySelector('.valor-fp__price-current');
-        var compare = priceEl.querySelector('.valor-fp__price-compare');
-        if (current) {
-          var isSale = variant.compare_at_price && variant.compare_at_price > variant.price;
-          current.textContent = formatMoney(variant.price);
-          if (isSale) {
-            current.classList.add('valor-fp__price-current--sale');
-          } else {
-            current.classList.remove('valor-fp__price-current--sale');
-          }
-          if (compare) {
-            if (isSale) {
-              compare.style.display = '';
-              var s = compare.querySelector('s');
-              if (s) s.textContent = formatMoney(variant.compare_at_price);
-            } else {
-              compare.style.display = 'none';
-            }
-          }
+        if (!current) return;
+
+        var isSale = variant.compare_at_price && variant.compare_at_price > variant.price;
+        current.textContent = formatMoney(variant.price);
+        if (isSale) {
+          current.classList.add('valor-fp__price-current--sale');
+        } else {
+          current.classList.remove('valor-fp__price-current--sale');
         }
+
+        // Compare-at strikethrough — create on demand and remove when not on
+        // sale, so switching to a discounted variant shows the sale price even
+        // when the initially rendered variant was full price (matches the main
+        // product page behaviour in product-info.js).
+        var compare = priceEl.querySelector('.valor-fp__price-compare');
+        if (isSale) {
+          if (!compare) {
+            compare = document.createElement('span');
+            compare.className = 'valor-fp__price-compare';
+            compare.appendChild(document.createElement('s'));
+            current.insertAdjacentElement('afterend', compare);
+          }
+          compare.style.display = '';
+          var s = compare.querySelector('s');
+          if (s) s.textContent = formatMoney(variant.compare_at_price);
+        } else if (compare) {
+          compare.parentNode.removeChild(compare);
+        }
+
+        {% if settings.show_sale_badge %}
+          // Sale badge — create on demand, remove when not on sale.
+          var badge = priceEl.querySelector('.valor-fp__price-badge');
+          if (isSale) {
+            if (!badge) {
+              badge = document.createElement('span');
+              badge.className = 'valor-fp__price-badge';
+              badge.textContent = {{ settings.sale_badge_text | default: 'Sale' | json }};
+              var anchor = priceEl.querySelector('.valor-fp__price-compare') || current;
+              anchor.insertAdjacentElement('afterend', badge);
+            }
+            badge.style.display = '';
+          } else if (badge) {
+            badge.parentNode.removeChild(badge);
+          }
+        {% endif %}
+
         updateUnitPrice(variant);
       }
 

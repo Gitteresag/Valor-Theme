@@ -66,9 +66,12 @@
 
   assign use_inline_size_guide = false
   for candidate_block in section.blocks
-    if candidate_block.type == 'variant_picker' and candidate_block.settings.size_option_style == 'minimal'
-      assign use_inline_size_guide = true
-      break
+    if candidate_block.type == 'variant_picker'
+      assign vp_size_style = candidate_block.settings.size_option_style
+      if vp_size_style == 'minimal' or vp_size_style == 'boxed'
+        assign use_inline_size_guide = true
+        break
+      endif
     endif
   endfor
 
@@ -100,6 +103,7 @@
         mobile_indicator: mobile_indicator,
         desktop_layout: desktop_gallery_layout,
         media_fit: media_fit,
+        color_grouping: section.settings.enable_color_media_grouping,
         priority: true
       -%}
     </div>
@@ -746,11 +750,12 @@
           "id": "size_option_style",
           "options": [
             { "value": "default", "label": "Default" },
-            { "value": "minimal", "label": "Minimal text" }
+            { "value": "minimal", "label": "Minimal text" },
+            { "value": "boxed", "label": "Boxed (segmented)" }
           ],
           "default": "default",
           "label": "Size option style",
-          "info": "Minimal text applies only to options named Size, Koko, Storlek, Taille, Taglia, Talla and similar size labels."
+          "info": "Minimal text and Boxed apply only to options named Size, Koko, Storlek, Taille, Taglia, Talla and similar size labels. Boxed shows a full-width segmented row that matches the Add to cart width."
         },
         {
           "type": "select",
@@ -780,7 +785,20 @@
       "type": "quantity_selector",
       "name": "Quantity selector",
       "limit": 1,
-      "settings": []
+      "settings": [
+        {
+          "type": "select",
+          "id": "quantity_style",
+          "label": "Quantity selector style",
+          "options": [
+            { "value": "default", "label": "Theme default" },
+            { "value": "underline", "label": "A — Minimal underline" },
+            { "value": "pill", "label": "B — Soft pill" },
+            { "value": "fullwidth", "label": "C — Full width" }
+          ],
+          "default": "default"
+        }
+      ]
     },
     {
       "type": "buy_buttons",
@@ -1078,7 +1096,8 @@
       "id": "desktop_gallery_layout",
       "options": [
         { "value": "single", "label": "t:sections.main_product.settings.desktop_gallery_layout.options.single" },
-        { "value": "stacked", "label": "t:sections.main_product.settings.desktop_gallery_layout.options.stacked" }
+        { "value": "stacked", "label": "t:sections.main_product.settings.desktop_gallery_layout.options.stacked" },
+        { "value": "column", "label": "Single column (full width)" }
       ],
       "default": "single",
       "label": "t:sections.main_product.settings.desktop_gallery_layout.label",
@@ -1093,6 +1112,13 @@
       ],
       "default": "counter",
       "label": "t:sections.main_product.settings.mobile_indicator.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_color_media_grouping",
+      "default": false,
+      "label": "Filter gallery images by color",
+      "info": "Show only the selected color's images. Name each image's ALT text to begin with the color option value (e.g. \"Pink\", \"Pink front\"). The first color shows by default. Images whose ALT text does not begin with a color show for every color. Requires a product option detected as Color."
     },
     {
       "type": "header",

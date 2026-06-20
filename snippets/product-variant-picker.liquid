@@ -114,13 +114,23 @@
           assign render_size_text = true
         endif
 
+        assign render_size_boxed = false
+        if resolved_size_option_style == 'boxed' and is_size_option
+          assign render_size_boxed = true
+        endif
+
+        assign render_size_custom = false
+        if render_size_text or render_size_boxed
+          assign render_size_custom = true
+        endif
+
         assign render_select = false
-        if resolved_picker_style == 'dropdown' and render_size_text == false
+        if resolved_picker_style == 'dropdown' and render_size_custom == false
           assign render_select = true
         endif
 
         assign render_swatches = false
-        if resolved_picker_style == 'swatches' and render_size_text == false
+        if resolved_picker_style == 'swatches' and render_size_custom == false
           assign all_have_swatch = true
           for value in option.values
             assign has_swatch = false
@@ -153,6 +163,9 @@
         elsif render_size_text
           assign values_modifier = 'size-text'
           assign value_label_class = prefix | append: '__option-size-text'
+        elsif render_size_boxed
+          assign values_modifier = 'size-boxed'
+          assign value_label_class = prefix | append: '__option-size-box'
         endif
       -%}
 
@@ -168,6 +181,9 @@
             id="{{ prefix }}-select-{{ section_id }}-{{ option_index }}"
             class="{{ prefix }}__option-select"
             data-option-position="{{ option.position }}"
+            {% if is_color_option %}
+              data-option-color="true"
+            {% endif %}
             {% if prefix == 'valor-fp' %}
               data-section-id="{{ section_id }}"
             {% endif %}
@@ -185,12 +201,12 @@
           </select>
         </div>
       {%- else -%}
-        <fieldset class="{{ prefix }}__option-group{% if render_size_text %} {{ prefix }}__option-group--size-text{% endif %}">
-          <legend class="{{ prefix }}__option-label{% if render_size_text %} {{ prefix }}__option-label--size-text{% endif %}">
+        <fieldset class="{{ prefix }}__option-group{% if render_size_text %} {{ prefix }}__option-group--size-text{% elsif render_size_boxed %} {{ prefix }}__option-group--size-boxed{% endif %}">
+          <legend class="{{ prefix }}__option-label{% if render_size_text %} {{ prefix }}__option-label--size-text{% elsif render_size_boxed %} {{ prefix }}__option-label--size-boxed{% endif %}">
             <span class="{{ prefix }}__option-label-row">
               <span class="{{ prefix }}__option-label-text">
                 {{ option.name }}
-                {%- unless render_size_text -%}
+                {%- unless render_size_custom -%}
                   :
                   <span
                     class="{{ prefix }}__option-selected"
@@ -200,7 +216,7 @@
                   </span>
                 {%- endunless -%}
               </span>
-              {%- if render_size_text -%}
+              {%- if render_size_custom -%}
                 <span
                   class="visually-hidden"
                   data-selected-for="option-{{ section_id }}-{{ option_index }}"
@@ -259,6 +275,9 @@
                 {% endif %}
                 data-option-position="{{ option.position }}"
                 data-option-display="option-{{ section_id }}-{{ option_index }}"
+                {% if is_color_option %}
+                  data-option-color="true"
+                {% endif %}
                 {% if prefix == 'valor-fp' %}
                   data-section-id="{{ section_id }}"
                 {% endif %}

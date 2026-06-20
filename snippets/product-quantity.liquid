@@ -33,8 +33,12 @@
       assign total_qty = total_qty | plus: item.quantity
     endif
   endfor
+  assign qty_style = block.settings.quantity_style | default: 'default'
 -%}
-<div class="valor-mp__quantity" {{ block.shopify_attributes }}>
+<div
+  class="valor-mp__quantity{% unless qty_style == 'default' or qty_style == blank %} qty-style--{{ qty_style }}{% endunless %}"
+  {{ block.shopify_attributes }}
+>
   <label
     for="Quantity-{{ section_id }}"
     class="valor-mp__quantity-label"

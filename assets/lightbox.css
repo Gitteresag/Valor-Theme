@@ -7,6 +7,12 @@
    image fills the available space; close, nav, and counter sit on top
    of the image with their own positioning. */
 
+/* The autonomous custom element only wraps the native <dialog>; it should
+   not generate a box of its own. */
+valor-lightbox {
+  display: contents;
+}
+
 .valor-lightbox {
   padding: 0;
   border: 0;

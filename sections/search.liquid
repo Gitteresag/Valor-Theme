@@ -80,12 +80,12 @@
   endif
 
   assign has_filters = false
-  if has_results and enable_filtering and search.filters != empty
+  if search.performed and enable_filtering and search.filters != empty
     assign has_filters = true
   endif
 
   assign has_sorting = false
-  if has_results and enable_sorting and search.sort_options.size > 1
+  if search.performed and enable_sorting and search.sort_options.size > 1
     assign has_sorting = true
   endif
 
@@ -99,6 +99,20 @@
   assign show_empty_state_grid = false
   if has_results == false and active_filter_count == 0
     assign show_empty_state_grid = true
+  endif
+
+  comment
+    Show the full filtered search experience (toolbar + facets + grid) whenever
+    a search has results OR active filters are applied. The second case keeps
+    the facet UI mounted when filters narrow a search down to zero results, so
+    the visitor can remove individual filters instead of only "clear all".
+    Mirrors collection.liquid, which never gates its facets on result count.
+  endcomment
+  assign show_search_experience = false
+  if search.performed and has_results
+    assign show_search_experience = true
+  elsif search.performed and active_filter_count > 0
+    assign show_search_experience = true
   endif
 -%}
 
@@ -242,16 +256,15 @@
       </valor-predictive-search>
     {%- endif -%}
 
-    {%- if search.performed and has_results == false -%}
-      {%- if active_filter_count > 0 -%}
-        <p class="valor-search__status" role="status">
-          {{ 'templates.search.no_results_filtered_html' | t: link: search_clear_url }}
-        </p>
-      {%- else -%}
-        <p class="valor-search__status" role="status">
-          {{ 'general.search.no_results_html' | t: terms: terms }}
-        </p>
-      {%- endif -%}
+    {%- comment -%}
+      Unfiltered zero-results message only. When active filters are what zeroed
+      the results, the message is shown in the results area beside the facets
+      (see show_search_experience branch) so the visitor can adjust filters.
+    {%- endcomment -%}
+    {%- if search.performed and has_results == false and active_filter_count == 0 -%}
+      <p class="valor-search__status" role="status">
+        {{ 'general.search.no_results_html' | t: terms: terms }}
+      </p>
     {%- endif -%}
 
     {%- comment -%}
@@ -293,7 +306,7 @@
     Each branch owns its own paginate where applicable so the URL
     `?page=N` parameter applies to the right product source.
   {%- endcomment -%}
-  {%- if search.performed and has_results -%}
+  {%- if show_search_experience -%}
     {%- paginate search.results by per_page -%}
       <div class="valor-search__toolbar valor-collection__toolbar--mobile">
         <span class="valor-search__count" role="status">
@@ -378,6 +391,7 @@
         </aside>
 
         <div class="valor-collection__main">
+          {%- if search.results_count > 0 -%}
           <ul
             class="valor-collection__grid valor-collection__grid--cols-{{ cols_desktop }} valor-collection__grid--mobile-{{ cols_mobile }} valor-search__grid"
             role="list"
@@ -442,6 +456,11 @@
           </ul>
 
           {%- render 'pagination', paginate: paginate -%}
+          {%- else -%}
+          <p class="valor-search__status valor-search__status--filtered" role="status">
+            {{ 'templates.search.no_results_filtered_html' | t: link: search_clear_url }}
+          </p>
+          {%- endif -%}
         </div>
       </div>
     {%- endpaginate -%}

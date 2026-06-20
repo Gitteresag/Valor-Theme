@@ -176,9 +176,18 @@
       <div class="valor-card__price">
         {%- if is_on_sale -%}
           <span class="valor-card__price-current valor-card__price-current--sale">{{ product.price | money }}</span>
-          <span class="valor-card__price-compare"
-            ><s>{{ product.compare_at_price | money }}</s></span
-          >
+          {%- comment -%}
+            Hide the compare-at strikethrough when every variant shares the same
+            price but only some carry a compare-at (price_varies == false,
+            compare_at_price_varies == true). Showing "$20 was $30" then implies
+            the whole product was reduced, when only one variant actually has
+            that former price. Dawn suppresses the strikethrough the same way.
+          {%- endcomment -%}
+          {%- unless product.price_varies == false and product.compare_at_price_varies -%}
+            <span class="valor-card__price-compare"
+              ><s>{{ product.compare_at_price | money }}</s></span
+            >
+          {%- endunless -%}
         {%- elsif product.price_varies -%}
           {%- assign from_price = product.price | money -%}
           <span class="valor-card__price-current">{{ 'product.from_price' | t: price: from_price }}</span>

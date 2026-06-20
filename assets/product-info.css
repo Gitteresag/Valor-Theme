@@ -1020,3 +1020,142 @@
     flex: 0 0 100%;
   }
 }
+
+/* === Quantity selector style variants — ADDITIVE ====================
+   Activated only when the Quantity selector block's "Quantity selector
+   style" setting is not "Theme default". The snippet root
+   (.valor-mp__quantity) gets a qty-style--* class; the bordered control
+   box is .valor-mp__quantity-wrapper, its buttons .valor-mp__quantity-btn
+   and field .valor-mp__quantity-input. The default style is untouched —
+   nothing below applies without a qty-style--* class. All colours follow
+   the theme tokens so the variants track the merchant's palette. */
+
+/* A — Minimal underline */
+.qty-style--underline .valor-mp__quantity-wrapper {
+  border: 0;
+  border-bottom: 1px solid var(--valor-border-strong);
+  border-radius: 0;
+  overflow: visible;
+  gap: 0.5rem;
+  padding-bottom: 0.25rem;
+}
+.qty-style--underline .valor-mp__quantity-btn {
+  width: 1.875rem;
+  height: 1.875rem;
+}
+.qty-style--underline .valor-mp__quantity-input {
+  width: 2.5rem;
+  border-left: 0;
+  border-right: 0;
+  font-weight: var(--font-body--weight-bold);
+}
+
+/* B — Soft pill */
+.qty-style--pill .valor-mp__quantity-wrapper {
+  border: 0;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--color-foreground) 5%, var(--color-background));
+  padding: 0.3125rem;
+  gap: 0.25rem;
+  overflow: visible;
+}
+.qty-style--pill .valor-mp__quantity-btn {
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 50%;
+  background-color: var(--color-background);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--color-foreground) 14%, transparent);
+}
+.qty-style--pill .valor-mp__quantity-btn:hover {
+  background-color: var(--color-background);
+}
+.qty-style--pill .valor-mp__quantity-input {
+  min-width: 2.625rem;
+  width: auto;
+  border-left: 0;
+  border-right: 0;
+  background: transparent;
+  font-weight: var(--font-body--weight-bold);
+}
+
+/* C — Full width (matches the Add to cart button width; both blocks are
+   siblings in the flex info column, so width:100% lines them up). */
+.qty-style--fullwidth .valor-mp__quantity-wrapper {
+  display: flex;
+  width: 100%;
+  height: 3.25rem;
+  align-items: stretch;
+  justify-content: space-between;
+  border: 1px solid var(--valor-border-strong);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  overflow: hidden;
+}
+.qty-style--fullwidth .valor-mp__quantity-btn {
+  flex: 0 0 3.25rem;
+  width: auto;
+  height: 100%;
+}
+.qty-style--fullwidth .valor-mp__quantity-input {
+  flex: 1 1 auto;
+  width: auto;
+  border-left: 0;
+  border-right: 0;
+}
+
+/* === Boxed (segmented) size selector — ADDITIVE =====================
+   Activated when the variant picker's "Size option style" is
+   "Boxed (segmented)" AND the option is a size-named option. A
+   full-width row of equal cells; 1px dividers are drawn by a grid gap
+   that reveals the container background, so they survive wrapping when
+   there are many sizes. Selection, focus and sold-out reuse the shared
+   .valor-mp__option-input states — sold-out cells line through
+   automatically (product-info.js sets data-disabled on the label, the
+   same mechanism used by pills and minimal size text). */
+.valor-mp__option-label--size-boxed {
+  width: 100%;
+}
+.valor-mp__option-values--size-boxed {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(3rem, 1fr));
+  gap: 1px;
+  background-color: var(--valor-border-default);
+  border: 1px solid var(--valor-border-strong);
+  border-radius: var(--style-border-radius-inputs, 4px);
+  overflow: hidden;
+}
+.valor-mp__option-size-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.875rem 0.5rem;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.valor-mp__option-input:checked + .valor-mp__option-size-box {
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+}
+.valor-mp__option-input:focus-visible + .valor-mp__option-size-box {
+  /* Inset so the ring isn't clipped by the container's overflow:hidden */
+  outline: 2px solid var(--color-foreground);
+  outline-offset: -3px;
+}
+.valor-mp__option-size-box[data-disabled="true"] {
+  color: color-mix(in srgb, var(--color-foreground) 35%, transparent);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+@media (prefers-reduced-motion: reduce) {
+  .valor-mp__option-size-box {
+    transition: none;
+  }
+}

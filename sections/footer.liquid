@@ -138,6 +138,9 @@
             {%- form 'customer', id: 'ContactFooter', class: 'valor-footer__newsletter-form' -%}
               <input type="hidden" name="contact[tags]" value="newsletter">
               <div class="valor-footer__newsletter-field">
+                <label for="NewsletterForm--{{ section.id }}" class="visually-hidden">
+                  {{- 'newsletter.label' | t -}}
+                </label>
                 <input
                   id="NewsletterForm--{{ section.id }}"
                   type="email"

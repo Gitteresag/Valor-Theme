@@ -431,3 +431,59 @@
     right: 0.375rem;
   }
 }
+
+/* ===== Single-column desktop layout (full width) — ADDITIVE =====
+   All product images render full-width, one per row, on desktop. Reuses the
+   carousel main items (which already respect the merchant's aspect ratio and
+   feed the lightbox + per-color filter), NOT the 2/3 stacked grid. Desktop
+   only; mobile, single (carousel), and stacked layouts are untouched. */
+@media (min-width: 990px) {
+  .valor-product-media--desktop-layout-column .valor-product-media__main {
+    aspect-ratio: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  /* Show every image (override the carousel's one-at-a-time hidden state) */
+  .valor-product-media--desktop-layout-column .valor-product-media__main-item[hidden] {
+    display: block;
+  }
+  .valor-product-media--desktop-layout-column .valor-product-media__main-item {
+    width: 100%;
+  }
+  /* Re-apply the merchant's chosen ratio per item — mirrors the existing
+     container ratio classes, not a new hardcoded ratio. */
+  .valor-product-media--desktop-layout-column.valor-product-media--square .valor-product-media__main-item {
+    aspect-ratio: 1 / 1;
+  }
+  .valor-product-media--desktop-layout-column.valor-product-media--portrait .valor-product-media__main-item {
+    aspect-ratio: 4 / 5;
+  }
+  .valor-product-media--desktop-layout-column.valor-product-media--adapt .valor-product-media__main-item {
+    aspect-ratio: auto;
+  }
+  .valor-product-media--desktop-layout-column.valor-product-media--adapt .valor-product-media__main-item img {
+    height: auto;
+  }
+  /* Carousel chrome is redundant when every image is shown */
+  .valor-product-media--desktop-layout-column .valor-product-media__nav,
+  .valor-product-media--desktop-layout-column .valor-product-media__counter,
+  .valor-product-media--desktop-layout-column .valor-product-media__progress,
+  .valor-product-media--desktop-layout-column .valor-product-media__thumbs-wrap {
+    display: none;
+  }
+}
+
+/* ===== Per-color image filter — ADDITIVE =====
+   product-media-gallery.js adds .is-color-hidden to media (and its thumb /
+   grid / progress representations) that don't belong to the selected color.
+   !important so it always wins over the single-column rule above, which
+   un-hides [hidden] main items. Only active when the gallery root has
+   data-color-grouping="true" (product page, opt-in). */
+.valor-product-media__main-item.is-color-hidden,
+.valor-product-media__thumb.is-color-hidden,
+.valor-product-media__desktop-grid-item.is-color-hidden,
+.valor-product-media__progress-button.is-color-hidden {
+  display: none !important;
+}

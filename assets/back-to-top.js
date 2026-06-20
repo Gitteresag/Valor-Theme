@@ -1,9 +1,15 @@
 /**
- * <button is="valor-back-to-top">
- * Shows the button after the user has scrolled past a threshold,
- * scrolls smoothly back to top on click. Respects prefers-reduced-motion.
+ * <valor-back-to-top> — autonomous custom element wrapping a real <button>.
+ *
+ * Autonomous (not `<button is="...">`) because Safari/WebKit never shipped
+ * customized built-in elements, so an `is=` button would never upgrade there
+ * and the button would never appear. The wrapper is layout-neutral
+ * (display: contents); the inner <button> keeps all styling and positioning.
+ *
+ * Shows the button after the user has scrolled past a threshold, scrolls
+ * smoothly back to top on click. Respects prefers-reduced-motion.
  */
-class ValorBackToTop extends HTMLButtonElement {
+class ValorBackToTop extends HTMLElement {
   constructor() {
     super();
     this.threshold = 400; // pixels scrolled before button appears
@@ -12,24 +18,23 @@ class ValorBackToTop extends HTMLButtonElement {
   }
 
   connectedCallback() {
-    this.removeAttribute("hidden");
-    this.addEventListener("click", this.handleClick);
+    this.button = this.querySelector("button");
+    if (!this.button) return;
+    this.button.removeAttribute("hidden");
+    this.button.addEventListener("click", this.handleClick);
     window.addEventListener("scroll", this.handleScroll, { passive: true });
     this.onScroll(); // initial state in case page loads scrolled
   }
 
   disconnectedCallback() {
-    this.removeEventListener("click", this.handleClick);
+    if (this.button) this.button.removeEventListener("click", this.handleClick);
     window.removeEventListener("scroll", this.handleScroll);
   }
 
   onScroll() {
+    if (!this.button) return;
     const scrolled = window.scrollY || window.pageYOffset;
-    if (scrolled > this.threshold) {
-      this.classList.add("is-visible");
-    } else {
-      this.classList.remove("is-visible");
-    }
+    this.button.classList.toggle("is-visible", scrolled > this.threshold);
   }
 
   onClick() {
@@ -42,5 +47,5 @@ class ValorBackToTop extends HTMLButtonElement {
 }
 
 if (!customElements.get("valor-back-to-top")) {
-  customElements.define("valor-back-to-top", ValorBackToTop, { extends: "button" });
+  customElements.define("valor-back-to-top", ValorBackToTop);
 }

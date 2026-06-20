@@ -163,8 +163,7 @@
       </h2>
     {%- endif -%}
 
-    <div
-      is="valor-video"
+    <valor-video
       class="valor-video__frame valor-video__frame--desktop"
       data-show-play-button="{{ section.settings.show_play_button }}"
       data-loop="{{ section.settings.loop }}"
@@ -310,11 +309,10 @@
           </svg>
         </button>
       {%- endif -%}
-    </div>
+    </valor-video>
 
     {%- if has_mobile_video -%}
-      <div
-        is="valor-video"
+      <valor-video
         class="valor-video__frame valor-video__frame--mobile valor-video__frame--aspect-{{ section.settings.mobile_aspect }}"
         data-show-play-button="{{ section.settings.show_play_button }}"
         data-loop="{{ section.settings.loop }}"
@@ -450,7 +448,7 @@
             </svg>
           </button>
         {%- endif -%}
-      </div>
+      </valor-video>
     {%- endif -%}
   </div>
 </div>
@@ -508,6 +506,9 @@
 
   /* Video frame — 16:9 by default, full-bleed image fills it */
   .valor-video__frame {
+    /* display: block because <valor-video> is an autonomous custom element,
+       which defaults to display: inline. */
+    display: block;
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;

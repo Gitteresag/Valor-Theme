@@ -353,6 +353,16 @@
             });
           });
 
+          // Cart note — persist on change (fires on blur after edit) so a note
+          // typed in the drawer is saved even if the customer closes the drawer
+          // or navigates away instead of clicking Checkout.
+          var noteInput = this.querySelector("[data-cart-note]");
+          if (noteInput) {
+            noteInput.addEventListener("change", function () {
+              self.updateNote(noteInput.value);
+            });
+          }
+
           // Quantity controls inside the items list
           this.bindQuantityControls();
         }
@@ -395,30 +405,64 @@
           }, 250);
         }
 
+        /* Clamp a desired quantity to the line's quantity rule (min / max /
+           increment), read from data-min/data-max/data-step on the input.
+           A desired value of 0 (or less) means "remove" and is preserved so
+           the customer can always empty a line. Mirrors the enforcement the
+           cart page already does via quantity-input.js, so case-pack /
+           wholesale products (e.g. min 6, step 6) behave the same in the
+           drawer as on the cart page. */
+        clampQuantity(input, desired) {
+          if (!desired || desired <= 0) return 0;
+          var min = parseInt(input.dataset.min, 10);
+          if (isNaN(min) || min < 1) min = 1;
+          var step = parseInt(input.dataset.step, 10);
+          if (isNaN(step) || step < 1) step = 1;
+          var max = parseInt(input.dataset.max, 10);
+          var hasMax = !isNaN(max) && max > 0;
+          if (desired < min) desired = min;
+          var steps = Math.round((desired - min) / step);
+          desired = min + steps * step;
+          if (desired < min) desired = min;
+          if (hasMax && desired > max) {
+            desired = min + Math.floor((max - min) / step) * step;
+          }
+          return desired;
+        }
+
         bindQuantityControls() {
           var self = this;
 
-          // +/- buttons
+          // +/- buttons — step by the variant's increment and respect min/max.
           this.querySelectorAll("[data-qty-change]").forEach(function (btn) {
             btn.addEventListener("click", function () {
               var line = parseInt(btn.dataset.line, 10);
               var direction = parseInt(btn.dataset.direction, 10);
               var input = self.querySelector('[data-qty-input][data-line="' + line + '"]');
               if (!input) return;
-              var newQty = Math.max(0, parseInt(input.value, 10) + direction);
-              self.changeLine(line, newQty);
+              var step = parseInt(input.dataset.step, 10);
+              if (isNaN(step) || step < 1) step = 1;
+              var min = parseInt(input.dataset.min, 10);
+              if (isNaN(min) || min < 1) min = 1;
+              var raw = parseInt(input.value, 10);
+              if (isNaN(raw)) raw = 0;
+              var desired = raw + direction * step;
+              // Stepping below the rule minimum removes the line.
+              if (direction < 0 && desired < min) desired = 0;
+              self.changeLine(line, self.clampQuantity(input, desired));
             });
           });
 
-          // Direct input change (debounced)
+          // Direct input change (debounced) — snap to the nearest valid value.
           this.querySelectorAll("[data-qty-input]").forEach(function (input) {
             var t;
             input.addEventListener("input", function () {
               clearTimeout(t);
               t = setTimeout(function () {
                 var line = parseInt(input.dataset.line, 10);
-                var qty = Math.max(0, parseInt(input.value, 10) || 0);
-                self.changeLine(line, qty);
+                var raw = parseInt(input.value, 10);
+                if (isNaN(raw)) raw = 0;
+                self.changeLine(line, self.clampQuantity(input, raw));
               }, 500);
             });
           });
@@ -775,10 +819,28 @@
           return false;
         }
 
+        /* Persist the cart note. Fire-and-forget — no section render or
+           broadcast needed because no visible totals or counts depend on the
+           note value. Mirrors the cart page, which also saves the note on
+           change rather than only on checkout. */
+        updateNote(note) {
+          fetch(cartUrl("cart/update.js"), {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ note: note }),
+          }).catch(function (err) {
+            console.error("[Valor cart] note update failed:", err);
+          });
+        }
+
         updateCartCount(cart) {
           var cartLink = document.querySelector(CART_ICON_BUBBLE_SELECTOR);
           if (!cartLink) return;
           var bubble = cartLink.querySelector(CART_COUNT_SELECTOR);
+          var hiddenText = cartLink.querySelector("[data-cart-count-text]");
           var count = cart.item_count;
 
           if (count > 0) {
@@ -786,11 +848,24 @@
               bubble = document.createElement("span");
               bubble.className = "valor-cart-count";
               bubble.setAttribute("aria-hidden", "true");
-              cartLink.appendChild(bubble);
+              if (hiddenText) {
+                cartLink.insertBefore(bubble, hiddenText);
+              } else {
+                cartLink.appendChild(bubble);
+              }
             }
             bubble.textContent = count < 100 ? String(count) : "";
           } else if (bubble) {
             bubble.remove();
+          }
+
+          // Keep the screen-reader cart label ("Cart (N)") in sync with the
+          // visible bubble after drawer mutations.
+          if (hiddenText) {
+            var template = hiddenText.dataset.template;
+            if (template) {
+              hiddenText.textContent = template.replace("%count%", count);
+            }
           }
         }
       },
@@ -880,6 +955,17 @@
             detail: { form: form, body: res.body },
           }),
         );
+
+        // If the cart drawer isn't on the page (merchant turned off "Enable
+        // cart drawer"), there's no panel to slide open — navigate to the cart
+        // page after the AJAX add, the same way Dawn/Horizon behave in "page"
+        // cart mode. The AJAX add already ran, so inline sold-out errors and
+        // the cart-count update still work; only the post-add destination
+        // differs. When the drawer IS present its valor:cart:added listener
+        // opens it and this branch is skipped.
+        if (!document.querySelector("valor-cart-drawer")) {
+          window.location = cartUrl("cart");
+        }
       })
       .catch(function (err) {
         if (submitBtn) submitBtn.removeAttribute("aria-busy");

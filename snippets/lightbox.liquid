@@ -12,11 +12,11 @@
       }));
 {%- endcomment -%}
 
-<dialog
-  is="valor-lightbox"
-  class="valor-lightbox"
-  aria-label="{{ 'accessibility.lightbox' | t | default: 'Image viewer' }}"
->
+<valor-lightbox>
+  <dialog
+    class="valor-lightbox"
+    aria-label="{{ 'accessibility.lightbox' | t | default: 'Image viewer' }}"
+  >
   <button
     type="button"
     class="valor-lightbox__close"
@@ -83,4 +83,5 @@
   </button>
 
   <div class="valor-lightbox__counter" data-lightbox-counter aria-live="polite"></div>
-</dialog>
+  </dialog>
+</valor-lightbox>
