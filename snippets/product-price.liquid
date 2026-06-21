@@ -26,6 +26,8 @@
     assign price_font_size = block.settings.price_font_size | default: 24
   endif
   assign compare_price_font_size = price_font_size | times: 0.75 | round
+  assign unit_price_class = prefix | append: '__unit-price'
+  assign unit_price_wrapper_id = 'ProductUnitPrice-' | append: section_id
 -%}
 
 <div
@@ -50,8 +52,8 @@
 </div>
 {%- render 'product-unit-price',
   variant: variant,
-  class_name: prefix | append: '__unit-price',
-  wrapper_id: 'ProductUnitPrice-' | append: section_id
+  class_name: unit_price_class,
+  wrapper_id: unit_price_wrapper_id
 -%}
 {%- if cart.taxes_included -%}
   <p class="{{ prefix }}__tax">{{ 'product.include_taxes' | t }}</p>

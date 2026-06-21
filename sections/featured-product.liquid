@@ -40,6 +40,16 @@
   endif
 -%}
 
+{%- comment -%}
+  Shared variant behaviour lives in assets/product-info.js (the same
+  <product-info> custom element used by sections/main-product.liquid).
+  Load it here too so featured-product works on pages without a main
+  product section — e.g. the homepage. The script self-guards against
+  double registration (customElements.get check), so loading it on a
+  product page that also has main-product is safe.
+{%- endcomment -%}
+<script src="{{ 'product-info.js' | asset_url }}" defer></script>
+
 <section
   class="valor-fp valor-fp--media-{{ media_position }} valor-fp--media-{{ media_width }}{% if section.settings.image_size_mobile == 'full' %} valor-fp--image-full-mobile{% endif %}"
   style="--valor-section-padding-top: {{ section.settings.padding_top }}px; --valor-section-padding-bottom: {{ section.settings.padding_bottom }}px;"
@@ -59,7 +69,30 @@
         -%}
       </div>
 
-      <div class="valor-fp__content">
+      <product-info
+        class="valor-fp__content"
+        data-prefix="valor-fp"
+        data-section-id="{{ section.id }}"
+        data-product-id="{{ product.id }}"
+        data-product-url="{{ product.url }}"
+      >
+        <script type="application/json" data-product-info-i18n>
+          {
+            "addToCart":       {{ 'product.add_to_cart'       | t | json }},
+            "soldOut":         {{ 'product.sold_out'          | t | json }},
+            "sale":            {{ 'product.sale'              | t | json }},
+            "sku":             {{ 'product.sku'               | t | json }},
+            "inCart":          {{ 'product.in_cart'           | t | json }},
+            "inCartCount":     {{ 'product.in_cart_count'     | t | json }},
+            "inCartOf":        {{ 'product.in_cart_of'        | t | json }},
+            "totalInCart":     {{ 'product.total_in_cart'     | t | json }},
+            "inStock":         {{ 'product.in_stock'          | t | json }},
+            "lowStock":        {{ 'product.low_stock'         | t | json }},
+            "lowStockCount":   {{ 'product.low_stock_count'   | t | json }},
+            "outOfStock":      {{ 'product.out_of_stock'      | t | json }},
+            "shareLinkCopied": {{ 'product.share_link_copied' | t | json }}
+          }
+        </script>
         {%- form 'product', product, id: product_form_id, class: 'valor-fp__form', novalidate: 'novalidate' -%}
           <input type="hidden" name="id" value="{{ current_variant.id }}" data-variant-id-input="{{ section.id }}">
           {%- for block in section.blocks -%}
@@ -81,35 +114,20 @@
                 {%- endif -%}
 
               {%- when 'sku' -%}
-                {%- if current_variant.sku != blank -%}
-                  <div class="valor-fp__sku" {{ block.shopify_attributes }}>
-                    <span class="valor-fp__sku-label">{{ 'product.sku' | t | default: 'SKU' }}:</span>
-                    <span class="valor-fp__sku-value" data-fp-sku>{{ current_variant.sku }}</span>
-                  </div>
-                {%- endif -%}
+                {%- render 'product-sku',
+                  variant: current_variant,
+                  block: block,
+                  section_id: section.id,
+                  class_prefix: 'valor-fp'
+                -%}
 
               {%- when 'price' -%}
-                <div class="valor-fp__price" {{ block.shopify_attributes }}>
-                  {%- if current_variant.compare_at_price > current_variant.price -%}
-                    <span class="valor-fp__price-current valor-fp__price-current--sale">
-                      {{- current_variant.price | money -}}
-                    </span>
-                    <span class="valor-fp__price-compare"
-                      ><s>{{ current_variant.compare_at_price | money }}</s></span
-                    >
-                    {%- if settings.show_sale_badge -%}
-                      <span class="valor-fp__price-badge">
-                        {{- settings.sale_badge_text | default: 'Sale' | escape -}}
-                      </span>
-                    {%- endif -%}
-                  {%- else -%}
-                    <span class="valor-fp__price-current">{{ current_variant.price | money }}</span>
-                  {%- endif -%}
-                  {%- if cart.taxes_included -%}
-                    <span class="valor-fp__tax-note">{{ 'product.include_taxes' | t | default: 'Tax included.' }}</span>
-                  {%- endif -%}
-                </div>
-                {%- render 'product-unit-price', variant: current_variant, class_name: 'valor-fp__unit-price' -%}
+                {%- render 'product-price',
+                  variant: current_variant,
+                  block: block,
+                  section_id: section.id,
+                  class_prefix: 'valor-fp'
+                -%}
 
               {%- when 'payment_terms' -%}
                 {%- render 'product-payment-terms',
@@ -237,11 +255,13 @@
                       disabled
                     {% endunless %}
                   >
-                    {%- if current_variant.available -%}
-                      {{ 'product.add_to_cart' | t | default: 'Add to cart' }}
-                    {%- else -%}
-                      {{ settings.soldout_badge_text | default: 'Sold out' }}
-                    {%- endif -%}
+                    <span data-add-button-text>
+                      {%- if current_variant.available -%}
+                        {{ 'product.add_to_cart' | t | default: 'Add to cart' }}
+                      {%- else -%}
+                        {{ settings.soldout_badge_text | default: 'Sold out' }}
+                      {%- endif -%}
+                    </span>
                   </button>
                   {%- if show_dynamic_checkout -%}
                     {{ form | payment_button }}
@@ -259,7 +279,7 @@
           {%- endcomment -%}
           <div class="valor-fp__add-error" data-cart-error role="alert" hidden></div>
         {%- endform -%}
-      </div>
+      </product-info>
     {%- else -%}
       <div class="valor-fp__media">
         <div class="valor-product-media valor-product-media--square">
@@ -405,7 +425,8 @@
     text-transform: uppercase;
     border-radius: 2px;
   }
-  .valor-fp__tax-note {
+  .valor-fp__tax-note,
+  .valor-fp__tax {
     width: 100%;
     font-size: 0.8125rem;
     color: color-mix(in srgb, var(--color-foreground) 80%, transparent);
@@ -812,372 +833,6 @@
     }
   }
 {% endstylesheet %}
-
-<script>
-  (function() {
-    var sectionId = {{ section.id | json }};
-
-    function init() {
-      var sectionRoot = document.querySelector('#shopify-section-' + sectionId);
-      if (!sectionRoot || sectionRoot.dataset.valorFpInitialized === 'true') return;
-      sectionRoot.dataset.valorFpInitialized = 'true';
-
-      window.ValorFeaturedProductInstances = window.ValorFeaturedProductInstances || {};
-      if (
-        window.ValorFeaturedProductInstances[sectionId] &&
-        typeof window.ValorFeaturedProductInstances[sectionId].destroy === 'function'
-      ) {
-        window.ValorFeaturedProductInstances[sectionId].destroy();
-      }
-
-      var cleanups = [];
-      function addTrackedListener(target, type, handler) {
-        if (!target) return;
-        target.addEventListener(type, handler);
-        cleanups.push(function() {
-          target.removeEventListener(type, handler);
-        });
-      }
-      function destroy() {
-        cleanups.forEach(function(cleanup) { cleanup(); });
-        cleanups = [];
-        if (sectionRoot && sectionRoot.dataset) delete sectionRoot.dataset.valorFpInitialized;
-        if (
-          window.ValorFeaturedProductInstances &&
-          window.ValorFeaturedProductInstances[sectionId] &&
-          window.ValorFeaturedProductInstances[sectionId].destroy === destroy
-        ) {
-          delete window.ValorFeaturedProductInstances[sectionId];
-        }
-      }
-      window.ValorFeaturedProductInstances[sectionId] = { destroy: destroy };
-
-      var dataEl = document.querySelector('script[data-section-variants="' + sectionId + '"]');
-      var idInput = document.querySelector('[data-variant-id-input="' + sectionId + '"]');
-      var addBtn = document.querySelector('[data-add-button="' + sectionId + '"]');
-      var optionInputs = document.querySelectorAll('.valor-fp__option-input[data-section-id="' + sectionId + '"]');
-      var optionSelects = document.querySelectorAll('.valor-fp__option-select[data-section-id="' + sectionId + '"]');
-      var qtyButtons = document.querySelectorAll('.valor-fp__quantity-btn[data-section-id="' + sectionId + '"]');
-      var qtyInput = document.getElementById('qty-' + sectionId);
-      var paymentTermsVariantInputs = sectionRoot ? sectionRoot.querySelectorAll('[data-payment-terms-variant-id-input]') : [];
-      var pickupAvailabilityEls = sectionRoot ? sectionRoot.querySelectorAll('valor-pickup-availability') : [];
-
-      // Quantity buttons (work even without variants)
-      qtyButtons.forEach(function(btn) {
-        addTrackedListener(btn, 'click', function() {
-          if (!qtyInput) return;
-          var v = parseInt(qtyInput.value, 10) || 1;
-          if (btn.dataset.qtyAction === 'increase') v += 1;
-          else if (v > 1) v -= 1;
-          qtyInput.value = v;
-        });
-      });
-
-      // Variant logic only runs if we have variant data
-      if (!dataEl) return;
-      var variants;
-      try { variants = JSON.parse(dataEl.textContent); } catch(e) { return; }
-      if (!variants || !variants.length) return;
-
-      function getCurrentOptions() {
-        var opts = [];
-        optionInputs.forEach(function(input) {
-          if (input.checked) {
-            var pos = parseInt(input.dataset.optionPosition, 10);
-            opts[pos - 1] = input.value;
-          }
-        });
-        optionSelects.forEach(function(sel) {
-          var pos = parseInt(sel.dataset.optionPosition, 10);
-          opts[pos - 1] = sel.value;
-        });
-        return opts;
-      }
-
-      function findVariant(opts) {
-        return variants.find(function(v) {
-          return v.options.every(function(val, i) { return val === opts[i]; });
-        });
-      }
-
-      function updateSelectedDisplay(input) {
-        var target = input.dataset.optionDisplay;
-        if (!target) return;
-        var el = document.querySelector('[data-selected-for="' + target + '"]');
-        if (el) el.textContent = input.value;
-      }
-
-      function updateSoldOutPills(currentOpts) {
-        optionInputs.forEach(function(input) {
-          var pos = parseInt(input.dataset.optionPosition, 10) - 1;
-          var testOpts = currentOpts.slice();
-          testOpts[pos] = input.value;
-          var v = findVariant(testOpts);
-          var label = input.nextElementSibling;
-          if (label) {
-            label.dataset.disabled = (!v || !v.available) ? 'true' : 'false';
-          }
-        });
-      }
-
-      function formatMoney(cents) {
-        try {
-          if (window.Shopify && Shopify.formatMoney) {
-            return Shopify.formatMoney(cents, "{{ shop.money_format }}");
-          }
-        } catch (e) {}
-        // Self-contained fallback honouring the store's money format (any
-        // currency), used when Shopify.formatMoney isn't loaded. Previously
-        // this hardcoded a euro sign + comma decimals, which was wrong on
-        // non-EUR stores.
-        var format = {{ shop.money_format | json }};
-        function fmt(number, precision, thousands, decimal) {
-          if (precision == null) precision = 2;
-          thousands = thousands == null ? ',' : thousands;
-          decimal = decimal == null ? '.' : decimal;
-          if (isNaN(number) || number == null) number = 0;
-          number = (number / 100.0).toFixed(precision);
-          var parts = number.split('.');
-          var dollars = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands);
-          var centsPart = parts[1] ? decimal + parts[1] : '';
-          return dollars + centsPart;
-        }
-        var match = format.match(/\{\{\s*(\w+)\s*\}\}/);
-        var placeholder = match ? match[1] : 'amount';
-        var value;
-        switch (placeholder) {
-          case 'amount_no_decimals': value = fmt(cents, 0); break;
-          case 'amount_with_comma_separator': value = fmt(cents, 2, '.', ','); break;
-          case 'amount_no_decimals_with_comma_separator': value = fmt(cents, 0, '.', ','); break;
-          case 'amount_with_space_separator': value = fmt(cents, 2, ' ', ','); break;
-          case 'amount_no_decimals_with_space_separator': value = fmt(cents, 0, ' ', ''); break;
-          case 'amount_with_apostrophe_separator': value = fmt(cents, 2, "'", '.'); break;
-          default: value = fmt(cents, 2);
-        }
-        return format.replace(/\{\{\s*\w+\s*\}\}/, value);
-      }
-
-      function updatePrice(variant) {
-        var priceEl = document.querySelector('#shopify-section-' + sectionId + ' .valor-fp__price');
-        if (!priceEl || !variant) return;
-        var current = priceEl.querySelector('.valor-fp__price-current');
-        if (!current) return;
-
-        var isSale = variant.compare_at_price && variant.compare_at_price > variant.price;
-        current.textContent = formatMoney(variant.price);
-        if (isSale) {
-          current.classList.add('valor-fp__price-current--sale');
-        } else {
-          current.classList.remove('valor-fp__price-current--sale');
-        }
-
-        // Compare-at strikethrough — create on demand and remove when not on
-        // sale, so switching to a discounted variant shows the sale price even
-        // when the initially rendered variant was full price (matches the main
-        // product page behaviour in product-info.js).
-        var compare = priceEl.querySelector('.valor-fp__price-compare');
-        if (isSale) {
-          if (!compare) {
-            compare = document.createElement('span');
-            compare.className = 'valor-fp__price-compare';
-            compare.appendChild(document.createElement('s'));
-            current.insertAdjacentElement('afterend', compare);
-          }
-          compare.style.display = '';
-          var s = compare.querySelector('s');
-          if (s) s.textContent = formatMoney(variant.compare_at_price);
-        } else if (compare) {
-          compare.parentNode.removeChild(compare);
-        }
-
-        {% if settings.show_sale_badge %}
-          // Sale badge — create on demand, remove when not on sale.
-          var badge = priceEl.querySelector('.valor-fp__price-badge');
-          if (isSale) {
-            if (!badge) {
-              badge = document.createElement('span');
-              badge.className = 'valor-fp__price-badge';
-              badge.textContent = {{ settings.sale_badge_text | default: 'Sale' | json }};
-              var anchor = priceEl.querySelector('.valor-fp__price-compare') || current;
-              anchor.insertAdjacentElement('afterend', badge);
-            }
-            badge.style.display = '';
-          } else if (badge) {
-            badge.parentNode.removeChild(badge);
-          }
-        {% endif %}
-
-        updateUnitPrice(variant);
-      }
-
-      function updateUnitPrice(variant) {
-        var wrapper = document.querySelector('#shopify-section-' + sectionId + ' .valor-fp__unit-price[data-unit-price-wrapper]');
-        if (!wrapper) return;
-        var price = wrapper.querySelector('[data-unit-price]');
-        if (!price) return;
-
-        if (!variant || !variant.unit_price_measurement) {
-          wrapper.hidden = true;
-          price.textContent = '';
-          return;
-        }
-
-        price.textContent = formatUnitPrice(variant);
-        wrapper.hidden = false;
-      }
-
-      function formatUnitPrice(variant) {
-        var measurement = variant && variant.unit_price_measurement;
-        if (!measurement) return '';
-        var value = measurement.reference_value && measurement.reference_value !== 1
-          ? String(measurement.reference_value)
-          : '';
-        return formatMoney(variant.unit_price) + ' / ' + value + measurement.reference_unit;
-      }
-
-      function updateSku(variant) {
-        var skuEl = document.querySelector('#shopify-section-' + sectionId + ' [data-fp-sku]');
-        if (skuEl && variant && variant.sku) {
-          skuEl.textContent = variant.sku;
-        }
-      }
-
-      function updateGalleryMedia(variant) {
-        // If the variant has a featured_media, tell the gallery to switch to it
-        if (!variant || !variant.featured_media || !variant.featured_media.id) return;
-        var gallery = document.querySelector('[data-fp-gallery="' + sectionId + '"] .valor-product-media');
-        if (!gallery) return;
-        gallery.dispatchEvent(new CustomEvent('valor:gallery:set-media', {
-          detail: { mediaId: variant.featured_media.id }
-        }));
-      }
-
-      function updateCartQty(variant) {
-        if (!variant) return;
-        var cartQtyEl = document.querySelector('#shopify-section-' + sectionId + ' [data-fp-cart-qty]');
-        if (!cartQtyEl) return;
-        // Fetch the cart to get up-to-date item counts. Build the URL from
-        // Shopify.routes.root so it works under localized/multi-market paths.
-        var cartRoot = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
-        if (cartRoot.charAt(cartRoot.length - 1) !== '/') cartRoot += '/';
-        fetch(cartRoot + 'cart.js', { headers: { 'Accept': 'application/json' } })
-          .then(function(r) { return r.json(); })
-          .then(function(cart) {
-            var qty = 0;
-            (cart.items || []).forEach(function(item) {
-              if (item.variant_id === variant.id) qty += item.quantity;
-            });
-            if (qty > 0) {
-              cartQtyEl.removeAttribute('hidden');
-              cartQtyEl.textContent = '(' + qty + ' ' + {{ 'product.in_cart' | t | default: 'in cart' | json }} + ')';
-            } else {
-              cartQtyEl.setAttribute('hidden', '');
-              cartQtyEl.textContent = '';
-            }
-          })
-          .catch(function() { /* silent */ });
-      }
-
-      function updateAddButton(variant) {
-        if (!addBtn) return;
-        if (variant && variant.available) {
-          addBtn.disabled = false;
-          addBtn.textContent = {{ 'product.add_to_cart' | t | json }};
-        } else {
-          addBtn.disabled = true;
-          addBtn.textContent = {{ settings.soldout_badge_text | default: 'Sold out' | json }};
-        }
-      }
-
-      function updatePaymentTerms(variant) {
-        if (!variant || !paymentTermsVariantInputs.length) return;
-        paymentTermsVariantInputs.forEach(function(input) {
-          input.value = variant.id;
-          input.dispatchEvent(new Event('change', { bubbles: true }));
-        });
-      }
-
-      function updatePickupAvailability(variant) {
-        if (!pickupAvailabilityEls.length) return;
-        pickupAvailabilityEls.forEach(function(el) {
-          if (typeof el.update === 'function') el.update(variant);
-        });
-      }
-
-      // Track current variant so external events (cart updates) can refresh the in-cart label
-      var currentVariant = variants.find(function(v) {
-        var opts = getCurrentOptions();
-        return v.options.every(function(val, i) { return val === opts[i]; });
-      }) || variants[0];
-
-      function onChange(e) {
-        if (e.target && e.target.dataset && e.target.dataset.optionDisplay) {
-          updateSelectedDisplay(e.target);
-        }
-        var opts = getCurrentOptions();
-        var variant = findVariant(opts);
-        if (variant) {
-          currentVariant = variant;
-          if (idInput) {
-            idInput.value = variant.id;
-            idInput.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-          updatePrice(variant);
-          updateSku(variant);
-          updateGalleryMedia(variant);
-          updateCartQty(variant);
-          updatePaymentTerms(variant);
-          updatePickupAvailability(variant);
-          /* Featured product can appear on non-product pages, such as the
-             homepage. Updating ?variant= in the browser URL there would
-             pollute unrelated links like href="#" (an in-page anchor in a
-             rich-text section below would resolve to "/?variant=ID#"
-             instead of the bare "#" the merchant intended). The variant
-             id still travels with the add-to-cart form via the hidden id
-             input above, so cart behaviour is unaffected on the homepage.
-             On product pages, however, ?variant=ID is the canonical way
-             to share a specific variant's URL, so we still update it
-             there. */
-          if (window.location.pathname.indexOf('/products/') !== -1) {
-            try {
-              var url = new URL(window.location.href);
-              url.searchParams.set('variant', variant.id);
-              window.history.replaceState({}, '', url.toString());
-            } catch(err) {}
-          }
-        } else {
-          updateUnitPrice(null);
-          updatePickupAvailability(null);
-        }
-        updateAddButton(variant);
-        updateSoldOutPills(opts);
-      }
-
-      optionInputs.forEach(function(input) { addTrackedListener(input, 'change', onChange); });
-      optionSelects.forEach(function(sel) { addTrackedListener(sel, 'change', onChange); });
-
-      updateSoldOutPills(getCurrentOptions());
-
-      // Listen for cart updates from anywhere on the page (add to cart, drawer quantity
-      // changes, line-item removal). Cart drawer dispatches 'valor:cart:added'; we also
-      // listen for the broader pattern in case other parts of the theme dispatch updates.
-      function refreshCartQty() {
-        if (currentVariant) updateCartQty(currentVariant);
-      }
-      addTrackedListener(document, 'valor:cart:added', refreshCartQty);
-      addTrackedListener(document, 'valor:cart:updated', refreshCartQty);
-      addTrackedListener(document, 'shopify:section:unload', function(event) {
-        if (event.detail && event.detail.sectionId === sectionId) destroy();
-      });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-  })();
-</script>
 
 {% schema %}
 {

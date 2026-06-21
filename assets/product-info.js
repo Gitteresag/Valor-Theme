@@ -1,32 +1,57 @@
 /* <product-info> — custom element that drives the interactive parts of
-   the product info column on a product page.
+   the product info column on a product page (and the featured-product
+   section, which reuses this same element via data-prefix="valor-fp").
+
+   Variant price / unit price / SKU / inventory / sticky price are NOT
+   formatted in JavaScript. On a variant change this element fetches the
+   section re-rendered for the new variant via the Section Rendering API
+   ({product.url}?variant=ID&section_id=SID) and swaps the server-rendered
+   fragments by their section-scoped id. Liquid is the single source of
+   truth for money formatting — there is no client-side formatMoney.
 
    Hosts:
      - Variant resolution (pills + dropdown), client-side, no reload
-     - Live updates to price, unit price, SKU, inventory, gallery image,
-       payment terms, pickup availability, URL, and Add-to-cart button state
-       when the variant changes
+     - Server-rendered fragment swap (price, unit price, SKU, inventory,
+       sticky price) on variant change, via fetch + DOMParser
+     - Client-side updates to gallery image, payment terms, pickup
+       availability, URL, Add-to-cart button state, and the in-cart count
      - Quantity +/− buttons and the in-cart count next to the label
      - Sold-out marking on individual option pills
      - Share button (Web Share API with clipboard fallback)
      - Cart event sync via 'valor:cart:updated' (no extra /cart.js fetch)
 
    Reads from the DOM:
-     dataset.sectionId    — the Shopify section id (for logging only)
-     dataset.productUrl   — used by URL state updates
-     dataset.moneyFormat  — money template (e.g. "€{{amount_with_comma_separator}}")
+     dataset.sectionId    — the Shopify section id (used for the fetch URL
+                            and the section-scoped fragment ids)
+     dataset.productId    — used to total per-product cart quantity
+     dataset.productUrl   — base URL for the variant fetch + URL state
+     dataset.prefix       — class prefix for this skin ('valor-mp' default,
+                            'valor-fp' for featured-product)
      <script data-product-info-i18n> — JSON map of translated strings
      <script data-section-variants>  — JSON array of variant objects
 
-   The element is registered as <product-info> and is always wrapped
-   around the info column in sections/main-product.liquid. The Shopify
-   Theme Editor re-mounts the section on edits, which calls
-   disconnectedCallback() and then a fresh connectedCallback(); document-
-   level listeners are cleaned up in disconnectedCallback() so they
-   don't accumulate across reloads.
+   Swapped fragments (by section-scoped id, prefix-independent):
+     ProductPrice-SID, ProductUnitPrice-SID, ProductSku-SID,
+     ProductInventory-SID, StickyPrice-SID. The sticky price lives in the
+     section root (outside this element), so its swap destination is looked
+     up in this.sectionRoot rather than within the element.
 
-   Product interactions are self-contained so the section can be reloaded
-   safely in the Theme Editor. */
+   The element is registered as <product-info> and wraps the info column
+   in sections/main-product.liquid and sections/featured-product.liquid.
+   The Shopify Theme Editor re-mounts the section on edits, which calls
+   disconnectedCallback() and then a fresh connectedCallback(); document-
+   level listeners and any in-flight fetch are cleaned up in
+   disconnectedCallback() so they don't accumulate across reloads.
+
+   Wrapped in an IIFE with a registration guard so the script can be safely
+   loaded more than once on the same page — a product page that also contains a
+   Featured product section loads product-info.js from both sections. The early
+   return prevents both a double customElements.define() and the
+   "Identifier 'ValorProductInfo' has already been declared" error that a
+   second top-level class declaration would otherwise throw. */
+
+(function () {
+  if (typeof customElements === "undefined" || customElements.get("product-info")) return;
 
 class ValorProductInfo extends HTMLElement {
   constructor() {
@@ -69,37 +94,34 @@ class ValorProductInfo extends HTMLElement {
     this.sectionId = this.dataset.sectionId || "";
     this.productId = parseInt(this.dataset.productId, 10) || 0;
     this.productUrl = this.dataset.productUrl || "";
-    this.moneyFormat = this.dataset.moneyFormat || "{{amount}}";
+    // NB: `prefix` is a read-only DOM property on Element, so this instance
+    // field must NOT be named `this.prefix` — use `this.classPrefix`.
+    this.classPrefix = this.dataset.prefix || "valor-mp";
 
     this.i18n = this._readJsonScript("[data-product-info-i18n]") || {};
     this.variants = this._readJsonScript("[data-section-variants]") || [];
 
-    this.optionInputs = Array.prototype.slice.call(this.querySelectorAll(".valor-mp__option-input"));
-    this.optionSelects = Array.prototype.slice.call(this.querySelectorAll(".valor-mp__option-select"));
+    this.optionInputs = Array.prototype.slice.call(this.querySelectorAll("." + this.classPrefix + "__option-input"));
+    this.optionSelects = Array.prototype.slice.call(this.querySelectorAll("." + this.classPrefix + "__option-select"));
 
     this.variantIdInput = this.querySelector("[data-variant-id-input]");
     this.addBtn = this.querySelector("[data-add-button]");
     this.addBtnText = this.querySelector("[data-add-button-text]");
-    this.priceEl = this.querySelector(".valor-mp__price");
-    this.unitPriceWrapper = this.querySelector(".valor-mp__unit-price[data-unit-price-wrapper]");
-    this.unitPriceEl = this.unitPriceWrapper ? this.unitPriceWrapper.querySelector("[data-unit-price]") : null;
-    this.skuEl = this.querySelector(".valor-mp__sku");
-    this.inventoryEl = this.querySelector(".valor-mp__inventory");
-    this.qtyInput = this.querySelector(".valor-mp__quantity-input");
-    this.cartQtyEl = this.querySelector("[data-mp-cart-qty]");
+    this.qtyInput = this.querySelector('input[name="quantity"]');
+    this.cartQtyEl = this.querySelector("[data-mp-cart-qty]") || this.querySelector("[data-fp-cart-qty]");
     this.paymentTermsVariantInputs = Array.prototype.slice.call(
       this.querySelectorAll("[data-payment-terms-variant-id-input]"),
     );
     this.pickupAvailabilityEls = Array.prototype.slice.call(this.querySelectorAll("valor-pickup-availability"));
-    this.sectionRoot = this.closest(".valor-mp");
+    this.sectionRoot = this.closest("." + this.classPrefix);
     this.stickyAtc = this.sectionRoot ? this.sectionRoot.querySelector("[data-sticky-atc]") : null;
     this.stickyAddBtn = this.stickyAtc ? this.stickyAtc.querySelector("[data-sticky-add-button]") : null;
     this.stickyAddBtnText = this.stickyAtc ? this.stickyAtc.querySelector("[data-sticky-add-button-text]") : null;
-    this.stickyPriceEl = this.stickyAtc ? this.stickyAtc.querySelector("[data-sticky-price]") : null;
     this.stickyVariantTitleEl = this.stickyAtc ? this.stickyAtc.querySelector("[data-sticky-variant-title]") : null;
     this.stickyImageEl = this.stickyAtc ? this.stickyAtc.querySelector(".valor-mp__sticky-atc-image") : null;
 
     this.currentVariant = null;
+    this._fetchAbort = null;
 
     this._bindQuantity();
     this._bindOptions();
@@ -117,6 +139,8 @@ class ValorProductInfo extends HTMLElement {
       const initialVariantId = parseInt(this.variantIdInput.value, 10);
       this.currentVariant = this.variants.find((variant) => variant.id === initialVariantId) || null;
     }
+    // No fetch on first load — the server already rendered the default
+    // variant's price/SKU/inventory. We only sync the sticky button state.
     this.updateStickyAddToCart(this.currentVariant);
   }
 
@@ -129,6 +153,11 @@ class ValorProductInfo extends HTMLElement {
       }
       this._initScheduled = false;
       this._initHandle = null;
+    }
+
+    if (this._fetchAbort) {
+      this._fetchAbort.abort();
+      this._fetchAbort = null;
     }
 
     document.removeEventListener("valor:cart:updated", this._handleCartEvent);
@@ -283,128 +312,81 @@ class ValorProductInfo extends HTMLElement {
     return null;
   }
 
-  /* --- Money formatting (handles {{amount}}, {{amount_no_decimals}},
-     {{amount_with_comma_separator}}, etc.). Falls back to plain number
-     for unknown placeholders. --- */
-  formatMoney(cents) {
-    if (cents == null) return "";
-    const value = cents / 100;
-    return this.moneyFormat.replace(/\{\{\s*(\w+)\s*\}\}/g, function (_, key) {
-      switch (key) {
-        case "amount":
-          return value.toFixed(2);
-        case "amount_no_decimals":
-          return Math.round(value).toString();
-        case "amount_with_comma_separator":
-          return value.toFixed(2).replace(".", ",");
-        case "amount_no_decimals_with_comma_separator":
-          return Math.round(value).toString();
-        case "amount_with_space_separator":
-          return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-        default:
-          return value.toFixed(2);
-      }
-    });
+  /* --- Variant render via Section Rendering API ---
+     Fetch the section re-rendered for the chosen variant and swap the
+     server-rendered fragments by their section-scoped id. This keeps
+     money formatting entirely in Liquid (no client-side formatMoney).
+     An AbortController cancels an in-flight request when the customer
+     changes the variant again before the previous fetch resolves. */
+  renderVariant(variant) {
+    if (!variant || !this.productUrl || !this.sectionId) return;
+
+    const separator = this.productUrl.indexOf("?") === -1 ? "?" : "&";
+    const url =
+      this.productUrl +
+      separator +
+      "variant=" +
+      encodeURIComponent(variant.id) +
+      "&section_id=" +
+      encodeURIComponent(this.sectionId);
+
+    if (this._fetchAbort) this._fetchAbort.abort();
+    const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    this._fetchAbort = controller;
+
+    const self = this;
+    fetch(url, controller ? { signal: controller.signal } : undefined)
+      .then(function (response) {
+        return response.text();
+      })
+      .then(function (text) {
+        if (controller && controller.signal.aborted) return;
+        const doc = new DOMParser().parseFromString(text, "text/html");
+        self._swapFragments(doc);
+        if (self._fetchAbort === controller) self._fetchAbort = null;
+      })
+      .catch(function () {
+        /* AbortError on rapid change is expected and ignored; on a real
+           network error we leave the current DOM in place rather than
+           blanking the price. */
+      });
   }
 
-  /* --- Updaters: price, SKU, inventory, image, URL, add-to-cart --- */
-  updatePrice(variant) {
-    if (!this.priceEl) return;
-    let current = this.priceEl.querySelector(".valor-mp__price-current");
-    let compare = this.priceEl.querySelector(".valor-mp__price-compare");
-    let badge = this.priceEl.querySelector(".valor-mp__price-badge");
-    if (!variant) return;
-
-    const onSale = variant.compare_at_price && variant.compare_at_price > variant.price;
-    if (current) {
-      current.textContent = this.formatMoney(variant.price);
-      current.classList.toggle("valor-mp__price-current--sale", onSale);
-    }
-    if (onSale) {
-      if (!compare) {
-        compare = document.createElement("s");
-        compare.className = "valor-mp__price-compare";
-        current.insertAdjacentElement("afterend", compare);
-      }
-      compare.textContent = this.formatMoney(variant.compare_at_price);
-      if (!badge) {
-        badge = document.createElement("span");
-        badge.className = "valor-mp__price-badge";
-        badge.textContent = this.i18n.sale || "";
-        (compare || current).insertAdjacentElement("afterend", badge);
-      }
-    } else {
-      if (compare) compare.remove();
-      if (badge) badge.remove();
-    }
-    this.updateUnitPrice(variant);
+  _swapFragments(doc) {
+    this.swapFragment(doc, "ProductPrice");
+    this.swapFragment(doc, "ProductUnitPrice");
+    this.swapFragment(doc, "ProductSku");
+    this.swapFragment(doc, "ProductInventory");
+    this.swapFragment(doc, "StickyPrice");
   }
 
-  updateUnitPrice(variant) {
-    if (!this.unitPriceWrapper || !this.unitPriceEl) return;
-    if (!variant || !variant.unit_price_measurement) {
-      this.unitPriceWrapper.hidden = true;
-      this.unitPriceEl.textContent = "";
-      return;
-    }
-
-    this.unitPriceEl.textContent = this.formatUnitPrice(variant);
-    this.unitPriceWrapper.hidden = false;
+  /* Replace a single fragment's innerHTML (and mirror its hidden state)
+     from the fetched document. Source comes from the parsed response;
+     destination is the live element. Most fragments live inside this
+     element; the sticky price lives in the section root, so we fall back
+     to searching there. Attribute selector avoids CSS.escape concerns
+     with section ids. */
+  swapFragment(doc, idBase) {
+    const id = idBase + "-" + this.sectionId;
+    const source = doc.getElementById(id);
+    if (!source) return;
+    let dest = this.querySelector('[id="' + id + '"]');
+    if (!dest && this.sectionRoot) dest = this.sectionRoot.querySelector('[id="' + id + '"]');
+    if (!dest) return;
+    dest.innerHTML = source.innerHTML;
+    dest.hidden = source.hidden;
   }
 
-  formatUnitPrice(variant) {
-    const measurement = variant && variant.unit_price_measurement;
-    if (!measurement) return "";
-    const value =
-      measurement.reference_value && measurement.reference_value !== 1 ? String(measurement.reference_value) : "";
-    return this.formatMoney(variant.unit_price) + " / " + value + measurement.reference_unit;
-  }
-
-  updateSku(variant) {
-    if (!this.skuEl || !variant) return;
-    if (variant.sku) {
-      this.skuEl.textContent = (this.i18n.sku || "SKU") + ": " + variant.sku;
-      this.skuEl.hidden = false;
-    } else {
-      this.skuEl.hidden = true;
+  /* No matching variant for the chosen option combination. There is
+     nothing to fetch; disable purchasing (handled by updateAddButton(null)
+     in onChange) and clear pickup availability. The last variant's
+     price/SKU stay visible — matching the previous behaviour. */
+  setUnavailable() {
+    if (this._fetchAbort) {
+      this._fetchAbort.abort();
+      this._fetchAbort = null;
     }
-  }
-
-  updateInventory(variant) {
-    if (!this.inventoryEl || !variant) return;
-    const threshold = parseInt(this.inventoryEl.dataset.threshold || "10", 10);
-    const showQty = this.inventoryEl.dataset.showQty === "true";
-    if (variant.inventory_management !== "shopify" || variant.inventory_policy !== "deny") {
-      this.inventoryEl.hidden = true;
-      return;
-    }
-    this.inventoryEl.hidden = false;
-    const qty = variant.inventory_quantity;
-    let labelText;
-    this.inventoryEl.classList.remove(
-      "valor-mp__inventory--in",
-      "valor-mp__inventory--low",
-      "valor-mp__inventory--out",
-    );
-    if (qty <= 0) {
-      this.inventoryEl.classList.add("valor-mp__inventory--out");
-      labelText = this.i18n.outOfStock || "Out of stock";
-    } else if (qty <= threshold) {
-      this.inventoryEl.classList.add("valor-mp__inventory--low");
-      labelText = showQty
-        ? (this.i18n.lowStockCount || "{{ count }} left in stock").replace("{{ count }}", qty)
-        : this.i18n.lowStock || "Low stock";
-    } else {
-      this.inventoryEl.classList.add("valor-mp__inventory--in");
-      labelText = this.i18n.inStock || "In stock";
-    }
-    // Re-write text without breaking the dot element
-    this.inventoryEl.innerHTML = "";
-    const newDot = document.createElement("span");
-    newDot.className = "valor-mp__inventory-dot";
-    newDot.setAttribute("aria-hidden", "true");
-    this.inventoryEl.appendChild(newDot);
-    this.inventoryEl.appendChild(document.createTextNode(" " + labelText));
+    this.updatePickupAvailability(null);
   }
 
   updateAddButton(variant) {
@@ -421,6 +403,9 @@ class ValorProductInfo extends HTMLElement {
     this.updateStickyAddToCart(variant);
   }
 
+  /* Sticky Add-to-cart bar mirrors the button state, variant title, and
+     image. The price is NOT formatted here — it is swapped from the
+     server-rendered StickyPrice fragment by swapFragment(). */
   updateStickyAddToCart(variant) {
     if (!this.stickyAtc) return;
 
@@ -436,16 +421,6 @@ class ValorProductInfo extends HTMLElement {
     if (this.stickyVariantTitleEl) {
       const title = variant && variant.title && variant.title !== "Default Title" ? variant.title : "";
       this.stickyVariantTitleEl.textContent = title;
-    }
-    if (this.stickyPriceEl && variant) {
-      const onSale = variant.compare_at_price && variant.compare_at_price > variant.price;
-      this.stickyPriceEl.innerHTML =
-        '<span class="valor-mp__sticky-atc-price-current">' +
-        this.formatMoney(variant.price) +
-        "</span>" +
-        (onSale
-          ? '<s class="valor-mp__sticky-atc-price-compare">' + this.formatMoney(variant.compare_at_price) + "</s>"
-          : "");
     }
     if (this.stickyImageEl && variant && variant.featured_media && variant.featured_media.preview_image) {
       this.stickyImageEl.src = variant.featured_media.preview_image.src;
@@ -474,8 +449,8 @@ class ValorProductInfo extends HTMLElement {
     // gallery's setActiveMedia() runs without firing the thumbnail's own
     // click handler (which would open the lightbox).
     if (!variant || !variant.featured_media || !variant.featured_media.id) return;
-    // Gallery lives on the same section; reach it from the section root
-    const section = this.closest(".valor-mp");
+    // Gallery lives on the same section; reach it from the section root.
+    const section = this.sectionRoot || this.closest("." + this.classPrefix);
     if (!section) return;
     const gallery = section.querySelector(".valor-product-media");
     if (!gallery) return;
@@ -489,14 +464,13 @@ class ValorProductInfo extends HTMLElement {
   updateUrl(variant) {
     if (!variant) return;
     // Defensive guard: only rewrite the browser URL when we're actually
-    // on a product page. <valor-product-info> is currently only used in
-    // sections/main-product.liquid, but if a merchant ever embeds it
-    // elsewhere (a custom page template, for example), we don't want
-    // window.location to be rewritten to '/some-page?variant=ID' — that
-    // URL has no meaning outside a product context, and the variant
-    // parameter would also leak into nearby in-page anchors. The variant
-    // id still travels with the add-to-cart form, so cart behaviour is
-    // unaffected.
+    // on a product page. <product-info> is used in main-product.liquid
+    // and featured-product.liquid; the latter can sit on the homepage or
+    // any page. We don't want window.location rewritten to
+    // '/some-page?variant=ID' — that URL has no meaning outside a product
+    // context, and the variant parameter would also leak into nearby
+    // in-page anchors. The variant id still travels with the add-to-cart
+    // form, so cart behaviour is unaffected.
     if (window.location.pathname.indexOf("/products/") === -1) return;
     try {
       const url = new URL(window.location.href);
@@ -598,7 +572,11 @@ class ValorProductInfo extends HTMLElement {
     });
   }
 
-  /* --- onChange: re-resolve variant and update UI --- */
+  /* --- onChange: re-resolve variant and update UI ---
+     Price / unit price / SKU / inventory / sticky price are refreshed by
+     renderVariant() (server fetch + fragment swap). Everything else
+     (gallery, URL, cart qty, payment terms, pickup, button state, sold-out
+     pills) stays client-side. */
   onChange(e) {
     // For pill style: also update the "selected: X" legend label
     if (e && e.target && e.target.dataset.optionDisplay) {
@@ -612,17 +590,14 @@ class ValorProductInfo extends HTMLElement {
     this.currentVariant = variant;
 
     if (variant) {
-      this.updatePrice(variant);
-      this.updateSku(variant);
-      this.updateInventory(variant);
+      this.renderVariant(variant);
       this.updateGalleryMedia(variant);
       this.updateUrl(variant);
       this.updateCartQty(variant);
       this.updatePaymentTerms(variant);
       this.updatePickupAvailability(variant);
     } else {
-      this.updateUnitPrice(null);
-      this.updatePickupAvailability(null);
+      this.setUnavailable();
     }
     this.updateAddButton(variant);
     this.updateSoldOutPills(opts);
@@ -816,6 +791,5 @@ class ValorProductInfo extends HTMLElement {
   }
 }
 
-if (typeof customElements !== "undefined" && !customElements.get("product-info")) {
-  customElements.define("product-info", ValorProductInfo);
-}
+customElements.define("product-info", ValorProductInfo);
+})();
