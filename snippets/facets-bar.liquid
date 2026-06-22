@@ -101,8 +101,19 @@
                 {%- when 'list' -%}
                   <ul class="valor-facets-bar__values" role="list">
                     {%- for value in filter.values -%}
+                      {%- liquid
+                        assign facet_swatch_color = null
+                        assign facet_swatch_image = null
+                        if filter.presentation == 'swatch' and value.swatch
+                          if value.swatch.color
+                            assign facet_swatch_color = 'rgb(' | append: value.swatch.color.rgb | append: ')'
+                          elsif value.swatch.image
+                            assign facet_swatch_image = value.swatch.image | image_url: width: 100
+                          endif
+                        endif
+                      -%}
                       <li class="valor-facets-bar__value">
-                        <label class="valor-facets-bar__option">
+                        <label class="valor-facets-bar__option{% if facet_swatch_color or facet_swatch_image %} valor-facets-bar__option--swatch{% endif %}">
                           <input
                             type="checkbox"
                             name="{{ value.param_name }}"
@@ -115,20 +126,28 @@
                               disabled
                             {% endif %}
                           >
-                          <span class="valor-facets-bar__check-box" aria-hidden="true">
-                            <svg
-                              width="10"
-                              height="10"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="3"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <polyline points="20 6 9 17 4 12"></polyline>
-                            </svg>
-                          </span>
+                          {%- if facet_swatch_color or facet_swatch_image -%}
+                            <span
+                              class="valor-facets-bar__swatch"
+                              aria-hidden="true"
+                              style="{% if facet_swatch_color %}--valor-facets-bar-swatch-color: {{ facet_swatch_color }};{% else %}--valor-facets-bar-swatch-image: url('{{ facet_swatch_image }}');{% endif %}"
+                            ></span>
+                          {%- else -%}
+                            <span class="valor-facets-bar__check-box" aria-hidden="true">
+                              <svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="3"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                            </span>
+                          {%- endif -%}
                           <span class="valor-facets-bar__option-label">{{ value.label }}</span>
                           {%- if value.count > 0 and value.active == false -%}
                             <span class="valor-facets-bar__option-count">({{ value.count }})</span>

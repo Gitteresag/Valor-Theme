@@ -378,10 +378,16 @@ class ValorProductMedia extends HTMLElement {
   }
 
   _normColor(value) {
+    // Canonicalize separators so multi-word / two-tone colors match no matter
+    // how the option value and the image alt are written: hyphen, underscore,
+    // slash and runs of whitespace all collapse to a single space. So a
+    // "Navy-White" option matches an alt that begins "Navy White", "Navy/White"
+    // or "Navy-White" — and vice versa. Matching still uses the FULL color name
+    // (longest-first, word-boundary), never just the first word.
     return String(value || "")
       .toLowerCase()
-      .trim()
-      .replace(/\s+/g, " ");
+      .replace(/[\s\/_-]+/g, " ")
+      .trim();
   }
 
   getSelectedColor() {

@@ -938,11 +938,12 @@
       "id": "variant_style",
       "label": "Variant style",
       "options": [
+        { "value": "", "label": "Use theme default" },
         { "value": "pills", "label": "Buttons (pills)" },
         { "value": "dropdown", "label": "Dropdown" },
         { "value": "swatches", "label": "Swatches" }
       ],
-      "default": "pills",
+      "default": "",
       "info": "Swatches use native color or image swatches set in Shopify and fall back to pills if a value is missing swatch data."
     },
     {
@@ -950,33 +951,36 @@
       "id": "size_option_style",
       "label": "Size option style",
       "options": [
+        { "value": "", "label": "Use theme default" },
         { "value": "default", "label": "Default" },
-        { "value": "minimal", "label": "Minimal text" }
+        { "value": "minimal", "label": "Minimal text" },
+        { "value": "boxed", "label": "Boxed (segmented)" }
       ],
-      "default": "default",
-      "info": "Minimal text applies only to size-named options. Other options keep the selected variant style."
+      "default": "",
+      "info": "Minimal text and Boxed apply only to size-named options. Other options keep the selected variant style."
     },
     {
       "type": "select",
       "id": "swatch_shape",
       "label": "Swatch shape",
       "options": [
+        { "value": "", "label": "Use theme default" },
         { "value": "circle", "label": "Circle" },
         { "value": "square", "label": "Square" }
       ],
-      "default": "circle",
+      "default": "",
       "info": "Applies when Variant style is set to Swatches."
     },
     {
       "type": "range",
       "id": "swatch_size",
       "label": "Swatch size",
-      "min": 20,
+      "min": 0,
       "max": 64,
       "step": 2,
       "unit": "px",
-      "default": 36,
-      "info": "Applies to both circle and square swatches."
+      "default": 0,
+      "info": "Set to 0 to use the theme default swatch size (Theme settings > Products). Applies to both circle and square swatches."
     },
     {
       "type": "header",

@@ -2,7 +2,7 @@
   {
     "name": "theme_info",
     "theme_name": "Valor",
-    "theme_version": "1.5.0",
+    "theme_version": "1.6.0",
     "theme_author": "Valor",
     "theme_documentation_url": "https://valortheme.com",
     "theme_support_url": "https://valortheme.com"
@@ -328,6 +328,72 @@
         "step": 4,
         "unit": "px",
         "default": 40
+      },
+      {
+        "type": "header",
+        "content": "Variant picker"
+      },
+      {
+        "type": "paragraph",
+        "content": "Default variant picker styles for the product page and the Featured product section. Each section can override these in its own settings — \"Use theme default\" inherits the value chosen here."
+      },
+      {
+        "type": "select",
+        "id": "product_picker_style",
+        "label": "Picker style",
+        "options": [
+          { "value": "pills", "label": "Pills" },
+          { "value": "dropdown", "label": "Dropdown" },
+          { "value": "swatches", "label": "Swatches" }
+        ],
+        "default": "pills",
+        "info": "Swatches use the native color or image swatches set in Shopify (Products > Options > Swatches). Falls back to pills automatically if a value is missing swatch data."
+      },
+      {
+        "type": "select",
+        "id": "product_size_option_style",
+        "label": "Size option style",
+        "options": [
+          { "value": "default", "label": "Default" },
+          { "value": "minimal", "label": "Minimal text" },
+          { "value": "boxed", "label": "Boxed (segmented)" }
+        ],
+        "default": "default",
+        "info": "Minimal text and Boxed apply only to size-named options (Size, Koko, Storlek, Taille, Taglia, Talla and similar)."
+      },
+      {
+        "type": "select",
+        "id": "product_swatch_shape",
+        "label": "Swatch shape",
+        "options": [
+          { "value": "circle", "label": "Circle" },
+          { "value": "square", "label": "Square" }
+        ],
+        "default": "circle",
+        "visible_if": "{{ settings.product_picker_style == 'swatches' }}"
+      },
+      {
+        "type": "range",
+        "id": "product_swatch_size",
+        "label": "Swatch size",
+        "min": 20,
+        "max": 64,
+        "step": 2,
+        "unit": "px",
+        "default": 36,
+        "visible_if": "{{ settings.product_picker_style == 'swatches' }}"
+      },
+      {
+        "type": "select",
+        "id": "product_quantity_style",
+        "label": "Quantity selector style",
+        "options": [
+          { "value": "default", "label": "Default" },
+          { "value": "underline", "label": "A — Minimal underline" },
+          { "value": "pill", "label": "B — Soft pill" },
+          { "value": "fullwidth", "label": "C — Full width" }
+        ],
+        "default": "default"
       }
     ]
   },

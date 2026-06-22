@@ -33,7 +33,7 @@
       assign total_qty = total_qty | plus: item.quantity
     endif
   endfor
-  assign qty_style = block.settings.quantity_style | default: 'default'
+  assign qty_style = block.settings.quantity_style | default: settings.product_quantity_style | default: 'default'
 -%}
 <div
   class="valor-mp__quantity{% unless qty_style == 'default' or qty_style == blank %} qty-style--{{ qty_style }}{% endunless %}"

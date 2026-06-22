@@ -73,7 +73,19 @@
   if color_option != blank and color_option.values.size > 0
     assign all_card_values_have_swatch = true
     for value in color_option.values
-      unless value.swatch.color or value.swatch.image
+      assign value_has_swatch = false
+      if value.swatch.color or value.swatch.image
+        assign value_has_swatch = true
+      else
+        for variant in product.variants
+          assign variant_color = variant.options[color_option_index]
+          if variant_color == value and variant.featured_media
+            assign value_has_swatch = true
+            break
+          endif
+        endfor
+      endif
+      unless value_has_swatch
         assign all_card_values_have_swatch = false
         break
       endunless
@@ -210,20 +222,27 @@
             elsif value.swatch.image
               assign swatch_image_url = value.swatch.image | image_url: width: 96
             endif
+
+            assign swatch_variant_url = product.url
+            assign swatch_available = false
+            assign swatch_variant_image = null
+            for variant in product.variants
+              assign variant_option = variant.options[color_option_index]
+              if variant_option == value
+                assign swatch_variant_url = product.url | append: '?variant=' | append: variant.id
+                assign swatch_available = variant.available
+                if variant.featured_media
+                  assign swatch_variant_image = variant.featured_media.preview_image | image_url: width: 96
+                endif
+                break
+              endif
+            endfor
+
+            if swatch_color == null and swatch_image_url == null and swatch_variant_image
+              assign swatch_image_url = swatch_variant_image
+            endif
           -%}
           {%- if swatch_color or swatch_image_url -%}
-            {%- liquid
-              assign swatch_variant_url = product.url
-              assign swatch_available = false
-              for variant in product.variants
-                assign variant_option = variant.options[color_option_index]
-                if variant_option == value
-                  assign swatch_variant_url = product.url | append: '?variant=' | append: variant.id
-                  assign swatch_available = variant.available
-                  break
-                endif
-              endfor
-            -%}
             <a
               href="{{ swatch_variant_url }}"
               class="valor-card__swatch{% if selected_color == value %} is-active{% endif %}{% unless swatch_available %} is-unavailable{% endunless %}"

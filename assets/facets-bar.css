@@ -247,6 +247,34 @@
     opacity: 0.5;
   }
 
+  /* Color swatches on the filter facet (Search & Discovery "Swatch" presentation).
+     The checkbox stays visually hidden for accessibility; the swatch is the visual. */
+  .valor-facets-bar__swatch {
+    flex-shrink: 0;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: var(--valor-facets-bar-swatch-color, transparent);
+    background-image: var(--valor-facets-bar-swatch-image, none);
+    background-size: cover;
+    background-position: center;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-foreground) 25%, transparent);
+    transition: box-shadow 0.15s ease;
+  }
+  .valor-facets-bar__checkbox:checked ~ .valor-facets-bar__swatch {
+    box-shadow:
+      0 0 0 2px var(--color-background),
+      0 0 0 4px var(--color-foreground);
+  }
+  .valor-facets-bar__checkbox:focus-visible ~ .valor-facets-bar__swatch {
+    outline: 2px solid var(--color-foreground);
+    outline-offset: 2px;
+  }
+  .valor-facets-bar__checkbox:disabled ~ .valor-facets-bar__swatch {
+    opacity: 0.4;
+  }
+
   .valor-facets-bar__option-label {
     flex: 1;
   }

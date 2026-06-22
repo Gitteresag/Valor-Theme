@@ -27,10 +27,13 @@
 {%- unless product.has_only_default_variant -%}
   {%- liquid
     assign prefix = class_prefix | default: 'valor-mp'
-    assign resolved_picker_style = picker_style | default: block.settings.picker_style | default: 'pills'
-    assign resolved_swatch_shape = swatch_shape | default: block.settings.swatch_shape | default: 'circle'
-    assign resolved_swatch_size = swatch_size | default: block.settings.swatch_size | default: 36
-    assign resolved_size_option_style = size_option_style | default: block.settings.size_option_style | default: 'default'
+    assign resolved_picker_style = picker_style | default: block.settings.picker_style | default: settings.product_picker_style | default: 'pills'
+    assign resolved_swatch_shape = swatch_shape | default: block.settings.swatch_shape | default: settings.product_swatch_shape | default: 'circle'
+    assign resolved_swatch_size = swatch_size | default: block.settings.swatch_size
+    if resolved_swatch_size == 0 or resolved_swatch_size == blank
+      assign resolved_swatch_size = settings.product_swatch_size | default: 36
+    endif
+    assign resolved_size_option_style = size_option_style | default: block.settings.size_option_style | default: settings.product_size_option_style | default: 'default'
   -%}
 
   <div
