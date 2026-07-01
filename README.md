@@ -11,7 +11,7 @@ accessories, and other visual product brands.
 
 ## Current Version
 
-The current release is `1.6.1`.
+The current release is `1.7.0`.
 
 Downloadable release ZIPs are published from the official website. This
 repository contains the theme source so issues, fixes, and improvements can be
@@ -42,6 +42,8 @@ See [LICENSE.md](LICENSE.md) and the canonical license page:
 - Cart drawer with discounts and order notes.
 - AJAX collection filtering and sorting.
 - Predictive search.
+- Product cards with in-place colour swatch swap: click a swatch to update the
+  card image and price without leaving the page.
 - Product media gallery with lightbox support.
 - Product page blocks for title, price, variant picker, quantity, buy buttons,
   description, share, rating, complementary products, custom Liquid, pickup
