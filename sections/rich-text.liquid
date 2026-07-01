@@ -33,7 +33,7 @@
               {%- if block.settings.button_label != blank and block.settings.button_link != blank -%}
                 <a
                   href="{{ block.settings.button_link }}"
-                  class="valor-button valor-button--{% if block.settings.button_style_secondary %}secondary{% else %}primary{% endif %}"
+                  class="valor-button valor-button--{{ block.settings.button_style }}"
                 >
                   {{ block.settings.button_label | escape }}
                 </a>
@@ -41,7 +41,7 @@
               {%- if block.settings.button_label_2 != blank and block.settings.button_link_2 != blank -%}
                 <a
                   href="{{ block.settings.button_link_2 }}"
-                  class="valor-button valor-button--{% if block.settings.button_style_secondary_2 %}secondary{% else %}primary{% endif %}"
+                  class="valor-button valor-button--{{ block.settings.button_style_2 }}"
                 >
                   {{ block.settings.button_label_2 | escape }}
                 </a>
@@ -322,10 +322,15 @@
           "info": "The button is hidden until both a label and a link are set. Use the picker to choose a page, product, collection, or paste a custom URL."
         },
         {
-          "type": "checkbox",
-          "id": "button_style_secondary",
-          "label": "Use outline style for button 1",
-          "default": false
+          "type": "select",
+          "id": "button_style",
+          "label": "Button 1 style",
+          "options": [
+            { "value": "primary", "label": "Solid" },
+            { "value": "secondary", "label": "Outline" },
+            { "value": "link", "label": "Text link" }
+          ],
+          "default": "primary"
         },
         {
           "type": "text",
@@ -339,10 +344,15 @@
           "info": "The button is hidden until both a label and a link are set."
         },
         {
-          "type": "checkbox",
-          "id": "button_style_secondary_2",
-          "label": "Use outline style for button 2",
-          "default": true
+          "type": "select",
+          "id": "button_style_2",
+          "label": "Button 2 style",
+          "options": [
+            { "value": "primary", "label": "Solid" },
+            { "value": "secondary", "label": "Outline" },
+            { "value": "link", "label": "Text link" }
+          ],
+          "default": "secondary"
         }
       ]
     }

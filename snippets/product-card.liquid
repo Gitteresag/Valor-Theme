@@ -110,6 +110,7 @@
   endunless
 -%}
 
+{%- if render_card_swatches -%}<valor-product-card>{%- endif -%}
 <article class="valor-card valor-card--ratio-{{ image_ratio }}{% if show_secondary_image and product.media.size > 1 %} valor-card--swap-image{% endif %}">
   <a href="{{ product.url }}" class="valor-card__media-link" aria-label="{{ product.title | escape }}">
     <div class="valor-card__media">
@@ -231,10 +232,12 @@
 
             assign swatch_variant_url = product.url
             assign swatch_available = false
+            assign swatch_variant = null
             assign swatch_variant_image = null
             for variant in product.variants
               assign variant_option = variant.options[color_option_index]
               if variant_option == value
+                assign swatch_variant = variant
                 assign swatch_variant_url = product.url | append: '?variant=' | append: variant.id
                 assign swatch_available = variant.available
                 if variant.featured_media
@@ -247,12 +250,21 @@
             if swatch_color == null and swatch_image_url == null and swatch_variant_image
               assign swatch_image_url = swatch_variant_image
             endif
+
+            assign swatch_media_image = null
+            if swatch_variant and swatch_variant.featured_media
+              assign swatch_media_image = swatch_variant.featured_media.preview_image
+            endif
           -%}
           {%- if swatch_color or swatch_image_url -%}
+            {%- capture swatch_price_html -%}{%- if swatch_variant.compare_at_price > swatch_variant.price and swatch_variant.compare_at_price > 0 -%}<span class="valor-card__price-current valor-card__price-current--sale">{{ swatch_variant.price | money }}</span><span class="valor-card__price-compare"><s>{{ swatch_variant.compare_at_price | money }}</s></span>{%- else -%}<span class="valor-card__price-current">{{ swatch_variant.price | money }}</span>{%- endif -%}{%- endcapture -%}
             <a
               href="{{ swatch_variant_url }}"
               class="valor-card__swatch{% if selected_color == value %} is-active{% endif %}{% unless swatch_available %} is-unavailable{% endunless %}"
               aria-label="{{ color_option.name | escape }}: {{ value | escape }}"
+              data-swatch-swap
+              {%- if swatch_variant %} data-price="{{ swatch_price_html | escape }}" data-available="{{ swatch_available }}"{%- endif -%}
+              {%- if swatch_media_image %} data-media-src="{{ swatch_media_image | image_url: width: 600 }}" data-media-srcset="{{ swatch_media_image | image_url: width: 250 }} 250w, {{ swatch_media_image | image_url: width: 400 }} 400w, {{ swatch_media_image | image_url: width: 600 }} 600w, {{ swatch_media_image | image_url: width: 800 }} 800w, {{ swatch_media_image | image_url: width: 1100 }} 1100w"{%- endif -%}
               {% if selected_color == value %}
                 aria-current="true"
               {% endif %}
@@ -292,3 +304,4 @@
     {%- endif -%}
   </div>
 </article>
+{%- if render_card_swatches -%}</valor-product-card>{%- endif -%}

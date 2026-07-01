@@ -64,7 +64,7 @@
               <div class="valor-iwt__button-wrap" {{ block.shopify_attributes }}>
                 <a
                   href="{{ block.settings.button_link }}"
-                  class="valor-button valor-button--{% if block.settings.button_style_secondary %}secondary{% else %}primary{% endif %}"
+                  class="valor-button valor-button--{{ block.settings.button_style }}"
                 >
                   {{ block.settings.button_label | escape }}
                 </a>
@@ -499,10 +499,15 @@
           "label": "Link"
         },
         {
-          "type": "checkbox",
-          "id": "button_style_secondary",
-          "label": "Use outline style",
-          "default": false
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            { "value": "primary", "label": "Solid" },
+            { "value": "secondary", "label": "Outline" },
+            { "value": "link", "label": "Text link" }
+          ],
+          "default": "primary"
         }
       ]
     }

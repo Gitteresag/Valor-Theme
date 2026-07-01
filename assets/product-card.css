@@ -63,6 +63,12 @@
   /* uses image's intrinsic ratio */
 }
 
+/* Wrapper custom element for in-place colour swatch swap. display:contents
+   keeps it out of the layout so the card article stays the grid child. */
+valor-product-card {
+  display: contents;
+}
+
 .valor-card__image {
   width: 100%;
   height: 100%;

@@ -201,6 +201,10 @@ body {
 .rte a.valor-button--secondary:hover {
   color: var(--color-button-outline-hover-text, var(--color-button-hover-text, var(--color-background)));
 }
+.rte a.valor-button--link {
+  color: var(--color-button-outline-text, var(--color-foreground));
+  text-decoration: underline;
+}
 .valor-button--primary {
   background-color: var(--color-button-bg, var(--color-foreground));
   color: var(--color-button-text, var(--color-background));
@@ -221,6 +225,27 @@ body {
   background-color: var(--color-button-outline-hover-bg, var(--color-foreground));
   color: var(--color-button-outline-hover-text, var(--color-background));
   border-color: var(--color-button-outline-hover-border, var(--color-button-outline-hover-bg, var(--color-foreground)));
+}
+/* Text-link button variant — borderless, no fill, underlined label. A
+   minimalist CTA style for marketing sections (banners, slideshow, rich
+   text). Commerce buttons (add to cart, checkout) never use this variant.
+   Keeps modest vertical padding so it stays a comfortable tap target. */
+.valor-button--link {
+  background-color: transparent;
+  color: var(--color-button-outline-text, var(--color-foreground));
+  border: 0;
+  border-radius: 0;
+  padding-inline: 0;
+  padding-block: 0.5rem;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+  text-decoration-thickness: 1.5px;
+}
+.valor-button--link:hover {
+  opacity: 1;
+  background-color: transparent;
+  border-color: transparent;
+  text-decoration-thickness: 2.5px;
 }
 
 /* Rich-text content (.rte)

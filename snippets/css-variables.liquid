@@ -194,4 +194,14 @@
     /* Inputs */
     --style-border-radius-inputs: {{ settings.input_corner_radius }}px;
   }
+
+  /* Mobile page margin override. Desktop uses --page-margin above; on small
+     viewports the merchant can set a separate, usually tighter, side margin.
+     Overriding the custom property on :root cascades to every .shopify-section
+     grid that reads var(--page-margin). */
+  @media screen and (max-width: 749px) {
+    :root {
+      --page-margin: {{ settings.min_page_margin_mobile | default: 16 }}px;
+    }
+  }
 {% endstyle %}

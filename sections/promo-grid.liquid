@@ -93,7 +93,7 @@
               <div class="valor-promo-card__text rte">{{ block.settings.text }}</div>
             {%- endif -%}
             {%- if block.settings.button_label != blank -%}
-              <span class="valor-button valor-button--{% if block.settings.button_style_secondary %}secondary{% else %}primary{% endif %} valor-promo-card__button">
+              <span class="valor-button valor-button--{{ block.settings.button_style }} valor-promo-card__button">
                 {{ block.settings.button_label | escape }}
               </span>
             {%- endif -%}
@@ -430,10 +430,15 @@
           "label": "t:sections.promo_grid.blocks.promo.settings.button_label.label"
         },
         {
-          "type": "checkbox",
-          "id": "button_style_secondary",
-          "label": "t:sections.promo_grid.blocks.promo.settings.button_style_secondary.label",
-          "default": false
+          "type": "select",
+          "id": "button_style",
+          "label": "Button style",
+          "options": [
+            { "value": "primary", "label": "Solid" },
+            { "value": "secondary", "label": "Outline" },
+            { "value": "link", "label": "Text link" }
+          ],
+          "default": "primary"
         },
         {
           "type": "select",
