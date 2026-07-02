@@ -21,6 +21,23 @@
       this.card = this.querySelector('.valor-card');
       this.primaryImage = this.querySelector('.valor-card__image--primary');
       this.priceEl = this.querySelector('.valor-card__price');
+
+      // Remember the card's initial image + hover-swap state so a colour that
+      // has no distinct image of its own can restore it, instead of leaving a
+      // previously-selected colour's photo on the card.
+      if (this.primaryImage) {
+        this.originalMedia = {
+          src: this.primaryImage.getAttribute('src') || '',
+          srcset: this.primaryImage.getAttribute('srcset') || '',
+          alt: this.primaryImage.getAttribute('alt') || '',
+          width: this.primaryImage.getAttribute('width') || '',
+          height: this.primaryImage.getAttribute('height') || '',
+        };
+      }
+      this.hoverSwap = !!(
+        this.card && this.card.classList.contains('valor-card--swap-image')
+      );
+
       this.links = Array.from(
         this.querySelectorAll(
           '.valor-card__media-link, .valor-card__title-link, a.valor-card__quick-add-button'
@@ -61,13 +78,33 @@
     }
 
     _select(swatch, src, priceHtml) {
-      if (src && this.primaryImage) {
-        const srcset = swatch.getAttribute('data-media-srcset');
-        this.primaryImage.src = src;
-        this.primaryImage.srcset = srcset || '';
-        // While a colour is chosen, suppress the hover image swap so hovering
-        // can't reveal a different-colour secondary image.
-        if (this.card) this.card.classList.remove('valor-card--swap-image');
+      if (this.primaryImage) {
+        if (src) {
+          // This colour has its own image → swap to it and suppress the hover
+          // secondary-image swap so hovering can't reveal a different colour.
+          this.primaryImage.src = src;
+          this.primaryImage.srcset =
+            swatch.getAttribute('data-media-srcset') || '';
+          this._setMediaMeta(
+            swatch.getAttribute('data-media-alt'),
+            swatch.getAttribute('data-media-width'),
+            swatch.getAttribute('data-media-height')
+          );
+          if (this.card) this.card.classList.remove('valor-card--swap-image');
+        } else if (this.originalMedia) {
+          // This colour has no distinct image → restore the card's original
+          // image rather than leaving a previously-selected colour's photo.
+          this.primaryImage.src = this.originalMedia.src;
+          this.primaryImage.srcset = this.originalMedia.srcset;
+          this._setMediaMeta(
+            this.originalMedia.alt,
+            this.originalMedia.width,
+            this.originalMedia.height
+          );
+          if (this.card && this.hoverSwap) {
+            this.card.classList.add('valor-card--swap-image');
+          }
+        }
       }
 
       if (priceHtml && this.priceEl) {
@@ -87,6 +124,13 @@
         if (isActive) node.setAttribute('aria-current', 'true');
         else node.removeAttribute('aria-current');
       });
+    }
+
+    _setMediaMeta(alt, width, height) {
+      if (!this.primaryImage) return;
+      if (alt !== null && alt !== undefined) this.primaryImage.alt = alt;
+      if (width) this.primaryImage.setAttribute('width', width);
+      if (height) this.primaryImage.setAttribute('height', height);
     }
   }
 

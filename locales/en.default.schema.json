@@ -367,17 +367,11 @@
             "button_link": {
               "label": "Button link"
             },
-            "button_style_secondary": {
-              "label": "Use outline style"
-            },
             "button_label_2": {
               "label": "Second button label"
             },
             "button_link_2": {
               "label": "Second button link"
-            },
-            "button_style_secondary_2": {
-              "label": "Use outline style for second button"
             }
           }
         }
@@ -464,9 +458,6 @@
             },
             "button_label": {
               "label": "Button label"
-            },
-            "button_style_secondary": {
-              "label": "Use outline style"
             },
             "card_size": {
               "label": "Card size",

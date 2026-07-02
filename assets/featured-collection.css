@@ -163,7 +163,12 @@
   }
   /* Card width is merchant-controlled; lower values show more of the
      next card as a swipe affordance, higher values feel more immersive. */
-  .valor-featured-collection__grid--swipe-mobile > * {
+  /* When a card renders colour swatches it is wrapped in
+     <valor-product-card> (display: contents), so the grid's direct child is
+     the wrapper, not the card. Target the promoted .valor-card too, otherwise
+     swatch-bearing cards lose their width and snap alignment. */
+  .valor-featured-collection__grid--swipe-mobile > *,
+  .valor-featured-collection__grid--swipe-mobile > valor-product-card > .valor-card {
     flex: 0 0 var(--valor-mobile-card-width, 70%);
     scroll-snap-align: start;
   }

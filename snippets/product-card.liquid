@@ -252,8 +252,10 @@
             endif
 
             assign swatch_media_image = null
+            assign swatch_media_alt = null
             if swatch_variant and swatch_variant.featured_media
               assign swatch_media_image = swatch_variant.featured_media.preview_image
+              assign swatch_media_alt = swatch_variant.featured_media.alt
             endif
           -%}
           {%- if swatch_color or swatch_image_url -%}
@@ -264,7 +266,7 @@
               aria-label="{{ color_option.name | escape }}: {{ value | escape }}"
               data-swatch-swap
               {%- if swatch_variant %} data-price="{{ swatch_price_html | escape }}" data-available="{{ swatch_available }}"{%- endif -%}
-              {%- if swatch_media_image %} data-media-src="{{ swatch_media_image | image_url: width: 600 }}" data-media-srcset="{{ swatch_media_image | image_url: width: 250 }} 250w, {{ swatch_media_image | image_url: width: 400 }} 400w, {{ swatch_media_image | image_url: width: 600 }} 600w, {{ swatch_media_image | image_url: width: 800 }} 800w, {{ swatch_media_image | image_url: width: 1100 }} 1100w"{%- endif -%}
+              {%- if swatch_media_image %} data-media-src="{{ swatch_media_image | image_url: width: 600 }}" data-media-srcset="{{ swatch_media_image | image_url: width: 250 }} 250w, {{ swatch_media_image | image_url: width: 400 }} 400w, {{ swatch_media_image | image_url: width: 600 }} 600w, {{ swatch_media_image | image_url: width: 800 }} 800w, {{ swatch_media_image | image_url: width: 1100 }} 1100w" data-media-alt="{{ swatch_media_alt | escape }}" data-media-width="{{ swatch_media_image.width }}" data-media-height="{{ swatch_media_image.height }}"{%- endif -%}
               {% if selected_color == value %}
                 aria-current="true"
               {% endif %}

@@ -204,6 +204,12 @@ body {
 .rte a.valor-button--link {
   color: var(--color-button-outline-text, var(--color-foreground));
   text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.25em;
+}
+.rte a.valor-button--link:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 2.5px;
 }
 .valor-button--primary {
   background-color: var(--color-button-bg, var(--color-foreground));
