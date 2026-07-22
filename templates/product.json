@@ -53,16 +53,6 @@
             "swatch_size": 0
           }
         },
-        "size_guide": {
-          "type": "popup",
-          "settings": {
-            "text": "Size guide",
-            "icon": "ruler",
-            "display_style": "block",
-            "content": "",
-            "page": ""
-          }
-        },
         "quantity_selector": {
           "type": "quantity_selector",
           "settings": {
@@ -106,7 +96,6 @@
         "sku",
         "inventory",
         "variant_picker",
-        "size_guide",
         "quantity_selector",
         "buy_buttons",
         "complementary",
