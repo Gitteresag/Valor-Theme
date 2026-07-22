@@ -9,7 +9,8 @@
  */
 {
   "current": {
-    "transparent_logo": "shopify://shop_images/A4dce8ca0ffc0476ba667aea6e871d5f2j.webp",
+    "logo": "shopify://shop_images/bfaeea5e-1aa0-41fe-af86-7f81a76b76bb.jpg",
+    "logo_height_mobile": 66,
     "sections": {
       "cart-drawer": {
         "type": "cart-drawer",
