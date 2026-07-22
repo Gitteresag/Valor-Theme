@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "image_banner": {
@@ -7,13 +16,15 @@
           "type": "heading",
           "settings": {
             "heading": "Browse our latest products",
-            "heading_size": "h1"
+            "heading_size": "h1",
+            "heading_color": ""
           }
         },
         "subheading": {
           "type": "subheading",
           "settings": {
-            "subheading": "<p>Discover the new collection.</p>"
+            "subheading": "<p>Discover the new collection.</p>",
+            "subheading_color": ""
           }
         },
         "buttons": {
@@ -28,17 +39,23 @@
           }
         }
       },
-      "block_order": ["heading", "subheading", "buttons"],
+      "block_order": [
+        "heading",
+        "subheading",
+        "buttons"
+      ],
       "settings": {
         "image_height": "medium",
         "image_overlay_opacity": 30,
+        "full_width_desktop": true,
+        "full_width_mobile": true,
+        "enable_transparent_header": true,
+        "transparent_header_behavior": "always",
         "desktop_content_position": "middle-center",
         "desktop_content_alignment": "center",
         "show_text_box": false,
         "mobile_content_alignment": "center",
-        "show_text_below": false,
-        "enable_transparent_header": true,
-        "transparent_header_behavior": "always"
+        "show_text_below": false
       }
     },
     "featured_collection": {
@@ -46,6 +63,7 @@
       "settings": {
         "title": "Featured products",
         "heading_size": "medium",
+        "heading_alignment": "center",
         "collection": "all",
         "products_to_show": 8,
         "show_view_all": true,
@@ -57,30 +75,16 @@
         "columns_desktop": 4,
         "columns_mobile": "2",
         "swipe_on_mobile": false,
-        "padding_top": 56,
-        "padding_bottom": 56
-      }
-    },
-    "collection_list": {
-      "type": "collection-list",
-      "blocks": {
-        "collection_1": { "type": "collection", "settings": {} },
-        "collection_2": { "type": "collection", "settings": {} },
-        "collection_3": { "type": "collection", "settings": {} }
-      },
-      "block_order": ["collection_1", "collection_2", "collection_3"],
-      "settings": {
-        "title": "Shop by category",
-        "heading_size": "medium",
-        "show_view_all": false,
-        "image_ratio": "portrait",
-        "columns_desktop": 3,
-        "columns_mobile": "2",
-        "swipe_on_mobile": false,
+        "mobile_card_width": 70,
+        "column_gap": 16,
+        "column_gap_mobile": 12,
         "padding_top": 56,
         "padding_bottom": 56
       }
     }
   },
-  "order": ["image_banner", "featured_collection", "collection_list"]
+  "order": [
+    "image_banner",
+    "featured_collection"
+  ]
 }
