@@ -92,14 +92,6 @@
             "open_by_default": false
           }
         },
-        "shipping_returns": {
-          "type": "collapsible_tab",
-          "settings": {
-            "heading": "Shipping & Returns",
-            "content": "",
-            "page": ""
-          }
-        },
         "share": {
           "type": "share",
           "settings": {
@@ -119,7 +111,6 @@
         "buy_buttons",
         "complementary",
         "description",
-        "shipping_returns",
         "share"
       ],
       "settings": {
