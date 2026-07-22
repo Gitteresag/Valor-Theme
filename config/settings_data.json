@@ -9,8 +9,9 @@
  */
 {
   "current": {
-    "logo": "shopify://shop_images/bfaeea5e-1aa0-41fe-af86-7f81a76b76bb.jpg",
-    "logo_height_mobile": 66,
+    "logo": "shopify://shop_images/05d9f1ee-6bae-401c-9b5d-be1017dc0654-removebg-preview.png",
+    "logo_height": 58,
+    "logo_height_mobile": 40,
     "sections": {
       "cart-drawer": {
         "type": "cart-drawer",
