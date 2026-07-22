@@ -15,22 +15,15 @@
         "heading": {
           "type": "heading",
           "settings": {
-            "heading": "Browse our latest products",
+            "heading": "Przeglądaj nasze najnowsze produkty",
             "heading_size": "h1",
             "heading_color": ""
-          }
-        },
-        "subheading": {
-          "type": "subheading",
-          "settings": {
-            "subheading": "<p>Discover the new collection.</p>",
-            "subheading_color": ""
           }
         },
         "buttons": {
           "type": "buttons",
           "settings": {
-            "button_label_1": "Shop all",
+            "button_label_1": "Zobacz wszystko",
             "button_link_1": "shopify://collections/all",
             "button_style_1": "primary",
             "button_label_2": "",
@@ -41,7 +34,6 @@
       },
       "block_order": [
         "heading",
-        "subheading",
         "buttons"
       ],
       "settings": {
