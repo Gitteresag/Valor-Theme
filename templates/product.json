@@ -66,14 +66,6 @@
             "show_gift_card_recipient": true
           }
         },
-        "complementary": {
-          "type": "complementary",
-          "settings": {
-            "heading": "Pairs well with",
-            "product_list_limit": 3,
-            "mobile_layout": "list"
-          }
-        },
         "description": {
           "type": "description",
           "settings": {
@@ -98,7 +90,6 @@
         "variant_picker",
         "quantity_selector",
         "buy_buttons",
-        "complementary",
         "description",
         "share"
       ],
