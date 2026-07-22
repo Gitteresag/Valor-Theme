@@ -13,12 +13,31 @@
   "sections": {
     "announcement-bar": {
       "type": "announcement-bar",
-      "settings": {}
+      "settings": {
+        "background_color": "",
+        "text_color": "",
+        "show_separator": false,
+        "auto_rotate": false,
+        "rotate_speed": 5
+      }
     },
     "header": {
       "type": "header",
-      "settings": {}
+      "settings": {
+        "logo_position": "center",
+        "menu": "main-menu",
+        "show_menu_view_all": false,
+        "customer_account_menu": "customer-account-main-menu",
+        "enable_customer_avatar": true,
+        "sticky_header_type": "always",
+        "enable_country_selector": true,
+        "enable_language_selector": true,
+        "enable_search": true
+      }
     }
   },
-  "order": ["announcement-bar", "header"]
+  "order": [
+    "announcement-bar",
+    "header"
+  ]
 }

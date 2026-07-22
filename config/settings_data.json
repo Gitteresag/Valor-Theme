@@ -8,5 +8,14 @@
  * ------------------------------------------------------------
  */
 {
-  "current": {}
+  "current": {
+    "transparent_logo": "shopify://shop_images/A4dce8ca0ffc0476ba667aea6e871d5f2j.webp",
+    "sections": {
+      "cart-drawer": {
+        "type": "cart-drawer",
+        "settings": {}
+      }
+    },
+    "content_for_index": []
+  }
 }
