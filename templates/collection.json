@@ -1,19 +1,39 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
       "type": "collection",
+      "name": "Produkty",
       "settings": {
         "show_collection_image": false,
         "banner_height": "medium",
         "show_description": true,
+        "heading_size": "large",
+        "heading_alignment": "center",
+        "body_size": "medium",
+        "body_alignment": "center",
         "products_per_page": 24,
         "columns_desktop": 4,
         "columns_mobile": "2",
         "image_ratio": "square",
         "show_secondary_image": false,
-        "show_vendor": false
+        "show_vendor": false,
+        "enable_filtering": true,
+        "enable_sorting": true,
+        "padding_top": 20,
+        "padding_bottom": 48
       }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main"
+  ]
 }
